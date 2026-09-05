@@ -1,0 +1,80 @@
+export const initialStudyTools = [
+  {
+    id: "chatgpt",
+    title: "ChatGPT",
+    category: "tutoring",
+    categoryLabel: "Tutoria",
+    categories: ["tutoring", "writing"],
+    description: "Explica conceitos complexos, tira dúvidas em tempo real, ajuda com exercícios e fornece explicações detalhadas em qualquer disciplina.",
+    url: "https://chat.openai.com",
+    btnText: "Acessar ChatGPT",
+    btnIcon: "fas fa-external-link-alt",
+    iconClass: "fas fa-brain",
+    gradient: "linear-gradient(135deg, #10a37f, #10b981)"
+  },
+  {
+    id: "perplexity",
+    title: "Perplexity AI",
+    category: "research",
+    categoryLabel: "Pesquisa",
+    categories: ["research"],
+    description: "Pesquisa académica com citação de fontes confiáveis. Ideal para trabalhos científicos, artigos e referências bibliográficas precisas.",
+    url: "https://www.perplexity.ai",
+    btnText: "Pesquisar Agora",
+    btnIcon: "fas fa-search",
+    iconClass: "fas fa-search",
+    gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)"
+  },
+  {
+    id: "notebooklm",
+    title: "NotebookLM",
+    category: "research",
+    categoryLabel: "Análise",
+    categories: ["research", "study"],
+    description: "Carregue PDFs, artigos e documentos para receber explicações, resumos e insights inteligentes sobre o conteúdo.",
+    url: "https://notebooklm.google.com",
+    btnText: "Analisar PDF",
+    btnIcon: "fas fa-upload",
+    iconClass: "fas fa-file-pdf",
+    gradient: "linear-gradient(135deg, #f59e0b, #d97706)"
+  },
+  {
+    id: "quillbot",
+    title: "QuillBot",
+    category: "writing",
+    categoryLabel: "Escrita",
+    categories: ["writing"],
+    description: "Reescreva, parafraseie, corrija gramática e melhore a qualidade de textos académicos. Ideal para trabalhos e artigos.",
+    url: "https://quillbot.com",
+    btnText: "Reescrever Texto",
+    btnIcon: "fas fa-pen-fancy",
+    iconClass: "fas fa-edit",
+    gradient: "linear-gradient(135deg, #0ea5e9, #0284c7)"
+  },
+  {
+    id: "quizlet",
+    title: "Quizlet",
+    category: "study",
+    categoryLabel: "Memorização",
+    categories: ["study"],
+    description: "Crie e estude com flashcards inteligentes, testes automáticos e jogos educativos para melhorar a retenção de informação.",
+    url: "https://quizlet.com",
+    btnText: "Estudar Agora",
+    btnIcon: "fas fa-graduation-cap",
+    iconClass: "fas fa-layer-group",
+    gradient: "linear-gradient(135deg, #6b7280, #4b5563)"
+  },
+  {
+    id: "gemini",
+    title: "Gemini (Google)",
+    category: "tutoring",
+    categoryLabel: "Multifuncional",
+    categories: ["tutoring", "research", "writing"],
+    description: "Assistente IA completo do Google para estudo, pesquisa, escrita, organização e resolução de problemas académicos.",
+    url: "https://gemini.google.com",
+    btnText: "Acessar Gemini",
+    btnIcon: "fas fa-external-link-alt",
+    iconClass: "fas fa-gem",
+    gradient: "linear-gradient(135deg, #ef4444, #dc2626)"
+  }
+];

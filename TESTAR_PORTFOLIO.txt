@@ -1,0 +1,178 @@
+========================================
+GUIA DE TESTES - SISTEMA DE PORTFÓLIO
+========================================
+
+Funcionalidades Principais a Testar:
+
+1. UPLOAD DE FICHEIROS
+═══════════════════════════════════════
+
+▶ Aceder a: http://localhost/ispotec.online/profile/portfolio-add.php
+
+Testes a Realizar:
+□ Upload de PDF
+  - Clique em upload
+  - Seleccione um ficheiro PDF
+  - Verifique pré-visualização
+  - Adicione ao portfólio
+  - Verifique se foi guardado
+
+□ Upload de Imagem
+  - Seleccione JPG/PNG
+  - Verifique ícone correto
+  - Arraste e largue (Drag & Drop)
+  - Confirme adição
+
+□ Upload de Vídeo
+  - Seleccione MP4
+  - Verifique tamanho máximo (100 MB)
+  - Confirme adição
+
+□ Upload de Documento Office
+  - Seleccione DOCX/XLSX
+  - Verifique funcionamento
+  - Confirme adição
+
+□ Validações
+  - Tente upload sem ficheiro (deve mostrar erro)
+  - Tente upload sem título (deve mostrar erro)
+  - Tente ficheiro > 100 MB (deve rejeitar)
+  - Tente formato não permitido (deve rejeitar)
+
+
+2. VISUALIZAÇÃO DE PORTFÓLIO
+═════════════════════════════════════════
+
+▶ Aceder a: http://localhost/ispotec.online/users/index.php
+▶ Clique num utilizador
+▶ Verifique portfólio completo
+
+Testes a Realizar:
+□ Pré-visualização de Imagens
+  - Imagens devem aparecer como miniaturas
+  - Clique em "Abrir" deve exibir fullscreen
+
+□ Reprodução de Vídeos
+  - Vídeos devem ter player integrado
+  - Controles de play/pause devem funcionar
+  - Volume deve ser controlável
+
+□ Visualização de Documentos
+  - PDF deve abrir em nova aba
+  - Download deve funcionar
+  - DOCX deve permitir download
+
+□ Links de Download
+  - Todos os ficheiros devem ter link de download
+  - Ficheiros devem descarregar corretamente
+
+□ Informações dos Itens
+  - Título deve aparecer
+  - Categoria deve aparecer
+  - Descrição deve aparecer (primeiros 150 caracteres)
+  - Data deve aparecer
+
+
+3. FUNCIONALIDADES AVANÇADAS
+════════════════════════════════════════
+
+□ Drag & Drop
+  - Arraste ficheiro para zona de upload
+  - Deve ser detectado automaticamente
+
+□ Categoria Persistência
+  - Seleccione categoria
+  - Se erro, categoria deve ficar selecionada
+
+□ Descrição Persistência
+  - Escreva descrição longa
+  - Se erro, texto deve ficar preservado
+
+□ Título Validação
+  - Tente deixar título vazio
+  - Deve mostrar erro
+
+□ Limpeza de Ficheiros
+  - Após sucesso, form deve limpar
+  - Pré-visualização deve desaparecer
+
+
+4. TIPOS DE FICHEIRO
+════════════════════════════════════════
+
+Teste todos os ícones:
+□ 📄 PDF - verificar visualização
+□ 📝 DOC/DOCX - verificar download
+□ 📊 XLS/XLSX - verificar download
+□ 🎯 PPT/PPTX - verificar download
+□ 🖼️ IMAGENS - verificar pré-visualização
+□ 🎥 VÍDEOS - verificar player
+□ 📦 ZIP/RAR - verificar download
+□ 📎 OUTROS - verificar fallback
+
+
+5. CASOS DE ERRO
+══════════════════════════════════════
+
+□ Ficheiro Não Encontrado
+  - Elimine ficheiro do servidor manualmente
+  - Mensagem "⚠️ Ficheiro não disponível" deve aparecer
+
+□ Ficheiro Corrompido
+  - Upload de ficheiro corrompido
+  - Deve permitir upload mesmo assim
+  - Download deve funcionar (ou mostrar erro ao abrir)
+
+□ Sem Permissão
+  - Aceder com utilizador diferente
+  - Deve conseguir visualizar portfólio de outro
+
+□ Base de Dados
+  - Inserir dados manualmente na tabela portfolio
+  - Deve aparecer no portfólio
+
+
+6. PERFORMANCE
+════════════════════════════════════════
+
+□ Múltiplos Ficheiros
+  - Adicione 10+ itens ao portfólio
+  - Página deve carregar rapidamente
+
+□ Ficheiros Grandes
+  - Teste com vídeo de 50-100 MB
+  - Upload deve funcionar sem timeout
+
+
+7. SEGURANÇA
+════════════════════════════════════════
+
+□ Uploads Seguros
+  - Ficheiros têm nomes únicos
+  - Sem sobrescrita possível
+  - Apenas extensões permitidas
+
+□ Acesso
+  - Não autenticado: redirecionado para login
+  - Utilizador A vê portfólio de Utilizador B
+
+
+CHECKLIST FINAL
+════════════════════════════════════════
+
+✓ Upload funciona sem erros
+✓ Ficheiros guardados no servidor
+✓ Base de dados atualizada
+✓ Pré-visualizações funcionam
+✓ Download funciona
+✓ Validações funcionam
+✓ Drag & Drop funciona
+✓ Mobile friendly
+✓ Sem erros no console
+✓ Sem erros de PHP
+✓ Perfil visualiza portfólio
+✓ Histórico de uploads preservado
+
+========================================
+Status: PRONTO PARA PRODUÇÃO ✓
+========================================

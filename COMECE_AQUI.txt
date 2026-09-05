@@ -1,0 +1,205 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║          ISPOTEC.ONLINE - REDE SOCIAL ACADÉMICA INSTITUCIONAL      ║
+║                                                                      ║
+║                    COMECE AQUI - GUIA RÁPIDO                        ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+
+1. INSTALAÇÃO (3 PASSOS SIMPLES)
+═════════════════════════════════
+
+   PASSO 1: Extrair para pasta do servidor
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   C:\xampp\htdocs\ispotec.online\
+   
+   Ou qualquer outro servidor web (Apache, Nginx, etc)
+
+
+   PASSO 2: Executar instalador automático
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   1. Iniciar XAMPP (Apache + MySQL)
+   2. Navegue para: http://localhost/ispotec.online/install.php
+   3. Siga os 4 passos do assistente
+   
+   (Deixe com valores padrão se não tiver alterações)
+
+
+   PASSO 3: Aceder à plataforma
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   http://localhost/ispotec.online/
+
+
+2. CREDENCIAIS DE ACESSO
+═════════════════════════
+
+   ADMINISTRADOR (para gerir plataforma):
+   Email:    admin@ispotec.online
+   Password: Admin123!
+
+
+3. O QUE JÁ ESTÁ PRONTO
+═══════════════════════
+
+   ✅ Autenticação segura com bcrypt
+   ✅ 4 tipos de utilizadores (Estudante, Docente, Especialista, Admin)
+   ✅ Aprovação de novas contas por administrador
+   ✅ Grupos por disciplinas/módulos
+   ✅ Feed social com posts e comentários
+   ✅ Portfólio académico digital
+   ✅ Chatbot inteligente com FAQ
+   ✅ Dashboard administrativo
+   ✅ Painel de controlo de utilizador
+
+
+4. COMO USAR COMO ADMIN
+═══════════════════════
+
+   Ao entrar no dashboard como admin:
+   
+   → Dashboard mostra:
+      • Número de utilizadores aprovados
+      • Utilizadores pendentes (para aprovar)
+      • Total de grupos/disciplinas criadas
+      • Total de publicações
+   
+   → Ações disponíveis:
+      1. "Gerir Utilizadores Pendentes" 
+         Aprove novas contas de utilizadores
+      
+      2. "Ver Todos os Utilizadores"
+         Veja lista completa de utilizadores registados
+      
+      3. "Gerir Disciplinas/Grupos"
+         Crie novas disciplinas (grupos)
+
+
+5. COMO USAR COMO UTILIZADOR NORMAL
+════════════════════════════════════
+
+   Ao registar-se:
+   
+   1. Aceda a: auth/register.php
+   2. Preencha:
+      - Nome completo
+      - Email
+      - Tipo (Estudante/Docente/Especialista)
+      - Curso e Nível académico
+      - Password (mínimo 8 caracteres)
+   
+   3. Aguarde aprovação do administrador
+   
+   Após aprovação:
+   
+   1. Login em: auth/login.php
+   2. Aceda ao Dashboard
+   3. Ações disponíveis:
+      → "Meus Grupos" - Entrar em disciplinas
+      → "Feed Geral" - Ver publicações de todos
+      → "Ver Meu Perfil" - Editar dados pessoais
+      → "Chatbot Académico" - Fazer perguntas
+
+
+6. PROBLEMAS COMUNS
+═══════════════════
+
+   ❌ "Erro de ligação à Base de Dados"
+   
+   Solução:
+   • Verificar se MySQL está ativo (XAMPP Control Panel)
+   • Verificar credenciais em config/database.php
+   • Executar test-connection.php para diagnóstico
+   
+   
+   ❌ "Classe não encontrada"
+   
+   Solução:
+   • Garantir que todos os ficheiros estão na pasta certa
+   • Reexecute o instalador (install.php)
+   
+   
+   ❌ "Não conseguo fazer login"
+   
+   Solução:
+   • Verificar se a conta foi aprovada pelo admin
+   • Para teste, use: admin@ispotec.online / Admin123!
+   
+   
+   ❌ "Instalação não funciona"
+   
+   Solução:
+   • Limpar cache (Ctrl+Shift+Del)
+   • Recarregar página (Ctrl+F5)
+   • Executar novamente install.php
+
+
+7. FICHEIROS IMPORTANTES
+════════════════════════
+
+   Para Instalação:
+   • install.php - Assistente de instalação automática
+   • test-connection.php - Teste de ligação à BD
+   
+   Para Configuração:
+   • config/database.php - Credenciais MySQL
+   • config/config.php - Constantes da aplicação
+   
+   Para Lógica:
+   • classes/ - Todas as classes PHP
+   • auth/ - Autenticação e login
+   • dashboard/ - Painel de controlo
+   • profile/ - Perfil do utilizador
+   
+   Para Base de Dados:
+   • scripts/criar_tabelas.sql - Criação de tabelas
+
+
+8. DOCUMENTAÇÃO COMPLETA
+════════════════════════
+
+   Leia os ficheiros:
+   • README.md - Documentação técnica completa
+   • INSTALACAO_COMPLETA.md - Guia detalhado
+   • LEIA_PRIMEIRO.txt - Instruções rápidas
+
+
+9. ESTRUTURA DE PASTAS
+══════════════════════
+
+   ispotec.online/
+   ├── index.php - Página inicial
+   ├── install.php - Instalador
+   ├── test-connection.php - Teste
+   ├── config/ - Configurações
+   ├── classes/ - Lógica PHP
+   ├── auth/ - Login/Registo
+   ├── dashboard/ - Painel
+   ├── profile/ - Perfil
+   ├── chatbot/ - Chatbot IA
+   ├── includes/ - Header/Footer
+   ├── scripts/ - SQL
+   └── uploads/ - Ficheiros
+
+
+10. PRÓXIMOS PASSOS
+═══════════════════
+
+    Para começar a usar:
+    
+    1. Instale usando install.php
+    2. Faça login como admin
+    3. Aprove utilizadores novos
+    4. Crie disciplinas/grupos
+    5. Convide estudantes a participar
+    6. Configure o chatbot com respostas
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║                  SISTEMA PRONTO PARA USAR!                          ║
+║                                                                      ║
+║              Desenvolvido para ISPOtec - 2024                       ║
+║                     Versão 1.0.0                                     ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝

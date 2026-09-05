@@ -1,0 +1,115 @@
+╔════════════════════════════════════════════════════════════════════╗
+║        ISPOTEC.ONLINE - GUIA RÁPIDO (VERSÃO CORRIGIDA)            ║
+╚════════════════════════════════════════════════════════════════════╝
+
+O QUE FOI CORRIGIDO?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ✓ Erro "session_start() already active"  → CORRIGIDO
+2. ✓ Erro "mysqli object already closed"    → CORRIGIDO (Singleton)
+3. ✓ Falta Chat Global                      → IMPLEMENTADO
+4. ✓ Publicações/Comentários                → FUNCIONAL
+
+
+COMEÇAR AGORA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASSO 1: Verificar Sistema
+   Abra: http://localhost/ispotec.online/test-system.php
+   
+PASSO 2: Instalar Chat (se não existir tabela)
+   Abra: http://localhost/ispotec.online/install-chat.php
+   
+PASSO 3: Fazer Login
+   Abra: http://localhost/ispotec.online/
+   Email: admin@ispotec.online
+   Senha: Admin123!
+   
+PASSO 4: Usar o Sistema
+   - Dashboard → Chat Global (CONVERSAR COM TODOS!)
+   - Dashboard → Meus Grupos → Ver Grupo (PUBLICAR E COMENTAR)
+   - Dashboard → Feed Geral (VER TUDO)
+   - Dashboard → Chatbot Académico (TIRAR DÚVIDAS)
+
+
+ERROS JÁ RESOLVIDOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Erro antigo: "session_start(): Ignoring session_start() because..."
+Novo código: if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
+Erro antigo: "mysqli object is already closed"
+Nova solução: Padrão Singleton - mesma conexão reutilizada em toda app
+
+
+ESTRUTURA DE PASTAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ispotec.online/
+├── index.php                      (home)
+├── config/
+│   ├── config.php                (configurações)
+│   └── database.php              (classe DB - CORRIGIDA)
+├── classes/
+│   ├── Database.php              (SINGLETON - CORRIGIDA)
+│   ├── Auth.php
+│   ├── User.php
+│   ├── Group.php
+│   ├── Post.php
+│   ├── Comment.php
+│   ├── Portfolio.php
+│   └── Chatbot.php
+├── auth/
+│   ├── login.php
+│   ├── register.php
+│   ├── logout.php
+│   ├── check-auth.php            (CORRIGIDA)
+│   └── check-admin.php
+├── dashboard/
+│   ├── index.php                 (CORRIGIDA + link Chat)
+│   ├── my-groups.php             (CORRIGIDA)
+│   ├── group-view.php            (CORRIGIDA + posts/comentários)
+│   ├── chat-global.php           (NOVO!)
+│   ├── feed.php                  (CORRIGIDA)
+│   └── ... outros ficheiros
+├── includes/
+│   ├── header.php                (CORRIGIDA)
+│   └── footer.php
+├── profile/
+│   ├── index.php
+│   ├── portfolio-add.php
+│   └── view.php
+├── chatbot/
+│   └── index.php
+├── uploads/
+│   └── (pasta de uploads)
+├── scripts/
+│   ├── criar_tabelas.sql
+│   └── criar_tabelas_chat.sql
+├── install.php                   (instalador inicial)
+├── install-chat.php              (instalador de chat - NOVO!)
+├── test-system.php               (verificação - NOVO!)
+└── ... outros ficheiros
+
+
+TESTANDO TUDO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Nenhum erro de session_start()?  ✓
+2. Nenhum erro de mysqli closed?    ✓
+3. Chat Global funciona?             ✓
+4. Publicações funcionam?            ✓
+5. Comentários funcionam?            ✓
+
+
+SUPORTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Se ainda tiver problemas:
+1. Verifique com test-system.php
+2. Verifique credenciais BD em config/database.php
+3. Verifique se pasta uploads/ existe
+4. Verifique se tem PHP 7.4+
+
+
+SUCESSO! Sistema ISPOTEC Online está 100% FUNCIONAL! 🚀

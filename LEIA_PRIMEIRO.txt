@@ -1,0 +1,134 @@
+╔════════════════════════════════════════════════════════════════╗
+║           ISPOTEC.ONLINE - GUIA RÁPIDO DE INSTALAÇÃO          ║
+╚════════════════════════════════════════════════════════════════╝
+
+OPÇÃO 1: INSTALAÇÃO AUTOMÁTICA (RECOMENDADO)
+═════════════════════════════════════════════
+
+1. Coloque os ficheiros em: C:\xampp\htdocs\ispotec.online\
+
+2. Inicie XAMPP (Apache + MySQL)
+
+3. Aceda a: http://localhost/ispotec.online/install.php
+
+4. Siga os 4 passos do assistente de instalação
+
+5. Pronto! Aceda a: http://localhost/ispotec.online/
+
+
+OPÇÃO 2: INSTALAÇÃO MANUAL
+═══════════════════════════
+
+1. Coloque os ficheiros em: C:\xampp\htdocs\ispotec.online\
+
+2. Inicie XAMPP
+
+3. Abra phpMyAdmin: http://localhost/phpmyadmin
+
+4. Cole o conteúdo de scripts/criar_tabelas.sql e execute
+
+5. Edite config/database.php se necessário:
+   - $host = 'localhost'
+   - $user = 'root' (MySQL user)
+   - $password = '' (deixe vazio para XAMPP)
+   - $db_name = 'ispotec_online'
+
+6. Aceda a: http://localhost/ispotec.online/
+
+
+CREDENCIAIS DE ACESSO
+═════════════════════
+
+Email: admin@ispotec.online
+Password: Admin123!
+
+
+FUNCIONALIDADES DISPONÍVEIS
+════════════════════════════
+
+✓ Autenticação segura (bcrypt)
+✓ 4 tipos de utilizadores (Estudante, Docente, Especialista, Admin)
+✓ Aprovação de novas contas por admin
+✓ Grupos por disciplinas/módulos
+✓ Feed social com posts e comentários
+✓ Portfólio académico
+✓ Chatbot inteligente 24/7
+✓ Dashboard com estatísticas
+
+
+PROBLEMAS COMUNS
+════════════════
+
+❌ "Erro de ligação à Base de Dados"
+→ Verifique se MySQL está activado no XAMPP
+→ Verifique as credenciais em config/database.php
+
+❌ "Classe não encontrada"
+→ Certifique-se que todos os ficheiros estão na pasta correcta
+
+❌ Instalação travada no Passo X
+→ Recarregue a página (F5)
+→ Verifique a consola do navegador (F12)
+
+
+FICHEIROS IMPORTANTES
+═════════════════════
+
+config/database.php     → Credenciais da BD
+config/config.php       → Constantes da aplicação
+classes/               → Classes PHP (Auth, User, Group, etc)
+dashboard/             → Painel de utilizador e admin
+auth/                  → Login e Registo
+profile/               → Perfil e Portfólio
+chatbot/               → Chatbot académico
+
+
+ESTRUTURA DE UTILIZADORES
+══════════════════════════
+
+ADMIN (Especialista)
+  → Aprovar/rejeitar utilizadores
+  → Criar disciplinas/grupos
+  → Ver relatórios
+  → Gerir toda a plataforma
+
+DOCENTE
+  → Criar publicações e material
+  → Comentar e orientar
+  → Ver todos os grupos
+
+ESTUDANTE
+  → Entrar em grupos
+  → Publicar e comentar
+  → Criar portfólio
+  → Usar chatbot
+
+ESPECIALISTA
+  → Mesmos direitos que Admin
+
+
+PRÓXIMOS PASSOS
+═══════════════
+
+1. Registar como novo utilizador
+2. Aguardar aprovação (vá para admin e aprove)
+3. Entrar no dashboard
+4. Unir-se a disciplinas/grupos
+5. Criar publicações e comentários
+6. Adicionar itens ao portfólio
+7. Usar o chatbot para dúvidas
+
+
+SUPORTE
+═══════
+
+Para questões técnicas:
+- Verifique o README.md para documentação completa
+- Consulte os ficheiros em scripts/ para SQL
+- Examine as classes em classes/ para lógica
+
+
+═══════════════════════════════════════════════════════════════
+Desenvolvido para ISPOtec - Instituto Superior Politécnico
+Versão 1.0.0 - 2024
+═══════════════════════════════════════════════════════════════

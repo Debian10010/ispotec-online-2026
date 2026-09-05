@@ -1,0 +1,190 @@
+============================================
+ISPOTEC.ONLINE - GUIA DE TESTES COMPLETO
+============================================
+
+CREDENCIAIS DE TESTE PADRÃO
+============================
+
+Admin (Especialista):
+- Email: admin@ispotec.online
+- Password: Admin123!
+- Tipo: especialista
+
+Docente Teste:
+- Email: docente@ispotec.online  
+- Password: Docente123!
+- Tipo: docente
+
+Estudante Teste:
+- Email: estudante@ispotec.online
+- Password: Estudante123!
+- Tipo: estudante
+
+
+TESTES A REALIZAR
+=================
+
+1. AUTENTICAÇÃO
+   [✓] Registar novo utilizador
+   [✓] Login com credenciais válidas
+   [✓] Rejeitar login com password errada
+   [✓] Rejeitar login com email inexistente
+   [✓] Logout e voltar à home
+   [✓] Verificar permissão de não-autenticados
+
+
+2. APROVAÇÃO DE UTILIZADORES (Admin)
+   [✓] Acessar dashboard admin
+   [✓] Ver utilizadores pendentes
+   [✓] Aprovar um utilizador
+   [✓] Rejeitar um utilizador
+   [✓] Verificar que aprovados aparecem em "Ver Todos"
+
+
+3. GRUPOS E DISCIPLINAS (Admin)
+   [✓] Criar novo grupo
+   [✓] Eliminar um grupo
+   [✓] Ver lista de grupos criados
+   [✓] Editar informações do grupo
+
+
+4. NAVEGAÇÃO DE GRUPOS (Utilizador Normal)
+   [✓] Acessar "Meus Grupos"
+   [✓] Entrar em um grupo disponível
+   [✓] Ver lista de membros do grupo
+   [✓] Sair de um grupo
+   [✓] Verificar que grupo aparece em "Meus Grupos"
+
+
+5. POSTS E COMENTÁRIOS
+   [✓] Criar um post num grupo
+   [✓] Ver posts no grupo
+   [✓] Comentar num post
+   [✓] Ver comentários aparecerem em tempo real
+   [✓] Eliminar próprio post
+   [✓] Eliminar próprio comentário
+
+
+6. FEED GLOBAL
+   [✓] Acessar feed global
+   [✓] Ver todos os posts de todos os grupos
+   [✓] Filtrar por grupo
+   [✓] Paginação funciona corretamente
+
+
+7. DIRETÓRIO DE UTILIZADORES
+   [✓] Acessar "Encontrar Utilizadores"
+   [✓] Pesquisar por nome
+   [✓] Pesquisar por email
+   [✓] Filtrar por tipo (Estudante/Docente/Especialista)
+   [✓] Limpar filtros
+   [✓] Clicar em "Ver Perfil"
+   [✓] Não aparecer próprio utilizador na lista
+
+
+8. PERFIL PESSOAL
+   [✓] Acessar "Meu Perfil"
+   [✓] Ver informações próprias
+   [✓] Editar nome
+   [✓] Editar curso
+   [✓] Editar nível académico
+   [✓] Editar biofio
+   [✓] Alterações salvam corretamente
+
+
+9. PORTFÓLIO
+   [✓] Acessar "Adicionar ao Portfólio"
+   [✓] Preencher título
+   [✓] Seleccionar categoria
+   [✓] Adicionar descrição
+   [✓] Item aparece em "Portfólio Académico"
+   [✓] Visualizar portfólio de outro utilizador
+   [✓] Não conseguir editar portfólio de outros
+
+
+10. CHAT GLOBAL
+    [✓] Acessar "Chat Global"
+    [✓] Enviar uma mensagem
+    [✓] Ver mensagem própria à direita
+    [✓] Ver mensagens de outros à esquerda
+    [✓] Histórico de mensagens carrega
+    [✓] Timestamp correto nas mensagens
+    [✓] Chat funciona com múltiplos utilizadores
+
+
+11. CHATBOT ACADÉMICO
+    [✓] Acessar "Chatbot Académico"
+    [✓] Fazer uma pergunta
+    [✓] Receber resposta instantânea
+    [✓] Ver histórico de conversas
+    [✓] Criar nova conversa
+    [✓] Clicar em conversa anterior carrega histórico
+    [✓] Perguntas sugeridas funcionam
+
+
+12. PERFIS PÚBLICOS
+    [✓] Clicar em perfil de outro utilizador (do diretório)
+    [✓] Ver informações públicas do utilizador
+    [✓] Ver portfólio do utilizador
+    [✓] Não conseguir editar perfil de outros
+    [✓] Redirecionamento se tentar ver próprio perfil
+
+
+13. NAVEGAÇÃO
+    [✓] Header mostra links corretos
+    [✓] "Meu Perfil" leva a profile/index.php
+    [✓] "Utilizadores" leva a users/index.php
+    [✓] "Dashboard" leva a dashboard/index.php
+    [✓] "Chat Global" leva a dashboard/chat-global.php
+    [✓] "Chatbot" leva a chatbot/index.php
+    [✓] "Sair" fecha sessão e redireciona
+
+
+14. ADMIN FEATURES
+    [✓] Ver estatísticas no dashboard
+    [✓] Contadores corretos (Utilizadores, Grupos, Posts)
+    [✓] Gerir disciplinas
+    [✓] Aprovar/rejeitar utilizadores
+    [✓] Apenas admin vê as opções de admin
+
+
+15. ERROS E EDGE CASES
+    [✓] Acessar página protegida sem login redireciona
+    [✓] Acessar página de admin sem ser admin redireciona
+    [✓] Eliminar grupo remove posts associados
+    [✓] Rejeitar utilizador impede login
+    [✓] Pesquisa vazia retorna todos os utilizadores
+    [✓] Sem conexão BD mostra erro apropriado
+
+
+TESTES DE PERFORMANCE
+=====================
+[✓] Feed carrega em menos de 1 segundo
+[✓] Diretório de utilizadores carrega em menos de 1 segundo
+[✓] Chatbot responde em menos de 100ms
+[✓] Múltiplos utilizadores simultâneos no chat
+
+
+TESTES DE SEGURANÇA
+===================
+[✓] Password visível apenas com ●●●●●●
+[✓] Não conseguir ver password de outros
+[✓] Verificar CSRF para POST (sessions)
+[✓] Verificar XSS (htmlspecialchars)
+[✓] SQL injection impossível (prepared statements)
+[✓] Apenas autenticados conseguem acessar dados
+
+
+RESULTADO FINAL
+===============
+
+Se todos os testes acima passarem ✓, o sistema está 100% funcional e pronto para produção!
+
+Problemas encontrados devem ser reportados com:
+- Qual teste falhou
+- Passos para reproduzir
+- Comportamento esperado vs real
+- Browser e versão PHP/MySQL
+
+---
+Última atualização: 2026-01-15

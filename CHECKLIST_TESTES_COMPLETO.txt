@@ -1,0 +1,284 @@
+================================================================================
+                      CHECKLIST COMPLETO DE TESTES
+================================================================================
+
+Marque cada item conforme testar e verificar que funciona sem erros.
+
+================================================================================
+                         1. AUTENTICAÇÃO E LOGIN
+================================================================================
+
+☐ Registo
+  ☐ Abrir: /auth/register.php
+  ☐ Preencher form com dados válidos
+  ☐ Verificar validação de password forte (mín 8 chars)
+  ☐ Confirmar password diferente deve mostrar erro
+  ☐ Email duplicado deve mostrar erro
+  ☐ Registo com sucesso deve redirecionar
+  ☐ Verificar que conta fica como "pendente"
+
+☐ Login
+  ☐ Abrir: /auth/login.php
+  ☐ Tentar login com credenciais erradas → erro
+  ☐ Login com credenciais corretas → dashboard
+  ☐ Verificar que session está ativa
+  ☐ Logout deve limpar sessão
+
+☐ Admin Dashboard
+  ☐ Login com admin@ispotec.online / Admin123!
+  ☐ Ir a Dashboard → Utilizadores Pendentes
+  ☐ Verificar utilizadores para aprovar
+  ☐ Aprovar/Rejeitar utilizador
+  ☐ Verificar lista de utilizadores aprovados
+
+================================================================================
+                    2. GRUPOS E DISCIPLINAS
+================================================================================
+
+☐ Criar Grupos (Admin)
+  ☐ Dashboard → Gerir Grupos
+  ☐ Criar novo grupo com nome e descrição
+  ☐ Verificar grupo aparece na lista
+
+☐ Entrar em Grupos
+  ☐ Dashboard → Meus Grupos
+  ☐ Ver grupos disponíveis
+  ☐ Entrar em um grupo
+  ☐ Verificar membership
+
+☐ Visualizar Grupo
+  ☐ Abrir grupo → verificar posts
+  ☐ Verificar lista de membros
+  ☐ Clicar "💬 Abrir Chat" → abrir chat do grupo
+  ☐ SEM ERRORS/WARNINGS sobre headers
+
+================================================================================
+                    3. CHAT GLOBAL
+================================================================================
+
+☐ Acessar Chat Global
+  ☐ Dashboard → Chat Global
+  ☐ Verificar histórico de mensagens
+  ☐ SEM ERRORS sobre headers
+
+☐ Enviar Mensagem de Texto
+  ☐ Digite mensagem
+  ☐ Clique Enviar
+  ☐ Mensagem aparece no chat
+  ☐ Mostra nome do utilizador
+  ☐ Mostra hora
+
+☐ Enviar Ficheiro (Imagem)
+  ☐ Clique no ícone 📎
+  ☐ Selecione uma imagem (PNG, JPG)
+  ☐ Clique Enviar
+  ☐ Imagem aparece inline no chat
+  ☐ Mostra preview pequeno
+
+☐ Enviar Ficheiro (Vídeo)
+  ☐ Clique 📎 e selecione vídeo (MP4)
+  ☐ Clique Enviar
+  ☐ Vídeo aparece com player
+  ☐ Player possui controles (play, pausa, volume)
+
+☐ Enviar Ficheiro (Áudio)
+  ☐ Clique 📎 e selecione áudio (MP3)
+  ☐ Clique Enviar
+  ☐ Áudio aparece com player
+  ☐ Player possui controles
+
+☐ Enviar Ficheiro (Documento)
+  ☐ Clique 📎 e selecione PDF/Word
+  ☐ Clique Enviar
+  ☐ Ficheiro aparece com link de download
+  ☐ Mostra tamanho do ficheiro
+
+================================================================================
+                    4. CHAT DE GRUPO
+================================================================================
+
+☐ Acessar Chat de Grupo
+  ☐ Abrir grupo → Clique "💬 Abrir Chat"
+  ☐ SEM ERRORS sobre headers ← CRÍTICO
+  ☐ Verificar histórico de mensagens
+
+☐ Enviar Mensagem no Grupo
+  ☐ Digite mensagem
+  ☐ Clique Enviar
+  ☐ Mensagem aparece imediatamente
+
+☐ Enviar Media no Grupo
+  ☐ Clique 📎
+  ☐ Enviar imagem → aparece preview
+  ☐ Enviar vídeo → aparece player
+  ☐ Enviar áudio → aparece player
+  ☐ Enviar documento → aparece download link
+
+☐ Comportamento Multi-utilizador (se possível)
+  ☐ Abrir em 2 browsers diferentes
+  ☐ Enviar mensagem em um
+  ☐ Verificar que aparece no outro (página recarregada)
+
+================================================================================
+                    5. PERFIL E PORTFÓLIO
+================================================================================
+
+☐ Editar Perfil
+  ☐ Dashboard → Meu Perfil
+  ☐ Editar nome, curso, nível
+  ☐ Salvar alterações
+  ☐ Verificar que guardou
+
+☐ Adicionar ao Portfólio
+  ☐ Ir a Meu Perfil → Portfólio
+  ☐ Clique "Adicionar Item"
+  ☐ Preencha tipo (projeto, artigo, certificado)
+  ☐ Preencha título e descrição
+  ☐ Salve item
+  ☐ Verifique que aparece no portfólio
+
+☐ Ver Perfil de Outro Utilizador
+  ☐ Dashboard → Encontrar Utilizadores
+  ☐ Clique em um utilizador
+  ☐ SEM ERRORS sobre headers ← CRÍTICO
+  ☐ Verifique nome, curso, portfólio
+  ☐ Não pode editar (read-only)
+
+☐ Ver Portfólio de Outro Utilizador
+  ☐ Na página do utilizador
+  ☐ Verifique items do portfólio
+  ☐ Clicar em item deve mostrar detalhes
+
+================================================================================
+                    6. CHATBOT ACADÉMICO
+================================================================================
+
+☐ Acessar Chatbot
+  ☐ Dashboard → Consultório Académico
+  ☐ SEM ERRORS sobre headers ← CRÍTICO
+  ☐ Verificar histórico de conversas
+
+☐ Fazer Pergunta
+  ☐ Digite pergunta (ex: "O que é base de dados?")
+  ☐ Clique Enviar
+  ☐ Chatbot responde em tempo real
+  ☐ Resposta relacionada com pergunta
+
+☐ Múltiplas Conversas
+  ☐ Criar nova conversa
+  ☐ Histórico mantém mensagens anteriores
+  ☐ Voltar a conversa anterior → histórico intacto
+
+================================================================================
+                    7. DIRETÓRIO DE UTILIZADORES
+================================================================================
+
+☐ Abrir Diretório
+  ☐ Dashboard → Encontrar Utilizadores
+  ☐ Ou navegação header → "Utilizadores"
+  ☐ Verificar lista de cards de utilizadores
+
+☐ Pesquisa
+  ☐ Digitar nome no filtro
+  ☐ Lista atualiza em tempo real
+  ☐ Mostra utilizadores correspondentes
+
+☐ Filtro por Tipo
+  ☐ Selecionar "Estudante"
+  ☐ Mostra apenas estudantes
+  ☐ Selecionar "Docente"
+  ☐ Mostra apenas docentes
+
+☐ Clicar em Utilizador
+  ☐ Abrir perfil
+  ☐ SEM ERRORS ← CRÍTICO
+  ☐ Ver dados públicos
+
+================================================================================
+                    8. PUBLICAÇÕES E COMENTÁRIOS
+================================================================================
+
+☐ Criar Publicação
+  ☐ Abrir grupo
+  ☐ Seção de "Criar Publicação"
+  ☐ Selecionar tipo (discussão, material, etc)
+  ☐ Preencher conteúdo
+  ☐ Publicar
+  ☐ Aparece no feed
+
+☐ Comentar em Publicação
+  ☐ Ir a um post
+  ☐ Seção de comentários
+  ☐ Digite comentário
+  ☐ Clique Enviar
+  ☐ Comentário aparece
+
+☐ Responder a Comentário
+  ☐ Clicar "Responder" em um comentário
+  ☐ Tipo resposta em thread
+  ☐ Salvar resposta
+  ☐ Aparece indentada
+
+================================================================================
+                    9. VALIDAÇÕES E ERROS
+================================================================================
+
+☐ SEM WARNINGS na Console do Browser
+  ☐ F12 → Console
+  ☐ Abrir cada página
+  ☐ Verificar que não há mensagens de error
+
+☐ SEM NOTICES no PHP
+  ☐ View page source
+  ☐ Procurar por "<b>Notice:" ou "<b>Warning:"
+  ☐ ESPECIALMENTE: "headers already sent"
+
+☐ Upload de Ficheiro Inválido
+  ☐ Tentar upload de ficheiro não permitido
+  ☐ Sistema deve mostrar erro
+  ☐ Não fazer upload
+
+☐ Upload de Ficheiro Muito Grande
+  ☐ Tentar upload de ficheiro > limite
+  ☐ Sistema deve mostrar erro
+  ☐ Não fazer upload
+
+================================================================================
+                    10. FUNCIONALIDADES ADMIN
+================================================================================
+
+☐ Aprovação de Utilizadores
+  ☐ Login como admin
+  ☐ Dashboard → Utilizadores Pendentes
+  ☐ Aprovar utilizador
+  ☐ Utilizador consegue login após aprovação
+
+☐ Rejeição de Utilizadores
+  ☐ Dashboard → Utilizadores Pendentes
+  ☐ Rejeitar utilizador
+  ☐ Utilizador não consegue mais login
+
+☐ Gerir Grupos
+  ☐ Dashboard → Gerir Grupos
+  ☐ Criar novo grupo
+  ☐ Editar grupo
+  ☐ Eliminar grupo
+
+☐ Visualizar Estatísticas
+  ☐ Dashboard principal
+  ☐ Mostrar contadores:
+    ☐ Total utilizadores
+    ☐ Total grupos
+    ☐ Total posts
+
+================================================================================
+                    RESULTADO FINAL
+================================================================================
+
+Se TODOS os items acima estão ✓ marcados:
+
+    ✓✓✓ SISTEMA ESTÁ 100% FUNCIONAL ✓✓✓
+
+Parabéns! O ISPOTEC.ONLINE está pronto para produção!
+
+================================================================================

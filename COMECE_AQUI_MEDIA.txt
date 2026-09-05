@@ -1,0 +1,128 @@
+===================================================================
+    SISTEMA DE UPLOAD DE MEDIA - ISPOTEC ONLINE
+    Chat com Imagens, Vídeos, Áudios e Documentos
+===================================================================
+
+PASSO 1: INSTALAR SISTEMA DE MÉDIA
+===================================================================
+1. Abra: http://localhost/ispotec.online/install-media.php
+2. Clique em "Instalar Sistema de Média"
+3. Aguarde mensagem de sucesso
+
+✅ Instalado:
+   - Tabela chat_messages (com suporte a ficheiros)
+   - Tabela chat_files (metadados)
+   - Pasta uploads/chat/ (armazenamento)
+
+
+PASSO 2: USAR CHAT GLOBAL COM UPLOAD
+===================================================================
+1. Login com: admin@ispotec.online / Admin123!
+2. Vá para: Dashboard → Chat Global
+3. Ou acesse direto: dashboard/chat-global.php
+4. Clique no ícone 📎 para selecionar ficheiro
+5. Tipos permitidos:
+   - 🖼️ Imagens: JPG, PNG, GIF, WebP (até 10 MB)
+   - 🎥 Vídeos: MP4, AVI, MOV, MKV, WebM (até 100 MB)
+   - 🎵 Áudios: MP3, WAV, OGG, M4A, AAC (até 50 MB)
+   - 📄 Documentos: PDF, Word, Excel, PowerPoint, TXT (até 50 MB)
+
+
+PASSO 3: USAR CHAT DE GRUPO COM UPLOAD
+===================================================================
+1. Vá para: Dashboard → Meus Grupos
+2. Abra um grupo
+3. Clique no botão "💬 Abrir Chat"
+4. Mesmas funcionalidades do chat global
+5. Visualize membros na barra lateral
+
+
+FUNCIONALIDADES
+===================================================================
+✅ Upload de ficheiros variados
+✅ Visualização inline de imagens
+✅ Reprodução de vídeos integrada
+✅ Reprodução de áudios integrada
+✅ Download de documentos
+✅ Preview de ficheiro antes de envio
+✅ Nomes de ficheiro seguros
+✅ Validação de tipo e tamanho
+✅ Mensagens com ou sem ficheiro
+
+
+CLASSES ADICIONADAS
+===================================================================
+1. FileManager.php
+   - Gerencia uploads de ficheiros
+   - Valida tipos e tamanhos
+   - Formata informações de ficheiro
+
+2. ChatMessage.php
+   - Gerencia mensagens de chat
+   - Suporta ficheiros anexados
+   - Lista mensagens de grupo ou global
+
+
+FICHEIROS CRIADOS/MODIFICADOS
+===================================================================
+Novos:
+  - classes/FileManager.php
+  - classes/ChatMessage.php
+  - dashboard/chat-grupo.php
+  - scripts/criar_tabelas_media.sql
+  - install-media.php
+  - MEDIA_UPLOAD_SETUP.md
+  - COMECE_AQUI_MEDIA.txt
+
+Modificados:
+  - dashboard/chat-global.php (upgrade com upload)
+  - dashboard/group-view.php (adicionado botão chat)
+
+
+TROUBLESHOOTING
+===================================================================
+Problema: "Erro ao fazer upload"
+Solução:
+  - Verificar pasta uploads/chat/ existe
+  - Verificar permissões 755
+  - Verificar espaço em disco
+
+Problema: "Tipo de ficheiro não permitido"
+Solução:
+  - Extensão deve estar na lista permitida
+  - Ver MEDIA_UPLOAD_SETUP.md para adicionar extensões
+
+Problema: Ficheiros não aparecem
+Solução:
+  - Executar install-media.php de novo
+  - Verificar permissões de pasta
+  - Verificar tabelas foram criadas (chat_messages, chat_files)
+
+
+DOCUMENTAÇÃO COMPLETA
+===================================================================
+Aceda a: MEDIA_UPLOAD_SETUP.md
+
+Inclui:
+  - Descrição detalhada de todas as funcionalidades
+  - Estrutura de banco de dados
+  - Métodos de cada classe
+  - Configuração avançada
+  - Guia de segurança
+  - Próximas melhorias sugeridas
+
+
+PRÓXIMAS VERSÕES (Sugestões)
+===================================================================
+- Drag and drop para upload
+- Compressão automática de imagens
+- Preview de documentos PDF
+- Limite de armazenamento por utilizador
+- Limpeza automática de ficheiros antigos
+- Partilha de ficheiros em posts
+
+
+SISTEMA PRONTO! ✅
+===================================================================
+Aproveite o novo sistema de media do ISPOTEC Online!
+Qualquer dúvida, consulte MEDIA_UPLOAD_SETUP.md
