@@ -1,8 +1,25 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Determine default base API URL intelligently:
+// 1. Explicit environment variable (VITE_API_URL) takes highest priority.
+// 2. If running on production (e.g. Vercel domain or not localhost), fallback to the deployed backend URL.
+// 3. In local development (localhost / 127.0.0.1), fallback to local backend at http://localhost:5000/api.
+const getInitialApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocal) {
+      return 'https://back-end-ispotec-online-2026.vercel.app/api';
+    }
+  }
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = getInitialApiUrl();
 
 class ApiClient {
   constructor(baseUrl) {
-    this.baseUrl = baseUrl.replace(/\/+$/, '');
+    this.baseUrl = (baseUrl || 'http://localhost:5000/api').replace(/\/+$/, '');
   }
 
   getToken() {
