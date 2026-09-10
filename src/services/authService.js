@@ -1,92 +1,58 @@
-import { initialUsers } from '../data/users';
+import { api } from './api';
 
-const USERS_STORAGE_KEY = 'ispotec_users';
 const CURRENT_USER_KEY = 'ispotec_current_user';
-
-function getUsers() {
-  const data = localStorage.getItem(USERS_STORAGE_KEY);
-  if (!data) {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialUsers));
-    return initialUsers;
-  }
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    return initialUsers;
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-}
 
 export const authService = {
   async login(email, password) {
-    const users = getUsers();
-    const cleanEmail = email.trim().toLowerCase();
-    const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+    try {
+      const res = await api.post('/auth/login', {
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    if (!user) {
-      return { sucesso: false, mensagem: 'Email ou password incorretos' };
+      if (res.sucesso && res.token && res.user) {
+        api.setToken(res.token);
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(res.user));
+        return {
+          sucesso: true,
+          mensagem: res.mensagem || 'Login efetuado com sucesso!',
+          user: res.user,
+        };
+      }
+
+      return {
+        sucesso: false,
+        mensagem: res.mensagem || 'Credenciais inválidas.',
+      };
+    } catch (error) {
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao efetuar login. Tente novamente.',
+      };
     }
-
-    if (user.status === 'pendente') {
-      return { sucesso: false, mensagem: 'A sua conta ainda está pendente de aprovação por um administrador' };
-    }
-
-    if (user.status === 'bloqueado') {
-      return { sucesso: false, mensagem: 'A sua conta foi bloqueada. Contacte a administração' };
-    }
-
-    // Allow Admin123! or admin123 or whatever password matches
-    if (user.password !== password && password !== 'Admin123!' && password !== 'admin123') {
-      return { sucesso: false, mensagem: 'Email ou password incorretos' };
-    }
-
-    const sessionUser = {
-      id: user.id,
-      nome: user.nome,
-      email: user.email,
-      tipo: user.tipo,
-      curso: user.curso,
-      nivel_academico: user.nivel_academico,
-      status: user.status,
-      foto_perfil: user.foto_perfil
-    };
-
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(sessionUser));
-    return { sucesso: true, mensagem: 'Login efetuado com sucesso!', user: sessionUser };
   },
 
   async register(data) {
-    const users = getUsers();
-    const cleanEmail = data.email.trim().toLowerCase();
+    try {
+      const res = await api.post('/auth/register', {
+        nome: data.nome?.trim(),
+        email: data.email?.trim().toLowerCase(),
+        password: data.password,
+        tipo: data.tipo || 'estudante',
+        curso: data.curso ? data.curso.trim() : '',
+        nivel_academico: data.nivel_academico || '',
+      });
 
-    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
-      return { sucesso: false, mensagem: 'Já existe uma conta associada a este email' };
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Registo efetuado com sucesso! Aguarde a aprovação da administração para poder aceder.',
+      };
+    } catch (error) {
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao efetuar registo. Tente novamente.',
+      };
     }
-
-    const newUser = {
-      id: Date.now(),
-      nome: data.nome.trim(),
-      email: cleanEmail,
-      password: data.password,
-      tipo: data.tipo || 'estudante',
-      curso: data.curso ? data.curso.trim() : '',
-      nivel_academico: data.nivel_academico || '',
-      bio: '',
-      foto_perfil: '',
-      status: 'pendente',
-      data_registo: new Date().toISOString().replace('T', ' ').substring(0, 19)
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    return {
-      sucesso: true,
-      mensagem: 'Registo efetuado com sucesso! Aguarde a aprovação da administração para poder aceder.'
-    };
   },
 
   getCurrentUser() {
@@ -108,16 +74,32 @@ export const authService = {
   },
 
   logout() {
+    api.setToken(null);
     localStorage.removeItem(CURRENT_USER_KEY);
     return true;
   },
 
   isAuthenticated() {
-    return !!this.getCurrentUser();
+    return !!(this.getCurrentUser() && api.getToken());
   },
 
   isAdmin() {
     const user = this.getCurrentUser();
-    return user && (user.tipo === 'especialista' || user.tipo === 'admin');
-  }
+    return !!(user && (user.tipo === 'especialista' || user.tipo === 'admin'));
+  },
+
+  async getMe() {
+    try {
+      const res = await api.get('/auth/me');
+      if (res.sucesso && res.user) {
+        this.setCurrentUser(res.user);
+        return res.user;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
 };
+
+export default authService;

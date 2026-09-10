@@ -1,110 +1,85 @@
-import { initialGroups } from '../data/groups';
-import { initialPosts } from '../data/posts';
-
-const GROUPS_STORAGE_KEY = 'ispotec_groups';
-const POSTS_STORAGE_KEY = 'ispotec_posts';
-
-function getGroups() {
-  const data = localStorage.getItem(GROUPS_STORAGE_KEY);
-  if (!data) {
-    localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(initialGroups));
-    return initialGroups;
-  }
-  try {
-    return JSON.parse(data);
-  } catch {
-    return initialGroups;
-  }
-}
-
-function saveGroups(groups) {
-  localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(groups));
-}
-
-function getPosts() {
-  const data = localStorage.getItem(POSTS_STORAGE_KEY);
-  if (!data) {
-    localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(initialPosts));
-    return initialPosts;
-  }
-  try {
-    return JSON.parse(data);
-  } catch {
-    return initialPosts;
-  }
-}
+import { api } from './api';
 
 export const groupService = {
   async getAllGroups() {
-    const groups = getGroups();
-    const posts = getPosts();
-    return groups.map(g => ({
-      ...g,
-      total_membros: g.membros ? g.membros.length : 0,
-      total_posts: posts.filter(p => p.group_id === g.id).length
-    }));
+    try {
+      const res = await api.get('/groups');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[groupService.getAllGroups error]', error.message);
+      return [];
+    }
   },
 
-  async getMyGroups(userId) {
-    const all = await this.getAllGroups();
-    return all.filter(g => g.membros && g.membros.includes(Number(userId)));
+  async getMyGroups() {
+    try {
+      const res = await api.get('/groups/my');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[groupService.getMyGroups error]', error.message);
+      return [];
+    }
   },
 
   async getGroupById(groupId) {
-    const all = await this.getAllGroups();
-    return all.find(g => g.id === Number(groupId)) || null;
+    try {
+      const res = await api.get(`/groups/${groupId}`);
+      return res.dados || null;
+    } catch (error) {
+      console.error('[groupService.getGroupById error]', error.message);
+      return null;
+    }
   },
 
-  async createGroup(data, creatorId) {
-    const groups = getGroups();
-    const newGroup = {
-      id: Date.now(),
-      nome: data.nome.trim(),
-      descricao: data.descricao ? data.descricao.trim() : '',
-      disciplina: data.disciplina.trim(),
-      modulo: data.modulo ? data.modulo.trim() : '',
-      criado_por: creatorId,
-      data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      membros: [creatorId]
-    };
-    groups.unshift(newGroup);
-    saveGroups(groups);
-    return newGroup;
+  async createGroup(data) {
+    try {
+      const res = await api.post('/groups', data);
+      return res.dados;
+    } catch (error) {
+      console.error('[groupService.createGroup error]', error.message);
+      throw error;
+    }
   },
 
   async deleteGroup(groupId) {
-    const groups = getGroups();
-    const filtered = groups.filter(g => g.id !== Number(groupId));
-    saveGroups(filtered);
-    return true;
+    try {
+      const res = await api.delete(`/groups/${groupId}`);
+      return !!res.sucesso;
+    } catch (error) {
+      console.error('[groupService.deleteGroup error]', error.message);
+      return false;
+    }
   },
 
-  async joinGroup(groupId, userId) {
-    const groups = getGroups();
-    const g = groups.find(item => item.id === Number(groupId));
-    if (g && (!g.membros || !g.membros.includes(Number(userId)))) {
-      if (!g.membros) g.membros = [];
-      g.membros.push(Number(userId));
-      saveGroups(groups);
-      return true;
+  async joinGroup(groupId) {
+    try {
+      const res = await api.post(`/groups/${groupId}/join`);
+      return !!res.sucesso;
+    } catch (error) {
+      console.error('[groupService.joinGroup error]', error.message);
+      return false;
     }
-    return false;
   },
 
-  async leaveGroup(groupId, userId) {
-    const groups = getGroups();
-    const g = groups.find(item => item.id === Number(groupId));
-    if (g && g.membros) {
-      g.membros = g.membros.filter(id => id !== Number(userId));
-      saveGroups(groups);
-      return true;
+  async leaveGroup(groupId) {
+    try {
+      const res = await api.post(`/groups/${groupId}/leave`);
+      return !!res.sucesso;
+    } catch (error) {
+      console.error('[groupService.leaveGroup error]', error.message);
+      return false;
     }
-    return false;
   },
 
   async isMember(groupId, userId) {
-    const groups = getGroups();
-    const g = groups.find(item => item.id === Number(groupId));
-    return g && g.membros && g.membros.includes(Number(userId));
-  }
+    try {
+      const group = await this.getGroupById(groupId);
+      if (!group || !group.membros) return false;
+      return group.membros.some(m => String(m.id || m._id || m) === String(userId));
+    } catch {
+      return false;
+    }
+  },
 };
+
+export default groupService;

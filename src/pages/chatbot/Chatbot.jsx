@@ -23,7 +23,7 @@ export default function Chatbot() {
     setConversas(userConvs);
 
     if (convParam && convParam !== '0') {
-      const found = userConvs.find(c => c.id === Number(convParam));
+      const found = userConvs.find(c => String(c.id) === String(convParam));
       if (found) {
         setActiveConv(found);
         return;

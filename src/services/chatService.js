@@ -1,83 +1,69 @@
-import { initialGlobalMessages, initialGroupMessages } from '../data/messages';
-
-const GLOBAL_CHAT_KEY = 'ispotec_global_chat';
-const GROUP_CHAT_KEY = 'ispotec_group_chat';
-
-function getGlobalMessages() {
-  const data = localStorage.getItem(GLOBAL_CHAT_KEY);
-  if (!data) {
-    localStorage.setItem(GLOBAL_CHAT_KEY, JSON.stringify(initialGlobalMessages));
-    return initialGlobalMessages;
-  }
-  try { return JSON.parse(data); } catch { return initialGlobalMessages; }
-}
-
-function saveGlobalMessages(msgs) {
-  localStorage.setItem(GLOBAL_CHAT_KEY, JSON.stringify(msgs));
-}
-
-function getGroupMessagesMap() {
-  const data = localStorage.getItem(GROUP_CHAT_KEY);
-  if (!data) {
-    localStorage.setItem(GROUP_CHAT_KEY, JSON.stringify(initialGroupMessages));
-    return initialGroupMessages;
-  }
-  try { return JSON.parse(data); } catch { return initialGroupMessages; }
-}
-
-function saveGroupMessagesMap(map) {
-  localStorage.setItem(GROUP_CHAT_KEY, JSON.stringify(map));
-}
+import { api } from './api';
 
 export const chatService = {
   async getGlobalMessages() {
-    return getGlobalMessages();
+    try {
+      const res = await api.get('/chat/global');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[chatService.getGlobalMessages error]', error.message);
+      return [];
+    }
   },
 
-  async sendGlobalMessage({ user, conteudo, tipo_mensagem = 'texto', ficheiro_path = null, ficheiro_nome = null, ficheiro_tamanho = null }) {
-    const msgs = getGlobalMessages();
-    const newMsg = {
-      id: Date.now(),
-      user_id: user.id,
-      user_nome: user.nome,
-      user_tipo: user.tipo,
-      conteudo: conteudo || '',
-      tipo_mensagem,
-      ficheiro_path,
-      ficheiro_nome,
-      ficheiro_tamanho,
-      data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19)
-    };
-    msgs.push(newMsg);
-    saveGlobalMessages(msgs);
-    return newMsg;
+  async sendGlobalMessage({ conteudo, tipo_mensagem = 'texto', ficheiro_path = null, ficheiro_nome = null, ficheiro_tamanho = null }) {
+    try {
+      const res = await api.post('/chat/global', {
+        conteudo,
+        tipo_mensagem,
+        ficheiro_path,
+        ficheiro_nome,
+        ficheiro_tamanho,
+      });
+      return res.dados;
+    } catch (error) {
+      console.error('[chatService.sendGlobalMessage error]', error.message);
+      throw error;
+    }
   },
 
   async getGroupMessages(groupId) {
-    const map = getGroupMessagesMap();
-    return map[groupId] || [];
+    try {
+      const res = await api.get(`/chat/group/${groupId}`);
+      return res.dados || [];
+    } catch (error) {
+      console.error('[chatService.getGroupMessages error]', error.message);
+      return [];
+    }
   },
 
-  async sendGroupMessage({ groupId, user, conteudo, tipo_mensagem = 'texto', ficheiro_path = null, ficheiro_nome = null, ficheiro_tamanho = null }) {
-    const map = getGroupMessagesMap();
-    if (!map[groupId]) {
-      map[groupId] = [];
+  async sendGroupMessage({ groupId, conteudo, tipo_mensagem = 'texto', ficheiro_path = null, ficheiro_nome = null, ficheiro_tamanho = null }) {
+    try {
+      const res = await api.post(`/chat/group/${groupId}`, {
+        conteudo,
+        tipo_mensagem,
+        ficheiro_path,
+        ficheiro_nome,
+        ficheiro_tamanho,
+      });
+      return res.dados;
+    } catch (error) {
+      console.error('[chatService.sendGroupMessage error]', error.message);
+      throw error;
     }
-    const newMsg = {
-      id: Date.now(),
-      group_id: Number(groupId),
-      user_id: user.id,
-      user_nome: user.nome,
-      user_tipo: user.tipo,
-      conteudo: conteudo || '',
-      tipo_mensagem,
-      ficheiro_path,
-      ficheiro_nome,
-      ficheiro_tamanho,
-      data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19)
-    };
-    map[groupId].push(newMsg);
-    saveGroupMessagesMap(map);
-    return newMsg;
-  }
+  },
+
+  async uploadAttachment(file) {
+    try {
+      const formData = new FormData();
+      formData.append('ficheiro', file);
+      const res = await api.upload('/chat/upload', formData);
+      return res.dados;
+    } catch (error) {
+      console.error('[chatService.uploadAttachment error]', error.message);
+      throw error;
+    }
+  },
 };
+
+export default chatService;

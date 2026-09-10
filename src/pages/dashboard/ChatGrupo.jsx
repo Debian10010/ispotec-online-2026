@@ -21,6 +21,15 @@ export default function ChatGrupo() {
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const audioInputRef = useRef(null);
+
+  const getFileUrl = (path) => {
+    if (!path || path === '#') return '#';
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) return path;
+    const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    return `${backendBase}${path.startsWith('/') ? '' : '/'}${path}`;
+  };
 
   const loadData = async () => {
     if (!groupId) {
@@ -35,7 +44,7 @@ export default function ChatGrupo() {
     setGrupo(g);
 
     const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
-    const isMember = g.membros && g.membros.includes(Number(user?.id));
+    const isMember = g.membros && g.membros.some(m => String(m.id || m._id || m) === String(user?.id));
     if (!isMember && !isAdmin) {
       navigate('/dashboard/my-groups');
       return;
@@ -73,29 +82,27 @@ export default function ChatGrupo() {
     let tipo_mensagem = 'texto';
     let ficheiro_path = null;
     let ficheiro_nome = null;
+    let ficheiro_tamanho = null;
 
     if (selectedFile) {
-      ficheiro_nome = selectedFile.name;
-      if (selectedFile.type.startsWith('image/')) {
-        tipo_mensagem = 'imagem';
-        ficheiro_path = URL.createObjectURL(selectedFile);
-      } else if (selectedFile.type.startsWith('audio/')) {
-        tipo_mensagem = 'audio';
-        ficheiro_path = URL.createObjectURL(selectedFile);
-      } else {
-        tipo_mensagem = 'documento';
-        ficheiro_path = '#';
+      try {
+        const uploadData = await chatService.uploadAttachment(selectedFile);
+        ficheiro_path = uploadData.ficheiro_path;
+        ficheiro_nome = uploadData.ficheiro_nome;
+        ficheiro_tamanho = uploadData.ficheiro_tamanho;
+        tipo_mensagem = uploadData.tipo_mensagem;
+      } catch (err) {
+        console.error('Erro no upload de anexo:', err);
       }
     }
 
     await chatService.sendGroupMessage({
       groupId,
-      user,
       conteudo: texto,
       tipo_mensagem,
       ficheiro_path,
       ficheiro_nome,
-      ficheiro_tamanho: selectedFile ? selectedFile.size : null
+      ficheiro_tamanho,
     });
 
     setTexto('');
@@ -104,20 +111,17 @@ export default function ChatGrupo() {
     setMessages(msgs);
   };
 
-  const handleSimulatePhoto = () => {
-    const fakePhotoFile = new File(['[mock image content]'], 'foto_grupo.jpg', { type: 'image/jpeg' });
-    setSelectedFile(fakePhotoFile);
+  const handleCameraCapture = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
     setShowCameraModal(false);
   };
 
-  const handleStartAudio = () => {
-    setIsRecording(true);
-  };
-
-  const handleStopAudio = () => {
-    setIsRecording(false);
-    const fakeAudioFile = new File(['[mock audio content]'], 'audio_grupo.mp3', { type: 'audio/mp3' });
-    setSelectedFile(fakeAudioFile);
+  const handleAudioSelected = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
     setShowAudioModal(false);
   };
 
@@ -451,21 +455,21 @@ export default function ChatGrupo() {
 
                     {m.tipo_mensagem === 'imagem' && m.ficheiro_path && (
                       <div className="msg-media">
-                        <img src={m.ficheiro_path} alt="Anexo" />
+                        <img src={getFileUrl(m.ficheiro_path)} alt="Anexo" />
                       </div>
                     )}
 
                     {m.tipo_mensagem === 'audio' && (
                       <div className="msg-media">
                         <audio controls style={{ maxWidth: '100%' }}>
-                          <source src={m.ficheiro_path || '#'} />
+                          <source src={getFileUrl(m.ficheiro_path)} />
                           O seu navegador não suporta áudio.
                         </audio>
                       </div>
                     )}
 
                     {m.tipo_mensagem === 'documento' && (
-                      <a href={m.ficheiro_path || '#'} className="msg-file-link" download>
+                      <a href={getFileUrl(m.ficheiro_path)} className="msg-file-link" download target="_blank" rel="noreferrer">
                         📎 {m.ficheiro_nome || 'Ficheiro anexo'}
                       </a>
                     )}
@@ -555,25 +559,24 @@ export default function ChatGrupo() {
         <div className="capture-modal">
           <div className="capture-box">
             <h3>📷 Captura de Imagem</h3>
-            <div style={{
-              width: '100%',
-              height: '200px',
-              backgroundColor: '#000',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff'
-            }}>
-              [Pré-visualização da Câmara]
-            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Tire uma foto utilizando a câmara do seu dispositivo ou selecione um ficheiro de imagem para o grupo.
+            </p>
+            <input 
+              type="file" 
+              ref={cameraInputRef} 
+              accept="image/*" 
+              capture="environment" 
+              style={{ display: 'none' }} 
+              onChange={handleCameraCapture} 
+            />
             <div className="capture-btns">
               <button 
                 type="button" 
                 style={{ background: '#10b981' }} 
-                onClick={handleSimulatePhoto}
+                onClick={() => cameraInputRef.current?.click()}
               >
-                Capturar Foto
+                Tirar / Selecionar Foto
               </button>
               <button 
                 type="button" 
@@ -592,37 +595,29 @@ export default function ChatGrupo() {
         <div className="capture-modal">
           <div className="capture-box">
             <h3>🎤 Gravar Nota de Voz</h3>
-            <div className="audio-timer">
-              {formatTime(audioTimer)}
-            </div>
-            <div style={{ textAlign: 'center', color: isRecording ? '#ef4444' : '#64748b', marginBottom: '1rem' }}>
-              {isRecording ? 'A gravar áudio...' : 'Prima Iniciar para gravar'}
-            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Grave uma mensagem de voz ou selecione um ficheiro de áudio para partilhar com o grupo.
+            </p>
+            <input 
+              type="file" 
+              ref={audioInputRef} 
+              accept="audio/*" 
+              capture 
+              style={{ display: 'none' }} 
+              onChange={handleAudioSelected} 
+            />
             <div className="capture-btns">
-              {!isRecording ? (
-                <button 
-                  type="button" 
-                  style={{ background: '#ef4444' }} 
-                  onClick={handleStartAudio}
-                >
-                  Iniciar Gravação
-                </button>
-              ) : (
-                <button 
-                  type="button" 
-                  style={{ background: '#10b981' }} 
-                  onClick={handleStopAudio}
-                >
-                  Concluir & Anexar
-                </button>
-              )}
+              <button 
+                type="button" 
+                style={{ background: '#ef4444' }} 
+                onClick={() => audioInputRef.current?.click()}
+              >
+                Gravar / Selecionar Áudio
+              </button>
               <button 
                 type="button" 
                 style={{ background: '#64748b' }} 
-                onClick={() => {
-                  setIsRecording(false);
-                  setShowAudioModal(false);
-                }}
+                onClick={() => setShowAudioModal(false)}
               >
                 Cancelar
               </button>

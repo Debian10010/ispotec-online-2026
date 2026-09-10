@@ -53,7 +53,7 @@ export default function MyGroups() {
   };
 
   const gruposDisponiveis = todosGrupos.filter(
-    g => !g.membros || !g.membros.includes(Number(user?.id))
+    g => !g.membros || !g.membros.some(m => String(m.id || m._id || m) === String(user?.id))
   );
 
   return (

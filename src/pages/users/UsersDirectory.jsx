@@ -34,7 +34,7 @@ export default function UsersDirectory() {
         search: qParam
       });
       // Filter out current user from directory
-      const filtered = all.filter(u => u.id !== Number(currentUser?.id));
+      const filtered = all.filter(u => String(u.id) !== String(currentUser?.id));
       setUtilizadores(filtered);
       setLoading(false);
     }

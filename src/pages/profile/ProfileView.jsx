@@ -22,7 +22,7 @@ export default function ProfileView() {
       }
 
       // If viewing own profile, redirect to /profile
-      if (currentUser && Number(userId) === Number(currentUser.id)) {
+      if (currentUser && String(userId) === String(currentUser.id)) {
         navigate('/profile');
         return;
       }

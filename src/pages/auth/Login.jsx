@@ -104,15 +104,6 @@ export default function Login() {
           <p style={{ textAlign: 'center', marginTop: '1.5rem' }}>
             Não tem conta? <Link to="/auth/register" style={{ color: 'var(--secondary-blue)', textDecoration: 'none', fontWeight: 'bold' }}>Registar aqui</Link>
           </p>
-
-          <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--light-gray)', borderRadius: '6px', fontSize: '0.85rem' }}>
-            <strong>Credenciais de Demonstração (Mock):</strong>
-            <ul style={{ paddingLeft: '1.2rem', marginTop: '0.5rem' }}>
-              <li><strong>Admin/Especialista:</strong> admin@ispotec.online / Admin123!</li>
-              <li><strong>Docente:</strong> docente@ispotec.online / docente123</li>
-              <li><strong>Estudante:</strong> estudante@ispotec.online / estudante123</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>

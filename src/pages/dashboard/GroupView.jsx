@@ -46,7 +46,7 @@ export default function GroupView() {
 
     // Check membership or admin
     const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
-    const isMember = g.membros && g.membros.includes(Number(user?.id));
+    const isMember = g.membros && g.membros.some(m => String(m.id || m._id || m) === String(user?.id));
     if (!isMember && !isAdmin) {
       navigate('/dashboard/my-groups');
       return;
@@ -57,7 +57,7 @@ export default function GroupView() {
 
     // Load members
     const allUsers = await userService.getAllUsers();
-    const groupMembers = allUsers.filter(u => g.membros && g.membros.includes(u.id));
+    const groupMembers = allUsers.filter(u => g.membros && g.membros.some(m => String(m.id || m._id || m) === String(u.id)));
     setMembros(groupMembers);
   };
 

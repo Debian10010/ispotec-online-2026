@@ -1,91 +1,88 @@
-import { initialUsers } from '../data/users';
-
-const USERS_STORAGE_KEY = 'ispotec_users';
-
-function getUsers() {
-  const data = localStorage.getItem(USERS_STORAGE_KEY);
-  if (!data) {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialUsers));
-    return initialUsers;
-  }
-  try {
-    return JSON.parse(data);
-  } catch {
-    return initialUsers;
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-}
+import { api } from './api';
 
 export const userService = {
   async getAllUsers(filters = {}) {
-    let users = getUsers();
-    if (filters.tipo) {
-      users = users.filter(u => u.tipo === filters.tipo);
+    try {
+      const params = new URLSearchParams();
+      if (filters.tipo) params.append('tipo', filters.tipo);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.search) params.append('search', filters.search);
+
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+      const res = await api.get(`/users${queryStr}`);
+      return res.dados || [];
+    } catch (error) {
+      console.error('[userService.getAllUsers error]', error.message);
+      return [];
     }
-    if (filters.status) {
-      users = users.filter(u => u.status === filters.status);
-    }
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      users = users.filter(u => 
-        u.nome.toLowerCase().includes(q) || 
-        u.email.toLowerCase().includes(q)
-      );
-    }
-    return users;
   },
 
   async getPendingUsers() {
-    const users = getUsers();
-    return users.filter(u => u.status === 'pendente');
+    try {
+      const res = await api.get('/users?status=pendente');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[userService.getPendingUsers error]', error.message);
+      return [];
+    }
   },
 
   async updateStatus(userId, newStatus) {
-    const users = getUsers();
-    const index = users.findIndex(u => u.id === Number(userId));
-    if (index !== -1) {
-      users[index].status = newStatus;
-      saveUsers(users);
-      return true;
+    try {
+      const res = await api.patch(`/users/${userId}/status`, { status: newStatus });
+      return !!res.sucesso;
+    } catch (error) {
+      console.error('[userService.updateStatus error]', error.message);
+      return false;
     }
-    return false;
   },
 
   async getUserById(userId) {
-    const users = getUsers();
-    return users.find(u => u.id === Number(userId)) || null;
+    try {
+      const res = await api.get(`/users/${userId}`);
+      return res.dados || null;
+    } catch (error) {
+      console.error('[userService.getUserById error]', error.message);
+      return null;
+    }
   },
 
   async updateProfile(userId, data) {
-    const users = getUsers();
-    const index = users.findIndex(u => u.id === Number(userId));
-    if (index !== -1) {
-      users[index] = { ...users[index], ...data };
-      saveUsers(users);
-      return users[index];
+    try {
+      const res = await api.put('/profile/me', data);
+      return res.dados || null;
+    } catch (error) {
+      console.error('[userService.updateProfile error]', error.message);
+      throw error;
     }
-    return null;
   },
 
-  async updateAvatar(userId, avatarUrl) {
-    const users = getUsers();
-    const index = users.findIndex(u => u.id === Number(userId));
-    if (index !== -1) {
-      users[index].foto_perfil = avatarUrl;
-      saveUsers(users);
-      return true;
+  async updateAvatar(userId, avatarUrlOrFile) {
+    try {
+      let res;
+      if (avatarUrlOrFile instanceof File) {
+        const formData = new FormData();
+        formData.append('avatar', avatarUrlOrFile);
+        res = await api.upload('/profile/avatar', formData);
+      } else {
+        res = await api.post('/profile/avatar', { foto_perfil: avatarUrlOrFile });
+      }
+      return !!res.sucesso;
+    } catch (error) {
+      console.error('[userService.updateAvatar error]', error.message);
+      return false;
     }
-    return false;
   },
 
   async getCounts() {
-    const users = getUsers();
-    return {
-      aprovados: users.filter(u => u.status === 'aprovado').length,
-      pendentes: users.filter(u => u.status === 'pendente').length
-    };
-  }
+    try {
+      const res = await api.get('/users/counts');
+      return res.dados || { aprovados: 0, pendentes: 0 };
+    } catch (error) {
+      console.error('[userService.getCounts error]', error.message);
+      return { aprovados: 0, pendentes: 0 };
+    }
+  },
 };
+
+export default userService;

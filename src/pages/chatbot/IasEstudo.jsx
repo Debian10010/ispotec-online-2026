@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { initialStudyTools } from '../../data/studyTools';
+import { studyToolService } from '../../services/studyToolService';
 
 export default function IasEstudo() {
+  const [tools, setTools] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 
-  const filteredTools = initialStudyTools.filter(tool => {
-    const matchesCategory = activeCategory === 'all' || tool.categories.includes(activeCategory);
+  useEffect(() => {
+    async function loadTools() {
+      setLoading(true);
+      const data = await studyToolService.getAll();
+      setTools(data);
+      setLoading(false);
+    }
+    loadTools();
+  }, []);
+
+  const filteredTools = tools.filter(tool => {
+    const categories = tool.categories || [tool.category];
+    const matchesCategory = activeCategory === 'all' || categories.includes(activeCategory);
     const matchesSearch = !searchTerm.trim() || 
-      tool.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tool.categoryLabel.toLowerCase().includes(searchTerm.toLowerCase());
+      (tool.title && tool.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (tool.description && tool.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (tool.categoryLabel && tool.categoryLabel.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -372,31 +385,43 @@ export default function IasEstudo() {
           </div>
 
           {/* Tools Grid */}
-          <div className="tools-grid">
-            {filteredTools.map(tool => (
-              <div className="card-tool" key={tool.id}>
-                <span className="tool-category">{tool.categoryLabel}</span>
-                <div className="card-icon" style={{ background: tool.gradient, color: 'white' }}>
-                  <i className={tool.iconClass}></i>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+              A carregar ferramentas de estudo...
+            </div>
+          ) : filteredTools.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem', background: 'white', borderRadius: '1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+              <h3 style={{ color: 'var(--text-dark)', marginBottom: '0.5rem' }}>Nenhuma ferramenta encontrada</h3>
+              <p style={{ color: 'var(--text-muted)' }}>Tente ajustar a sua pesquisa ou selecionar outra categoria.</p>
+            </div>
+          ) : (
+            <div className="tools-grid">
+              {filteredTools.map(tool => (
+                <div className="card-tool" key={tool.id}>
+                  <span className="tool-category">{tool.categoryLabel}</span>
+                  <div className="card-icon" style={{ background: tool.gradient, color: 'white' }}>
+                    <i className={tool.iconClass}></i>
+                  </div>
+                  <h4 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>
+                    {tool.title}
+                  </h4>
+                  <p className="tool-description">
+                    {tool.description}
+                  </p>
+                  <a 
+                    href={tool.url} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="tool-btn" 
+                    style={{ background: tool.gradient, color: 'white' }}
+                  >
+                    <i className={tool.btnIcon}></i> {tool.btnText}
+                  </a>
                 </div>
-                <h4 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.75rem' }}>
-                  {tool.title}
-                </h4>
-                <p className="tool-description">
-                  {tool.description}
-                </p>
-                <a 
-                  href={tool.url} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="tool-btn" 
-                  style={{ background: tool.gradient, color: 'white' }}
-                >
-                  <i className={tool.btnIcon}></i> {tool.btnText}
-                </a>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Additional Resources */}
           <div className="additional-resources">
