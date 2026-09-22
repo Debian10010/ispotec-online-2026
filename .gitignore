@@ -26,6 +26,7 @@ dist-ssr
 # Backend excluded
 backend/
 backend.zip
+*.zip
 atlas-credentials.env
 
 # Frontend env

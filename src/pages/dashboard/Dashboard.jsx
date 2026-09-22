@@ -369,17 +369,47 @@ export default function Dashboard() {
         ) : (
           /* Painel do Utilizador Normal */
           <>
-            <h2 className="section-title">Acesso Rápido</h2>
+            <h2 className="section-title">Módulos da Plataforma</h2>
             <div className="action-grid">
-              <Link to="/dashboard/my-groups" className="action-card action-blue">
-                <div className="action-icon">📚</div>
+              <Link to="/ensino" className="action-card action-blue">
+                <div className="action-icon">🎓</div>
                 <div className="action-content">
-                  <div className="action-title">Meus Grupos</div>
-                  <div className="action-desc">Ver disciplinas e grupos</div>
+                  <div className="action-title">Ensino</div>
+                  <div className="action-desc">Cursos, aulas, avaliações e certificações</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
 
+              <Link to="/extensao" className="action-card action-green">
+                <div className="action-icon">🏗️</div>
+                <div className="action-content">
+                  <div className="action-title">Extensão</div>
+                  <div className="action-desc">Projectos, portfólio e biblioteca digital</div>
+                </div>
+                <div className="action-arrow">→</div>
+              </Link>
+
+              <Link to="/investigacao" className="action-card action-purple">
+                <div className="action-icon">🔬</div>
+                <div className="action-content">
+                  <div className="action-title">Investigação</div>
+                  <div className="action-desc">Propostas e projectos de investigação</div>
+                </div>
+                <div className="action-arrow">→</div>
+              </Link>
+
+              <Link to="/homeschool" className="action-card action-orange">
+                <div className="action-icon">🏠</div>
+                <div className="action-content">
+                  <div className="action-title">Home School</div>
+                  <div className="action-desc">Trilhas, mini-cursos e grupos</div>
+                </div>
+                <div className="action-arrow">→</div>
+              </Link>
+            </div>
+
+            <h2 className="section-title" style={{ marginTop: '2rem' }}>Acesso Rápido</h2>
+            <div className="action-grid">
               <Link to="/users" className="action-card action-purple">
                 <div className="action-icon">🔍</div>
                 <div className="action-content">

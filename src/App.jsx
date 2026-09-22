@@ -23,6 +23,10 @@ import Profile from './pages/profile/Profile';
 import PortfolioAdd from './pages/profile/PortfolioAdd';
 import ProfileView from './pages/profile/ProfileView';
 import UsersDirectory from './pages/users/UsersDirectory';
+import Ensino from './pages/ensino/Ensino';
+import Extensao from './pages/extensao/Extensao';
+import Investigacao from './pages/investigacao/Investigacao';
+import HomeSchool from './pages/homeschool/HomeSchool';
 
 export default function App() {
   return (
@@ -315,6 +319,40 @@ export default function App() {
               <UsersDirectory />
             </ProtectedRoute>
           } 
+        />
+
+        {/* Module Routes */}
+        <Route
+          path="/ensino"
+          element={
+            <ProtectedRoute>
+              <Ensino />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/extensao"
+          element={
+            <ProtectedRoute>
+              <Extensao />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investigacao"
+          element={
+            <ProtectedRoute>
+              <Investigacao />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homeschool"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
         />
 
         {/* Catch-all fallback */}
