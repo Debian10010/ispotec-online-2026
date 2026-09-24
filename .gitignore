@@ -25,6 +25,7 @@ dist-ssr
 
 # Backend excluded
 backend/
+Back-End-ispotec-online-2026/
 backend.zip
 *.zip
 atlas-credentials.env

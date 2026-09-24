@@ -24,8 +24,10 @@ import PortfolioAdd from './pages/profile/PortfolioAdd';
 import ProfileView from './pages/profile/ProfileView';
 import UsersDirectory from './pages/users/UsersDirectory';
 import Ensino from './pages/ensino/Ensino';
+import MicroCredenciais from './pages/ensino/MicroCredenciais';
 import Extensao from './pages/extensao/Extensao';
 import Investigacao from './pages/investigacao/Investigacao';
+import LaboratorioVirtual from './pages/laboratorio/LaboratorioVirtual';
 import HomeSchool from './pages/homeschool/HomeSchool';
 
 export default function App() {
@@ -326,7 +328,39 @@ export default function App() {
           path="/ensino"
           element={
             <ProtectedRoute>
-              <Ensino />
+              <MicroCredenciais />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ensino/micro-credenciais"
+          element={
+            <ProtectedRoute>
+              <MicroCredenciais />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ensino/micro-credenciais.php"
+          element={
+            <ProtectedRoute>
+              <MicroCredenciais />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/extensao-investigacao"
+          element={
+            <ProtectedRoute>
+              <LaboratorioVirtual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/extensao-investigacao/laboratorio-virtual"
+          element={
+            <ProtectedRoute>
+              <LaboratorioVirtual />
             </ProtectedRoute>
           }
         />
@@ -334,7 +368,7 @@ export default function App() {
           path="/extensao"
           element={
             <ProtectedRoute>
-              <Extensao />
+              <LaboratorioVirtual />
             </ProtectedRoute>
           }
         />
@@ -342,12 +376,20 @@ export default function App() {
           path="/investigacao"
           element={
             <ProtectedRoute>
-              <Investigacao />
+              <LaboratorioVirtual />
             </ProtectedRoute>
           }
         />
         <Route
           path="/homeschool"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homeschool/index.php"
           element={
             <ProtectedRoute>
               <HomeSchool />

@@ -371,29 +371,20 @@ export default function Dashboard() {
           <>
             <h2 className="section-title">Módulos da Plataforma</h2>
             <div className="action-grid">
-              <Link to="/ensino" className="action-card action-blue">
+              <Link to="/ensino/micro-credenciais" className="action-card action-blue">
                 <div className="action-icon">🎓</div>
                 <div className="action-content">
-                  <div className="action-title">Ensino</div>
-                  <div className="action-desc">Cursos, aulas, avaliações e certificações</div>
+                  <div className="action-title">Ensino — Micro-Credenciais</div>
+                  <div className="action-desc">Competências técnicas, humanas e digitais com certificações internacionais</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
 
-              <Link to="/extensao" className="action-card action-green">
-                <div className="action-icon">🏗️</div>
-                <div className="action-content">
-                  <div className="action-title">Extensão</div>
-                  <div className="action-desc">Projectos, portfólio e biblioteca digital</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/investigacao" className="action-card action-purple">
+              <Link to="/extensao-investigacao/laboratorio-virtual" className="action-card action-green">
                 <div className="action-icon">🔬</div>
                 <div className="action-content">
-                  <div className="action-title">Investigação</div>
-                  <div className="action-desc">Propostas e projectos de investigação</div>
+                  <div className="action-title">Extensão &amp; Investigação — Laboratório Virtual</div>
+                  <div className="action-desc">Plataformas imersivas, simulações médicas, laboratórios científicos e IA</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
@@ -402,7 +393,7 @@ export default function Dashboard() {
                 <div className="action-icon">🏠</div>
                 <div className="action-content">
                   <div className="action-title">Home School</div>
-                  <div className="action-desc">Trilhas, mini-cursos e grupos</div>
+                  <div className="action-desc">Meus Grupos de estudo e disciplinas colaborativas</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>

@@ -82,9 +82,8 @@ export default function Header() {
               {isAuthenticated ? (
                 <>
                   <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
-                  <li><Link to="/ensino" onClick={closeMenu}>Ensino</Link></li>
-                  <li><Link to="/extensao" onClick={closeMenu}>Extensão</Link></li>
-                  <li><Link to="/investigacao" onClick={closeMenu}>Investigação</Link></li>
+                  <li><Link to="/ensino/micro-credenciais" onClick={closeMenu}>Ensino</Link></li>
+                  <li><Link to="/extensao-investigacao/laboratorio-virtual" onClick={closeMenu}>Extensão &amp; Investigação</Link></li>
                   <li><Link to="/homeschool" onClick={closeMenu}>Home School</Link></li>
                   <li><Link to="/users" onClick={closeMenu}>Utilizadores</Link></li>
 
