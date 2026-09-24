@@ -455,8 +455,10 @@ export default function Chatbot() {
             <div className="chat-header">
               <div className="avatar">🤖</div>
               <div>
-                <h2>Assistente ISPOTEC</h2>
-                <p>Tire suas dúvidas académicas</p>
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Assistente ISPOTEC <span style={{ fontSize: '0.68rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>Groq IA</span>
+                </h2>
+                <p>Tire suas dúvidas académicas em tempo real</p>
               </div>
             </div>
 
