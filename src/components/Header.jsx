@@ -244,17 +244,15 @@ export default function Header() {
         </div>
       </header>
 
-      {isAuthenticated && (
-        <a 
-          href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
-          target="_blank" 
-          rel="noreferrer"
-          className="whatsapp-fixed" 
-          title="Contactar via WhatsApp"
-        >
-          💬
-        </a>
-      )}
+      <a 
+        href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+        target="_blank" 
+        rel="noreferrer"
+        className="whatsapp-fixed" 
+        title="Contactar via WhatsApp"
+      >
+        💬
+      </a>
     </>
   );
 }

@@ -7,6 +7,7 @@ export default function FloatingChatbot() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [showCallout, setShowCallout] = useState(true);
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
@@ -24,6 +25,7 @@ export default function FloatingChatbot() {
 
   useEffect(() => {
     if (isOpen) {
+      setShowCallout(false);
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       setTimeout(() => inputRef.current?.focus(), 150);
     }
@@ -45,7 +47,7 @@ export default function FloatingChatbot() {
     setLoading(true);
 
     try {
-      const res = await chatbotService.sendMessage(activeConvId, user?.id || 'guest', query.trim());
+      const res = await chatbotService.sendMessage(activeConvId, user?.id || 'visitante', query.trim());
       if (res && res.botMsg) {
         setMessages(prev => [...prev, res.botMsg]);
         if (res.conversation) {
@@ -96,7 +98,91 @@ export default function FloatingChatbot() {
   return (
     <>
       <style>{`
-        /* Floating Button next to WhatsApp */
+        /* Callout / Balão de convite logo ao entrar no sistema */
+        .chatbot-callout {
+          position: fixed;
+          bottom: 78px;
+          right: 20px;
+          background: #ffffff;
+          color: #1e293b;
+          padding: 0.65rem 1rem;
+          border-radius: 24px;
+          box-shadow: 0 8px 25px rgba(79, 70, 229, 0.25);
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          z-index: 998;
+          cursor: pointer;
+          border: 1.5px solid #6366f1;
+          animation: popInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .chatbot-callout:hover {
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 12px 28px rgba(79, 70, 229, 0.35);
+        }
+
+        .chatbot-callout::after {
+          content: '';
+          position: absolute;
+          bottom: -7px;
+          right: 75px;
+          width: 12px;
+          height: 12px;
+          background: #ffffff;
+          border-right: 1.5px solid #6366f1;
+          border-bottom: 1.5px solid #6366f1;
+          transform: rotate(45deg);
+        }
+
+        .chatbot-callout-text {
+          font-size: 0.86rem;
+          font-weight: 600;
+          color: #1e293b;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
+        .chatbot-callout-badge {
+          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          color: #ffffff;
+          font-size: 0.72rem;
+          padding: 2px 7px;
+          border-radius: 12px;
+          font-weight: 700;
+        }
+
+        .chatbot-callout-close {
+          background: none;
+          border: none;
+          color: #94a3b8;
+          font-size: 0.9rem;
+          cursor: pointer;
+          padding: 0 0 0 0.3rem;
+          line-height: 1;
+        }
+
+        .chatbot-callout-close:hover {
+          color: #ef4444;
+        }
+
+        @keyframes popInBounce {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.85);
+          }
+          70% {
+            transform: translateY(-4px) scale(1.03);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        /* Botão Flutuante ao Lado do WhatsApp */
         .floating-chatbot-btn {
           position: fixed;
           bottom: 20px;
@@ -111,7 +197,7 @@ export default function FloatingChatbot() {
           justify-content: center;
           text-decoration: none;
           font-size: 1.45rem;
-          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.45);
           z-index: 999;
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           border: none;
@@ -119,8 +205,8 @@ export default function FloatingChatbot() {
         }
 
         .floating-chatbot-btn:hover {
-          transform: scale(1.1);
-          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+          transform: scale(1.12);
+          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
         }
 
         .floating-chatbot-btn .ai-badge {
@@ -407,14 +493,20 @@ export default function FloatingChatbot() {
 
         @media (max-width: 768px) {
           .floating-chatbot-btn {
-            bottom: 60px;
-            right: 65px;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
+            bottom: 20px;
+            right: 75px;
+            width: 45px;
+            height: 45px;
+            font-size: 1.25rem;
+          }
+          .chatbot-callout {
+            bottom: 74px;
+            right: 15px;
+            font-size: 0.8rem;
+            padding: 0.5rem 0.85rem;
           }
           .floating-chatbot-window {
-            bottom: 110px;
+            bottom: 75px;
             right: 10px;
             left: 10px;
             width: auto;
@@ -423,19 +515,45 @@ export default function FloatingChatbot() {
         }
       `}</style>
 
-      {/* Floating Toggle Button next to WhatsApp */}
+      {/* Balão de Apresentação ao entrar no sistema */}
+      {showCallout && !isOpen && (
+        <div
+          className="chatbot-callout"
+          onClick={() => setIsOpen(true)}
+          title="Clique para testar o Assistente Académico ISPOTEC"
+        >
+          <div className="chatbot-callout-text">
+            <span>🤖</span>
+            <span>Chatbot Académico</span>
+            <span className="chatbot-callout-badge">Testar o assistente →</span>
+          </div>
+          <button
+            type="button"
+            className="chatbot-callout-close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowCallout(false);
+            }}
+            title="Fechar balão"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Botão Flutuante ao lado do WhatsApp */}
       <button
         type="button"
         className="floating-chatbot-btn"
         onClick={() => setIsOpen(prev => !prev)}
-        title="Assistente Académico ISPOTEC (Groq IA)"
+        title="Chatbot Académico ISPOTEC — Testar o assistente"
         aria-label="Abrir Assistente Académico IA"
       >
         <span>🤖</span>
         <span className="ai-badge">IA</span>
       </button>
 
-      {/* Floating Chat Modal */}
+      {/* Janela Flutuante do Chatbot */}
       {isOpen && (
         <div className="floating-chatbot-window" role="dialog" aria-label="Assistente Académico ISPOTEC">
           {/* Header */}
@@ -446,7 +564,7 @@ export default function FloatingChatbot() {
                 <h3 className="floating-chat-name">
                   Assistente ISPOTEC <small>Groq IA</small>
                 </h3>
-                <p className="floating-chat-status">Apoio a Estudos e Pesquisas</p>
+                <p className="floating-chat-status">Tire dúvidas académicas em tempo real</p>
               </div>
             </div>
 
