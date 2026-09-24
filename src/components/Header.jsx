@@ -85,6 +85,7 @@ export default function Header() {
                   <li><Link to="/ensino/micro-credenciais" onClick={closeMenu}>Ensino</Link></li>
                   <li><Link to="/extensao-investigacao/laboratorio-virtual" onClick={closeMenu}>Extensão &amp; Investigação</Link></li>
                   <li><Link to="/homeschool" onClick={closeMenu}>Home School</Link></li>
+                  <li><Link to="/dashboard/chat-global" onClick={closeMenu} style={{ fontWeight: '600', color: '#38bdf8' }}>💬 Chat Geral</Link></li>
                   <li><Link to="/users" onClick={closeMenu}>Utilizadores</Link></li>
 
                   {/* Dropdown de Contactos */}

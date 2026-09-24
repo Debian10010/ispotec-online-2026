@@ -133,6 +133,30 @@ export default function App() {
           } 
         />
         <Route 
+          path="/dashboard/chat-geral" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/chat-geral" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/chat-global" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/dashboard/chat-global.php" 
           element={
             <ProtectedRoute>

@@ -329,6 +329,15 @@ export default function Dashboard() {
 
             <h2 className="section-title">Gestão do Sistema</h2>
             <div className="action-grid">
+              <Link to="/dashboard/chat-global" className="action-card action-pink">
+                <div className="action-icon">💬</div>
+                <div className="action-content">
+                  <div className="action-title">Chat Geral ISPOTEC</div>
+                  <div className="action-desc">Canal de comunicação global com toda a comunidade</div>
+                </div>
+                <div className="action-arrow">→</div>
+              </Link>
+
               <Link to="/dashboard/users-pending" className="action-card action-orange">
                 <div className="action-icon">⏳</div>
                 <div className="action-content">
@@ -399,8 +408,26 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <h2 className="section-title" style={{ marginTop: '2rem' }}>Acesso Rápido</h2>
+            <h2 className="section-title" style={{ marginTop: '2rem' }}>Comunicação &amp; Acesso Rápido</h2>
             <div className="action-grid">
+              <Link to="/dashboard/chat-global" className="action-card action-pink" style={{ border: '2px solid #f472b6', background: 'linear-gradient(to right, #ffffff, #fdf2f8)' }}>
+                <div className="action-icon" style={{ background: '#fce7f3', color: '#db2777' }}>💬</div>
+                <div className="action-content">
+                  <div className="action-title" style={{ color: '#be185d', fontWeight: '700' }}>Chat Geral ISPOTEC</div>
+                  <div className="action-desc">Partilhar informações e mensagens em tempo real com todos os membros</div>
+                </div>
+                <div className="action-arrow" style={{ color: '#db2777' }}>→</div>
+              </Link>
+
+              <Link to="/dashboard/feed" className="action-card action-green">
+                <div className="action-icon">📰</div>
+                <div className="action-content">
+                  <div className="action-title">Feed Geral</div>
+                  <div className="action-desc">Ver publicações recentes da comunidade</div>
+                </div>
+                <div className="action-arrow">→</div>
+              </Link>
+
               <Link to="/users" className="action-card action-purple">
                 <div className="action-icon">🔍</div>
                 <div className="action-content">
@@ -414,25 +441,7 @@ export default function Dashboard() {
                 <div className="action-icon">👤</div>
                 <div className="action-content">
                   <div className="action-title">Meu Perfil</div>
-                  <div className="action-desc">Ver e editar perfil</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/dashboard/feed" className="action-card action-green">
-                <div className="action-icon">📰</div>
-                <div className="action-content">
-                  <div className="action-title">Feed Geral</div>
-                  <div className="action-desc">Ver publicações recentes</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/dashboard/chat-global" className="action-card action-pink">
-                <div className="action-icon">💬</div>
-                <div className="action-content">
-                  <div className="action-title">Forum Global</div>
-                  <div className="action-desc">Conversar com todos</div>
+                  <div className="action-desc">Ver e editar perfil pessoal</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
@@ -441,7 +450,7 @@ export default function Dashboard() {
                 <div className="action-icon">🤖</div>
                 <div className="action-content">
                   <div className="action-title">Chatbot Académico</div>
-                  <div className="action-desc">Tirar dúvidas com IA</div>
+                  <div className="action-desc">Tirar dúvidas académicas com IA</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
