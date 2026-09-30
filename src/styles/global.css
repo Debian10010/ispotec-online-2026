@@ -1,4 +1,6 @@
-/* ISPOTEC.ONLINE Global Stylesheet - Extracted from header.php, footer.php and original pages */
+/* ISPOTEC.ONLINE Global Stylesheet - Enterprise Edition */
+@import './designSystem.css';
+
 * {
     margin: 0;
     padding: 0;
@@ -530,10 +532,11 @@ input:focus, textarea:focus, select:focus {
 
 /* Footer Principal */
 footer {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, #003366 100%);
+    background: linear-gradient(180deg, var(--isp-navy-900) 0%, var(--isp-navy-950) 100%);
     color: var(--white);
-    padding: 2.5rem 0 2rem;
+    padding: 3rem 0 2rem;
     margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-content {

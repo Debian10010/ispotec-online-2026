@@ -1,272 +1,211 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function Header() {
+export default function Header({
+  isSidebarCollapsed,
+  onToggleSidebar,
+  onToggleMobileSidebar,
+  onOpenContacts
+}) {
   const { user, isAuthenticated, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [contactsOpen, setContactsOpen] = useState(false);
-  const contactsRef = useRef(null);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const toggleMenu = () => {
-    setMobileMenuOpen(prev => !prev);
-  };
-
-  const closeMenu = () => {
-    setMobileMenuOpen(false);
-    setContactsOpen(false);
-  };
-
-  // Close contacts dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
-      if (contactsRef.current && !contactsRef.current.contains(event.target)) {
-        setContactsOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close with Escape key
-  useEffect(() => {
-    function handleKeyDown(event) {
-      if (event.key === 'Escape') {
-        closeMenu();
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   const handleLogout = (e) => {
     e.preventDefault();
-    closeMenu();
+    setUserDropdownOpen(false);
     logout();
     navigate('/?logout=1');
   };
 
-  return (
-    <>
-      <div 
-        className={`menu-overlay ${mobileMenuOpen ? 'active' : ''}`} 
-        onClick={closeMenu}
-      />
+  // Determine current section title for breadcrumb
+  const getBreadcrumb = () => {
+    const path = location.pathname;
+    if (path === '/' || path === '/index.php') return 'Início';
+    if (path.startsWith('/dashboard/feed')) return 'Feed Académico';
+    if (path.startsWith('/dashboard/chat-global')) return 'Chat Geral ISPOTEC';
+    if (path.startsWith('/dashboard/my-groups')) return 'Minhas Disciplinas';
+    if (path.startsWith('/dashboard/groups-manage')) return 'Gestão de Disciplinas';
+    if (path.startsWith('/dashboard/users-list')) return 'Gestão de Utilizadores';
+    if (path.startsWith('/dashboard/users-pending')) return 'Utilizadores Pendentes';
+    if (path.startsWith('/dashboard')) return 'Painel Principal';
+    if (path.startsWith('/ensino')) return 'Ensino';
+    if (path.startsWith('/extensao')) return 'Extensão';
+    if (path.startsWith('/investigacao')) return 'Investigação';
+    if (path.startsWith('/grupo-de-estudos') || path.startsWith('/homeschool')) return 'Grupo de Estudos';
+    if (path.startsWith('/chatbot')) return 'Assistente Virtual IA';
+    if (path.startsWith('/profile')) return 'O Meu Perfil';
+    if (path.startsWith('/users')) return 'Directório de Utilizadores';
+    if (path.startsWith('/auth/login')) return 'Iniciar Sessão';
+    if (path.startsWith('/auth/register')) return 'Registar Conta';
+    return 'Portal Académico';
+  };
 
-      <header>
-        <div className="container">
-          <nav>
-            <Link to="/" className="logo" onClick={closeMenu}>
-              <img src="/assets/img/logo-ispotec.png" alt="ISPOTEC Online" />
-              <div className="logo-text">
-                <strong>ISPOTEC</strong>
-                <small>Instituto Superior Politécnico e de Tecnologias</small>
-              </div>
+  const userInitial = user?.nome ? user.nome.charAt(0).toUpperCase() : 'U';
+  const roleType = user?.tipo || 'estudante';
+  const roleLabel = roleType.charAt(0).toUpperCase() + roleType.slice(1);
+
+  return (
+    <header className="app-header">
+      {/* Left side: Toggles & Breadcrumb */}
+      <div className="header-left">
+        {/* Mobile Hamburger Button */}
+        <button
+          type="button"
+          className="header-toggle-btn header-mobile-toggle"
+          onClick={onToggleMobileSidebar}
+          aria-label="Abrir menu de navegação"
+          title="Menu de navegação"
+        >
+          ☰
+        </button>
+
+        {/* Desktop Sidebar Toggle */}
+        <button
+          type="button"
+          className="header-toggle-btn header-desktop-toggle"
+          onClick={onToggleSidebar}
+          aria-label={isSidebarCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+          title={isSidebarCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+        >
+          {isSidebarCollapsed ? '▶' : '◀'}
+        </button>
+
+        {/* Institutional Breadcrumb */}
+        <nav className="header-breadcrumb" aria-label="Caminho da página">
+          <Link to="/">ISPOTEC</Link>
+          <span>/</span>
+          <span className="header-breadcrumb-active">{getBreadcrumb()}</span>
+        </nav>
+      </div>
+
+      {/* Right side: Quick actions & User menu */}
+      <div className="header-right">
+        {/* Quick Official Contacts Button */}
+        <button
+          type="button"
+          className="header-contact-btn"
+          onClick={onOpenContacts}
+          title="Contactos Oficiais ISPOTEC: 878787442 | 877906666 | 873045610"
+        >
+          <span>📞</span>
+          <span>Contactos</span>
+        </button>
+
+        {isAuthenticated ? (
+          <>
+            {/* Quick Chat Link */}
+            <Link
+              to="/dashboard/chat-global"
+              className="header-chat-btn"
+              title="Aceder ao Chat Geral em tempo real"
+            >
+              <span>💬</span>
+              <span>Chat Geral</span>
             </Link>
 
-            <button 
-              className="menu-toggle" 
-              onClick={toggleMenu} 
-              aria-label="Menu"
-            >
-              <div className="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </button>
+            {/* Role Badge */}
+            <span className={`isp-role-badge isp-role-${roleType}`}>
+              {roleLabel}
+            </span>
 
-            <ul className={`nav-menu ${mobileMenuOpen ? 'active' : ''}`} id="navMenu">
-              <li><Link to="/" onClick={closeMenu}>Início</Link></li>
-              {isAuthenticated ? (
-                <>
-                  <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
-                  <li><Link to="/ensino" onClick={closeMenu}>Ensino</Link></li>
-                  <li><Link to="/extensao" onClick={closeMenu}>Extensão</Link></li>
-                  <li><Link to="/investigacao" onClick={closeMenu}>Investigação</Link></li>
-                  <li><Link to="/grupo-de-estudos" onClick={closeMenu}>Grupo de Estudos</Link></li>
-                  <li><Link to="/dashboard/chat-global" onClick={closeMenu} style={{ fontWeight: '600', color: '#38bdf8' }}>💬 Chat Geral</Link></li>
-                  <li><Link to="/users" onClick={closeMenu}>Utilizadores</Link></li>
+            {/* User Dropdown */}
+            <div className="header-user-menu" ref={dropdownRef}>
+              <button
+                type="button"
+                className="header-user-btn"
+                onClick={() => setUserDropdownOpen(prev => !prev)}
+                aria-expanded={userDropdownOpen}
+                aria-label="Menu do utilizador"
+              >
+                <div className="header-avatar">{userInitial}</div>
+                <span className="header-user-name">{user?.nome || 'Utilizador'}</span>
+                <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>▼</span>
+              </button>
 
-                  {/* Dropdown de Contactos */}
-                  <li className={`contacts-dropdown ${contactsOpen ? 'active' : ''}`} ref={contactsRef}>
-                    <button 
-                      className="contacts-toggle"
-                      onClick={() => setContactsOpen(prev => !prev)}
-                      type="button"
-                    >
-                      <span className="contacts-icon">📞</span>
-                      <span>Contactos</span>
-                    </button>
-                    <div className="contacts-dropdown-content">
-                      <div className="contacts-header">
-                        <h3>📞 Contactos ISPOTEC</h3>
-                      </div>
-                      <div className="contacts-body">
-                        {/* Telefones */}
-                        <div className="contact-group">
-                          <div className="group-title">
-                            <span>📞</span>
-                            <span>Telefones Oficiais</span>
-                          </div>
-                          <div className="contact-items">
-                            <a 
-                              href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
-                              target="_blank" 
-                              rel="noreferrer"
-                              className="contact-item contact-item-link"
-                              onClick={closeMenu}
-                            >
-                              <div className="contact-icon" style={{ background: 'rgba(37, 211, 102, 0.1)', color: '#25D366' }}>💬</div>
-                              <div className="contact-details">
-                                <div className="contact-title">WhatsApp / Chamadas</div>
-                                <div className="contact-info">878787442</div>
-                              </div>
-                              <div className="external-icon">↗</div>
-                            </a>
-                            <a 
-                              href="tel:+258877906666" 
-                              className="contact-item contact-item-link"
-                              onClick={closeMenu}
-                            >
-                              <div className="contact-icon" style={{ background: 'rgba(0, 123, 255, 0.1)', color: '#007bff' }}>📱</div>
-                              <div className="contact-details">
-                                <div className="contact-title">Linha Geral 2</div>
-                                <div className="contact-info">877906666</div>
-                              </div>
-                              <div className="external-icon">↗</div>
-                            </a>
-                            <a 
-                              href="tel:+258873045610" 
-                              className="contact-item contact-item-link"
-                              onClick={closeMenu}
-                            >
-                              <div className="contact-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}>📱</div>
-                              <div className="contact-details">
-                                <div className="contact-title">Linha Geral 3</div>
-                                <div className="contact-info">873045610</div>
-                              </div>
-                              <div className="external-icon">↗</div>
-                            </a>
-                          </div>
-                        </div>
+              {userDropdownOpen && (
+                <div className="header-dropdown-panel" role="menu">
+                  <div className="dropdown-user-header">
+                    <div className="dropdown-user-name">{user?.nome || 'Utilizador'}</div>
+                    <div className="dropdown-user-email">{user?.email || ''}</div>
+                  </div>
 
-                        {/* Redes Sociais */}
-                        <div className="contact-group">
-                          <div className="group-title">
-                            <span>🌐</span>
-                            <span>Redes Sociais</span>
-                          </div>
-                          <div className="contact-items">
-                            <a 
-                              href="https://web.facebook.com/ISPOTEC/" 
-                              target="_blank" 
-                              rel="noreferrer"
-                              className="contact-item contact-item-link"
-                              onClick={closeMenu}
-                            >
-                              <div className="contact-icon" style={{ background: 'rgba(24, 119, 242, 0.1)', color: '#1877F2' }}>📘</div>
-                              <div className="contact-details">
-                                <div className="contact-title">Facebook</div>
-                                <div className="contact-info">@ISPOTEC</div>
-                              </div>
-                              <div className="external-icon">↗</div>
-                            </a>
-                          </div>
-                        </div>
+                  <Link
+                    to="/profile"
+                    className="dropdown-item"
+                    onClick={() => setUserDropdownOpen(false)}
+                    role="menuitem"
+                  >
+                    <span>👤</span>
+                    <span>O Meu Perfil</span>
+                  </Link>
 
-                        {/* Email */}
-                        <div className="contact-group">
-                          <div className="group-title">
-                            <span>✉️</span>
-                            <span>Email</span>
-                          </div>
-                          <div className="contact-items">
-                            <a 
-                              href="mailto:ifoptec.politecnica@gmail.com" 
-                              className="contact-item contact-item-link"
-                              onClick={closeMenu}
-                            >
-                              <div className="contact-icon" style={{ background: 'rgba(220, 53, 69, 0.1)', color: '#dc3545' }}>📧</div>
-                              <div className="contact-details">
-                                <div className="contact-title">Email Institucional</div>
-                                <div className="contact-info">ifoptec.politecnica@gmail.com</div>
-                              </div>
-                              <div className="external-icon">↗</div>
-                            </a>
-                          </div>
-                        </div>
+                  <Link
+                    to="/dashboard"
+                    className="dropdown-item"
+                    onClick={() => setUserDropdownOpen(false)}
+                    role="menuitem"
+                  >
+                    <span>📊</span>
+                    <span>Painel Dashboard</span>
+                  </Link>
 
-                        {/* Localização */}
-                        <div className="contact-group">
-                          <div className="group-title">
-                            <span>📍</span>
-                            <span>Localização</span>
-                          </div>
-                          <div className="contact-items">
-                            <div className="contact-item">
-                              <div className="contact-icon" style={{ background: 'rgba(108, 117, 125, 0.1)', color: '#6c757d' }}>🏢</div>
-                              <div className="contact-details">
-                                <div className="contact-title">ISPOTEC</div>
-                                <div className="contact-info">Rua da Mozal, 5453-Matola</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
+                  <Link
+                    to="/dashboard/chat-global"
+                    className="dropdown-item"
+                    onClick={() => setUserDropdownOpen(false)}
+                    role="menuitem"
+                  >
+                    <span>💬</span>
+                    <span>Chat Geral</span>
+                  </Link>
 
-                  <li><Link to="/profile" onClick={closeMenu}>Perfil</Link></li>
-                  <li className="nav-user">{user?.nome || 'Utilizador'}</li>
-                  <li>
-                    <button 
-                      onClick={handleLogout} 
-                      className="nav-btn-link nav-logout"
-                      type="button"
-                    >
-                      Sair
-                    </button>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    <Link 
-                      to="/auth/login" 
-                      className="btn btn-secondary" 
-                      style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                      onClick={closeMenu}
-                    >
-                      Entrar
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      to="/auth/register" 
-                      className="btn btn-success"
-                      onClick={closeMenu}
-                    >
-                      Registar
-                    </Link>
-                  </li>
-                </>
+                  <button
+                    type="button"
+                    className="dropdown-item dropdown-item-danger"
+                    onClick={handleLogout}
+                    role="menuitem"
+                  >
+                    <span>🚪</span>
+                    <span>Terminar Sessão</span>
+                  </button>
+                </div>
               )}
-            </ul>
-          </nav>
-        </div>
-      </header>
-
-      <a 
-        href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
-        target="_blank" 
-        rel="noreferrer"
-        className="whatsapp-fixed" 
-        title="Contactar via WhatsApp"
-      >
-        💬
-      </a>
-    </>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Link
+              to="/auth/login"
+              className="btn btn-secondary btn-sm"
+              style={{ padding: '0.45rem 0.95rem', fontSize: '0.85rem' }}
+            >
+              Entrar
+            </Link>
+            <Link
+              to="/auth/register"
+              className="btn btn-primary btn-sm"
+              style={{ padding: '0.45rem 0.95rem', fontSize: '0.85rem' }}
+            >
+              Registar
+            </Link>
+          </div>
+        )}
+      </div>
+    </header>
   );
 }

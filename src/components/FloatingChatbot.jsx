@@ -101,16 +101,16 @@ export default function FloatingChatbot() {
         /* Callout / Balão de convite logo ao entrar no sistema */
         .chatbot-callout {
           position: fixed;
-          bottom: 78px;
-          right: 20px;
+          bottom: 82px;
+          right: 24px;
           background: #ffffff;
           color: #1e293b;
-          padding: 0.65rem 1rem;
-          border-radius: 24px;
-          box-shadow: 0 8px 25px rgba(79, 70, 229, 0.25);
+          padding: 0.55rem 0.95rem;
+          border-radius: 20px;
+          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.22);
           display: flex;
           align-items: center;
-          gap: 0.6rem;
+          gap: 0.55rem;
           z-index: 998;
           cursor: pointer;
           border: 1.5px solid #6366f1;
@@ -119,15 +119,15 @@ export default function FloatingChatbot() {
         }
 
         .chatbot-callout:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 28px rgba(79, 70, 229, 0.35);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 12px 28px rgba(79, 70, 229, 0.3);
         }
 
         .chatbot-callout::after {
           content: '';
           position: absolute;
           bottom: -7px;
-          right: 75px;
+          right: 80px;
           width: 12px;
           height: 12px;
           background: #ffffff;
@@ -137,7 +137,7 @@ export default function FloatingChatbot() {
         }
 
         .chatbot-callout-text {
-          font-size: 0.86rem;
+          font-size: 0.84rem;
           font-weight: 600;
           color: #1e293b;
           display: flex;
@@ -148,9 +148,9 @@ export default function FloatingChatbot() {
         .chatbot-callout-badge {
           background: linear-gradient(135deg, #6366f1, #4f46e5);
           color: #ffffff;
-          font-size: 0.72rem;
+          font-size: 0.7rem;
           padding: 2px 7px;
-          border-radius: 12px;
+          border-radius: 10px;
           font-weight: 700;
         }
 
@@ -158,9 +158,9 @@ export default function FloatingChatbot() {
           background: none;
           border: none;
           color: #94a3b8;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           cursor: pointer;
-          padding: 0 0 0 0.3rem;
+          padding: 0 0 0 0.25rem;
           line-height: 1;
         }
 
@@ -171,10 +171,10 @@ export default function FloatingChatbot() {
         @keyframes popInBounce {
           0% {
             opacity: 0;
-            transform: translateY(20px) scale(0.85);
+            transform: translateY(16px) scale(0.9);
           }
           70% {
-            transform: translateY(-4px) scale(1.03);
+            transform: translateY(-3px) scale(1.02);
           }
           100% {
             opacity: 1;
@@ -185,40 +185,40 @@ export default function FloatingChatbot() {
         /* Botão Flutuante ao Lado do WhatsApp */
         .floating-chatbot-btn {
           position: fixed;
-          bottom: 20px;
-          right: 80px;
+          bottom: 24px;
+          right: 84px;
           background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
           color: white;
-          width: 50px;
-          height: 50px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          font-size: 1.45rem;
-          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.45);
+          font-size: 1.35rem;
+          box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
           z-index: 999;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           border: none;
           cursor: pointer;
         }
 
         .floating-chatbot-btn:hover {
-          transform: scale(1.12);
-          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
         }
 
         .floating-chatbot-btn .ai-badge {
           position: absolute;
-          top: -3px;
-          right: -3px;
+          top: -2px;
+          right: -2px;
           background: #10b981;
           color: white;
-          font-size: 0.62rem;
+          font-size: 0.6rem;
           font-weight: 700;
-          padding: 2px 5px;
-          border-radius: 10px;
+          padding: 2px 4px;
+          border-radius: 8px;
           border: 2px solid white;
           line-height: 1;
         }
@@ -226,21 +226,21 @@ export default function FloatingChatbot() {
         /* Floating Window */
         .floating-chatbot-window {
           position: fixed;
-          bottom: 85px;
-          right: 20px;
-          width: 380px;
-          max-width: calc(100vw - 30px);
-          height: 530px;
-          max-height: calc(100vh - 120px);
+          bottom: 84px;
+          right: 24px;
+          width: 375px;
+          max-width: calc(100vw - 32px);
+          height: 520px;
+          max-height: calc(100vh - 110px);
           background: #ffffff;
           border-radius: 16px;
-          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
           display: flex;
           flex-direction: column;
-          z-index: 1000;
+          z-index: 1050;
           overflow: hidden;
-          border: 1px solid #e2e8f0;
-          animation: floatIn 0.25s ease-out;
+          border: 1px solid #cbd5e1;
+          animation: floatIn 0.22s ease-out;
         }
 
         @keyframes floatIn {
@@ -493,24 +493,27 @@ export default function FloatingChatbot() {
 
         @media (max-width: 768px) {
           .floating-chatbot-btn {
-            bottom: 20px;
-            right: 75px;
-            width: 45px;
-            height: 45px;
+            bottom: 18px;
+            right: 70px;
+            width: 44px;
+            height: 44px;
             font-size: 1.25rem;
           }
           .chatbot-callout {
-            bottom: 74px;
-            right: 15px;
-            font-size: 0.8rem;
-            padding: 0.5rem 0.85rem;
+            bottom: 70px;
+            right: 12px;
+            left: auto;
+            max-width: calc(100vw - 24px);
+            font-size: 0.78rem;
+            padding: 0.45rem 0.75rem;
           }
           .floating-chatbot-window {
-            bottom: 75px;
-            right: 10px;
-            left: 10px;
+            bottom: 72px;
+            right: 12px;
+            left: 12px;
             width: auto;
-            height: 480px;
+            height: 460px;
+            max-height: 75vh;
           }
         }
       `}</style>

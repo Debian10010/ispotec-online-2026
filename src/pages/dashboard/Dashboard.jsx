@@ -6,467 +6,621 @@ import { groupService } from '../../services/groupService';
 import { postService } from '../../services/postService';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [stats, setStats] = useState({
     usersAprovados: 0,
     usersPendentes: 0,
     totalGrupos: 0,
     totalPosts: 0
   });
-
-  const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
+  const [myGroupsCount, setMyGroupsCount] = useState(0);
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadStats() {
-      if (isAdmin) {
-        const userCounts = await userService.getCounts();
-        const groups = await groupService.getAllGroups();
-        const totalPosts = await postService.getTotalPostsCount();
+    async function loadDashboardData() {
+      try {
+        setLoading(true);
+        const [totalPosts, groups, recentFeed] = await Promise.all([
+          postService.getTotalPostsCount(),
+          groupService.getAllGroups(),
+          postService.getGlobalFeed(4, 0)
+        ]);
+
+        let userCounts = { aprovados: 0, pendentes: 0 };
+        if (isAdmin) {
+          userCounts = await userService.getCounts();
+        }
+
+        let myGroups = [];
+        try {
+          myGroups = await groupService.getMyGroups();
+        } catch {
+          myGroups = [];
+        }
+
         setStats({
-          usersAprovados: userCounts.aprovados,
-          usersPendentes: userCounts.pendentes,
-          totalGrupos: groups.length,
-          totalPosts: totalPosts
+          usersAprovados: userCounts.aprovados || 0,
+          usersPendentes: userCounts.pendentes || 0,
+          totalGrupos: groups.length || 0,
+          totalPosts: totalPosts || 0
         });
+        setMyGroupsCount(myGroups.length || 0);
+        setRecentPosts(recentFeed || []);
+      } catch (err) {
+        console.error('Erro ao carregar dados do dashboard:', err);
+      } finally {
+        setLoading(false);
       }
     }
-    loadStats();
+
+    loadDashboardData();
   }, [isAdmin]);
 
+  const roleType = user?.tipo || 'estudante';
+  const roleLabel = roleType.charAt(0).toUpperCase() + roleType.slice(1);
+  const todayFormatted = new Intl.DateTimeFormat('pt-PT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(new Date());
+
   return (
-    <>
-      <style>{`
-        .welcome-section {
-            text-align: center;
-            padding: 2rem 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .welcome-logo {
-            max-height: 80px;
-            margin-bottom: 1rem;
-        }
-
-        .welcome-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-subtitle {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        .user-badge {
-            display: inline-block;
-            padding: 0.35rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .user-badge-estudante {
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            color: #1e40af;
-        }
-
-        .user-badge-docente {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            color: #065f46;
-        }
-
-        .user-badge-especialista, .user-badge-admin {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #92400e;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 1.25rem;
-            padding-left: 0.5rem;
-            border-left: 4px solid var(--secondary-blue);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: var(--shadow);
-            border-left: 4px solid;
-            transition: all 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stat-blue { border-left-color: var(--secondary-blue); }
-        .stat-orange { border-left-color: var(--accent-orange); }
-        .stat-green { border-left-color: var(--accent-green); }
-        .stat-purple { border-left-color: var(--accent-purple); }
-
-        .stat-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--light-gray);
-            border-radius: var(--radius-sm);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-
-        /* Action Grid */
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .action-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.25rem;
-            background: var(--white);
-            border-radius: var(--radius);
-            text-decoration: none;
-            color: var(--text-dark);
-            box-shadow: var(--shadow);
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .action-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .action-blue:hover { border-color: var(--secondary-blue); }
-        .action-green:hover { border-color: var(--accent-green); }
-        .action-orange:hover { border-color: var(--accent-orange); }
-        .action-purple:hover { border-color: var(--accent-purple); }
-        .action-pink:hover { border-color: var(--accent-pink); }
-        .action-cyan:hover { border-color: #06b6d4; }
-        .action-indigo:hover { border-color: #6366f1; }
-
-        .action-icon {
-            font-size: 1.75rem;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            flex-shrink: 0;
-        }
-
-        .action-blue .action-icon { background: #dbeafe; }
-        .action-green .action-icon { background: #d1fae5; }
-        .action-orange .action-icon { background: #fef3c7; }
-        .action-purple .action-icon { background: #ede9fe; }
-        .action-pink .action-icon { background: #fce7f3; }
-        .action-cyan .action-icon { background: #cffafe; }
-        .action-indigo .action-icon { background: #e0e7ff; }
-
-        .action-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .action-title {
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .action-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .action-arrow {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            transition: transform 0.2s;
-        }
-
-        .action-card:hover .action-arrow {
-            transform: translateX(4px);
-        }
-
-        @media (max-width: 768px) {
-            .welcome-section {
-                padding: 1.5rem 0.5rem;
-            }
-
-            .welcome-logo {
-                max-height: 60px;
-            }
-
-            .welcome-title {
-                font-size: 1.4rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .stat-card {
-                padding: 1rem;
-            }
-
-            .stat-icon {
-                font-size: 1.5rem;
-                width: 40px;
-                height: 40px;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-            }
-
-            .action-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .action-card {
-                padding: 1rem;
-            }
-
-            .section-title {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-      `}</style>
-
-      <div className="container">
-        {/* Logo e Boas-vindas */}
-        <div className="welcome-section">
-          <img src="/assets/img/logo-ispotec.png" alt="ISPOTEC Online" className="welcome-logo" />
-          <h1 className="welcome-title">Olá, {user?.nome || 'Utilizador'}!</h1>
-          <p className="welcome-subtitle">
-            <span className={`user-badge user-badge-${user?.tipo || 'estudante'}`}>
-              {user?.tipo ? user.tipo.charAt(0).toUpperCase() + user.tipo.slice(1) : 'Estudante'}
+    <div className="dashboard-container">
+      {/* ========================================================
+          1. PAGE TITLE & INSTITUTIONAL HEADER BANNER
+          ======================================================== */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--isp-navy-950) 0%, var(--isp-navy-800) 100%)',
+        color: 'var(--isp-white)',
+        borderRadius: 'var(--isp-radius-lg)',
+        padding: '2rem 2.25rem',
+        marginBottom: '2rem',
+        boxShadow: 'var(--isp-shadow-md)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1.5rem',
+        border: '1px solid rgba(255, 255, 255, 0.08)'
+      }}>
+        <div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '0.5rem',
+            flexWrap: 'wrap'
+          }}>
+            <span style={{
+              fontSize: '0.8rem',
+              fontWeight: '600',
+              color: 'var(--isp-slate-400)',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Portal Académico ISPOTEC
             </span>
+            <span style={{ color: 'var(--isp-slate-600)' }}>•</span>
+            <span className={`isp-role-badge isp-role-${roleType}`}>
+              {roleLabel}
+            </span>
+          </div>
+
+          <h1 style={{
+            fontSize: '1.85rem',
+            fontWeight: '800',
+            letterSpacing: '-0.5px',
+            margin: '0 0 0.35rem 0',
+            color: 'var(--isp-white)'
+          }}>
+            Olá, {user?.nome || 'Utilizador'}!
+          </h1>
+          <p style={{
+            margin: 0,
+            fontSize: '0.95rem',
+            color: 'var(--isp-slate-300)',
+            maxWidth: '650px',
+            lineHeight: '1.5'
+          }}>
+            Acesso integrado aos 4 módulos académicos (Ensino, Extensão, Investigação e Grupo de Estudos),
+            ferramentas de comunicação e serviços institucionais.
           </p>
         </div>
 
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '0.5rem'
+        }}>
+          <div style={{
+            fontSize: '0.8rem',
+            color: 'var(--isp-slate-400)',
+            textTransform: 'capitalize'
+          }}>
+            📅 {todayFormatted}
+          </div>
+          <Link
+            to="/dashboard/chat-global"
+            className="btn btn-primary"
+            style={{
+              padding: '0.55rem 1.15rem',
+              fontSize: '0.88rem',
+              borderRadius: 'var(--isp-radius-md)'
+            }}
+          >
+            💬 Abrir Chat Geral
+          </Link>
+        </div>
+      </div>
+
+      {/* ========================================================
+          PENDING ACTIONS (WHERE APPLICABLE - ADMIN ONLY)
+          ======================================================== */}
+      {isAdmin && stats.usersPendentes > 0 && (
+        <div style={{
+          background: 'var(--isp-amber-50)',
+          border: '1px solid var(--isp-amber-100)',
+          borderRadius: 'var(--isp-radius-md)',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '1.4rem' }}>⚠️</span>
+            <div>
+              <strong style={{ color: 'var(--isp-amber-600)', display: 'block', fontSize: '0.95rem' }}>
+                Utilizadores Aguardando Validação
+              </strong>
+              <span style={{ color: 'var(--isp-slate-700)', fontSize: '0.88rem' }}>
+                Existem <strong>{stats.usersPendentes}</strong> registos pendentes de aprovação no sistema.
+              </span>
+            </div>
+          </div>
+          <Link
+            to="/dashboard/users-pending"
+            className="btn btn-warning"
+            style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+          >
+            Rever Pendentes →
+          </Link>
+        </div>
+      )}
+
+      {/* ========================================================
+          2. KPI CARDS (USING ONLY EXISTING REAL DATA)
+          ======================================================== */}
+      <div className="kpi-grid">
         {isAdmin ? (
-          /* Painel Admin */
           <>
-            <div className="stats-grid">
-              <div className="stat-card stat-blue">
-                <div className="stat-icon">👥</div>
-                <div className="stat-content">
-                  <div className="stat-number">{stats.usersAprovados}</div>
-                  <div className="stat-label">Utilizadores Aprovados</div>
-                </div>
-              </div>
-
-              <div className="stat-card stat-orange">
-                <div className="stat-icon">⏳</div>
-                <div className="stat-content">
-                  <div className="stat-number">{stats.usersPendentes}</div>
-                  <div className="stat-label">Pendentes de Aprovação</div>
-                </div>
-              </div>
-
-              <div className="stat-card stat-green">
-                <div className="stat-icon">📚</div>
-                <div className="stat-content">
-                  <div className="stat-number">{stats.totalGrupos}</div>
-                  <div className="stat-label">Grupos/Disciplinas</div>
-                </div>
-              </div>
-
-              <div className="stat-card stat-purple">
-                <div className="stat-icon">📝</div>
-                <div className="stat-content">
-                  <div className="stat-number">{stats.totalPosts}</div>
-                  <div className="stat-label">Publicações</div>
-                </div>
+            <div className="kpi-card kpi-card-blue">
+              <div className="kpi-icon-box">👥</div>
+              <div className="kpi-data">
+                <div className="kpi-value">{loading ? '...' : stats.usersAprovados}</div>
+                <div className="kpi-label">Utilizadores Aprovados</div>
               </div>
             </div>
 
-            <h2 className="section-title">Gestão do Sistema</h2>
-            <div className="action-grid">
-              <Link to="/dashboard/chat-global" className="action-card action-pink">
-                <div className="action-icon">💬</div>
-                <div className="action-content">
-                  <div className="action-title">Chat Geral ISPOTEC</div>
-                  <div className="action-desc">Canal de comunicação global com toda a comunidade</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
+            <div className="kpi-card kpi-card-orange">
+              <div className="kpi-icon-box">⏳</div>
+              <div className="kpi-data">
+                <div className="kpi-value">{loading ? '...' : stats.usersPendentes}</div>
+                <div className="kpi-label">Pendentes de Validação</div>
+              </div>
+            </div>
 
-              <Link to="/dashboard/users-pending" className="action-card action-orange">
-                <div className="action-icon">⏳</div>
-                <div className="action-content">
-                  <div className="action-title">Utilizadores Pendentes</div>
-                  <div className="action-desc">Aprovar ou rejeitar novos registos</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
+            <div className="kpi-card kpi-card-green">
+              <div className="kpi-icon-box">📚</div>
+              <div className="kpi-data">
+                <div className="kpi-value">{loading ? '...' : stats.totalGrupos}</div>
+                <div className="kpi-label">Grupos &amp; Disciplinas</div>
+              </div>
+            </div>
 
-              <Link to="/dashboard/users-list" className="action-card action-blue">
-                <div className="action-icon">👥</div>
-                <div className="action-content">
-                  <div className="action-title">Todos os Utilizadores</div>
-                  <div className="action-desc">Ver e gerir utilizadores</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/dashboard/groups-manage" className="action-card action-green">
-                <div className="action-icon">📚</div>
-                <div className="action-content">
-                  <div className="action-title">Disciplinas/Grupos</div>
-                  <div className="action-desc">Criar e gerir grupos</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/chatbot" className="action-card action-purple">
-                <div className="action-icon">🤖</div>
-                <div className="action-content">
-                  <div className="action-title">Chatbot Académico</div>
-                  <div className="action-desc">Testar o assistente virtual</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
+            <div className="kpi-card kpi-card-purple">
+              <div className="kpi-icon-box">📝</div>
+              <div className="kpi-data">
+                <div className="kpi-value">{loading ? '...' : stats.totalPosts}</div>
+                <div className="kpi-label">Publicações Académicas</div>
+              </div>
             </div>
           </>
         ) : (
-          /* Painel do Utilizador Normal */
           <>
-            <h2 className="section-title">Módulos Principais da Plataforma</h2>
-            <div className="action-grid">
-              <Link to="/ensino" className="action-card action-blue">
-                <div className="action-icon">🎓</div>
-                <div className="action-content">
-                  <div className="action-title">Ensino</div>
-                  <div className="action-desc">Projetos educativos, curriculares, bibliotecas, laboratórios e estatísticas</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/extensao" className="action-card action-green">
-                <div className="action-icon">🤝</div>
-                <div className="action-content">
-                  <div className="action-title">Extensão</div>
-                  <div className="action-desc">Centros de Práticas, projetos comunitários e parceiros institucionais</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/investigacao" className="action-card action-purple">
-                <div className="action-icon">🔬</div>
-                <div className="action-content">
-                  <div className="action-title">Investigação</div>
-                  <div className="action-desc">Laboratórios científicos de ponta, pesquisas, publicações e investigadores</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/grupo-de-estudos" className="action-card action-orange">
-                <div className="action-icon">👥</div>
-                <div className="action-content">
-                  <div className="action-title">Grupo de Estudos</div>
-                  <div className="action-desc">Grupos de estudo colaborativos e partilha académica entre estudantes</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
+            <div className="kpi-card kpi-card-blue">
+              <div className="kpi-icon-box">🎓</div>
+              <div className="kpi-data">
+                <div className="kpi-value">4</div>
+                <div className="kpi-label">Módulos Centrais</div>
+              </div>
             </div>
 
-            <h2 className="section-title" style={{ marginTop: '2rem' }}>Comunicação &amp; Acesso Rápido</h2>
-            <div className="action-grid">
-              <Link to="/dashboard/chat-global" className="action-card action-pink" style={{ border: '2px solid #f472b6', background: 'linear-gradient(to right, #ffffff, #fdf2f8)' }}>
-                <div className="action-icon" style={{ background: '#fce7f3', color: '#db2777' }}>💬</div>
-                <div className="action-content">
-                  <div className="action-title" style={{ color: '#be185d', fontWeight: '700' }}>Chat Geral ISPOTEC</div>
-                  <div className="action-desc">Partilhar informações e mensagens em tempo real com todos os membros</div>
-                </div>
-                <div className="action-arrow" style={{ color: '#db2777' }}>→</div>
-              </Link>
+            <div className="kpi-card kpi-card-green">
+              <div className="kpi-icon-box">📚</div>
+              <div className="kpi-data">
+                <div className="kpi-value">{loading ? '...' : myGroupsCount}</div>
+                <div className="kpi-label">Minhas Disciplinas</div>
+              </div>
+            </div>
 
-              <Link to="/dashboard/feed" className="action-card action-green">
-                <div className="action-icon">📰</div>
-                <div className="action-content">
-                  <div className="action-title">Feed Geral</div>
-                  <div className="action-desc">Ver publicações recentes da comunidade</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
+            <div className="kpi-card kpi-card-purple">
+              <div className="kpi-icon-box">📝</div>
+              <div className="kpi-data">
+                <div className="kpi-value">{loading ? '...' : stats.totalPosts}</div>
+                <div className="kpi-label">Publicações na Comunidade</div>
+              </div>
+            </div>
 
-              <Link to="/users" className="action-card action-purple">
-                <div className="action-icon">🔍</div>
-                <div className="action-content">
-                  <div className="action-title">Encontrar Utilizadores</div>
-                  <div className="action-desc">Pesquisar colegas e docentes</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/profile" className="action-card action-cyan">
-                <div className="action-icon">👤</div>
-                <div className="action-content">
-                  <div className="action-title">Meu Perfil</div>
-                  <div className="action-desc">Ver e editar perfil pessoal</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
-
-              <Link to="/chatbot" className="action-card action-indigo">
-                <div className="action-icon">🤖</div>
-                <div className="action-content">
-                  <div className="action-title">Chatbot Académico</div>
-                  <div className="action-desc">Tirar dúvidas académicas com IA</div>
-                </div>
-                <div className="action-arrow">→</div>
-              </Link>
+            <div className="kpi-card kpi-card-orange">
+              <div className="kpi-icon-box">🤖</div>
+              <div className="kpi-data">
+                <div className="kpi-value">IA</div>
+                <div className="kpi-label">Assistente Académico 24/7</div>
+              </div>
             </div>
           </>
         )}
       </div>
-    </>
+
+      {/* ========================================================
+          3. 4 MAIN ACADEMIC MODULES
+          ======================================================== */}
+      <div style={{ marginBottom: '2.5rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1.25rem'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.28rem',
+              fontWeight: '700',
+              color: 'var(--isp-slate-900)',
+              margin: '0 0 0.25rem 0'
+            }}>
+              Módulos Académicos
+            </h2>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--isp-slate-500)' }}>
+              Pilares formativos e científicos do Instituto Superior Politécnico e de Tecnologias
+            </p>
+          </div>
+        </div>
+
+        <div className="enterprise-module-grid">
+          {/* Ensino */}
+          <Link to="/ensino" className="enterprise-module-card">
+            <div className="module-card-top">
+              <div className="module-card-icon" style={{ background: '#dbeafe', color: '#1d4ed8' }}>
+                🎓
+              </div>
+              <span className="module-card-badge" style={{ background: '#eff6ff', color: '#1d4ed8' }}>
+                8 Secções
+              </span>
+            </div>
+            <h3 className="module-card-title">Ensino</h3>
+            <p className="module-card-desc">
+              Projetos Educativos, Projetos Curriculares, Bibliotecas Digitais, Laboratórios, Estatística Académica e Pedagógica, Calendário e Eventos Científicos.
+            </p>
+            <div className="module-card-footer">
+              <span>Aceder ao Módulo</span>
+              <span>→</span>
+            </div>
+          </Link>
+
+          {/* Extensão */}
+          <Link to="/extensao" className="enterprise-module-card">
+            <div className="module-card-top">
+              <div className="module-card-icon" style={{ background: '#d1fae5', color: '#059669' }}>
+                🤝
+              </div>
+              <span className="module-card-badge" style={{ background: '#ecfdf5', color: '#059669' }}>
+                6 Centros de Práticas
+              </span>
+            </div>
+            <h3 className="module-card-title">Extensão</h3>
+            <p className="module-card-desc">
+              Centros de Práticas Médicas, Empresariais, Resolução de Conflitos, Tecnológicas, Psicológicas e de Saúde Pública com os respetivos Projetos e Parceiros.
+            </p>
+            <div className="module-card-footer">
+              <span>Aceder ao Módulo</span>
+              <span>→</span>
+            </div>
+          </Link>
+
+          {/* Investigação */}
+          <Link to="/investigacao" className="enterprise-module-card">
+            <div className="module-card-top">
+              <div className="module-card-icon" style={{ background: '#ede9fe', color: '#7c3aed' }}>
+                🔬
+              </div>
+              <span className="module-card-badge" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                6 Laboratórios
+              </span>
+            </div>
+            <h3 className="module-card-title">Investigação</h3>
+            <p className="module-card-desc">
+              Laboratórios de Farmacologia, Exames Médicos, Microbiologia e Anatomia Patológica, Saúde Digital, Tecnologia e Inteligência Artificial e Medicina Dentária.
+            </p>
+            <div className="module-card-footer">
+              <span>Aceder ao Módulo</span>
+              <span>→</span>
+            </div>
+          </Link>
+
+          {/* Grupo de Estudos */}
+          <Link to="/grupo-de-estudos" className="enterprise-module-card">
+            <div className="module-card-top">
+              <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
+                👥
+              </div>
+              <span className="module-card-badge" style={{ background: '#fffbeb', color: '#d97706' }}>
+                Comunidade
+              </span>
+            </div>
+            <h3 className="module-card-title">Grupo de Estudos</h3>
+            <p className="module-card-desc">
+              Ambiente de estudo colaborativo, partilha de apontamentos, discussões académicas e entreajuda contínua entre estudantes e docentes.
+            </p>
+            <div className="module-card-footer">
+              <span>Aceder ao Módulo</span>
+              <span>→</span>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* ========================================================
+          4. RECENT ACTIVITIES / REAL CONTENT & QUICK SHORTCUTS
+          ======================================================== */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        {/* Atividades Recentes */}
+        <div style={{
+          background: 'var(--isp-white)',
+          border: '1px solid var(--isp-slate-200)',
+          borderRadius: 'var(--isp-radius-lg)',
+          padding: '1.5rem',
+          boxShadow: 'var(--isp-shadow-sm)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem',
+            paddingBottom: '0.75rem',
+            borderBottom: '1px solid var(--isp-slate-100)'
+          }}>
+            <h3 style={{
+              fontSize: '1.05rem',
+              fontWeight: '700',
+              color: 'var(--isp-slate-900)',
+              margin: 0
+            }}>
+              📰 Publicações Recentes
+            </h3>
+            <Link
+              to="/dashboard/feed"
+              style={{
+                fontSize: '0.84rem',
+                fontWeight: '600',
+                color: 'var(--isp-blue-600)',
+                textDecoration: 'none'
+              }}
+            >
+              Ver Todas →
+            </Link>
+          </div>
+
+          {loading ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--isp-slate-400)' }}>
+              A carregar publicações...
+            </div>
+          ) : recentPosts.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--isp-slate-400)' }}>
+              Ainda não existem publicações disponíveis.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {recentPosts.map((post) => (
+                <div
+                  key={post.id}
+                  style={{
+                    padding: '0.85rem',
+                    background: 'var(--isp-slate-50)',
+                    borderRadius: 'var(--isp-radius-md)',
+                    border: '1px solid var(--isp-slate-200)'
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.35rem'
+                  }}>
+                    <strong style={{ fontSize: '0.92rem', color: 'var(--isp-slate-900)' }}>
+                      {post.titulo}
+                    </strong>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      background: '#e0e7ff',
+                      color: '#4338ca'
+                    }}>
+                      {post.tipo || 'Post'}
+                    </span>
+                  </div>
+                  <p style={{
+                    fontSize: '0.84rem',
+                    color: 'var(--isp-slate-600)',
+                    margin: '0 0 0.4rem 0',
+                    lineHeight: '1.4',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {post.conteudo}
+                  </p>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--isp-slate-400)' }}>
+                    Por {post.nome || 'Autor'} {post.data_criacao && `• ${new Date(post.data_criacao).toLocaleDateString('pt-PT')}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Ferramentas e Comunicação Rápida */}
+        <div style={{
+          background: 'var(--isp-white)',
+          border: '1px solid var(--isp-slate-200)',
+          borderRadius: 'var(--isp-radius-lg)',
+          padding: '1.5rem',
+          boxShadow: 'var(--isp-shadow-sm)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem',
+            paddingBottom: '0.75rem',
+            borderBottom: '1px solid var(--isp-slate-100)'
+          }}>
+            <h3 style={{
+              fontSize: '1.05rem',
+              fontWeight: '700',
+              color: 'var(--isp-slate-900)',
+              margin: 0
+            }}>
+              ⚡ Atalhos &amp; Comunicação
+            </h3>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <Link
+              to="/dashboard/chat-global"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.85rem',
+                padding: '0.85rem',
+                background: 'var(--isp-blue-50)',
+                border: '1px solid var(--isp-blue-100)',
+                borderRadius: 'var(--isp-radius-md)',
+                textDecoration: 'none',
+                color: 'var(--isp-slate-900)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>💬</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-blue-700)' }}>
+                  Chat Geral ISPOTEC
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
+                  Canal de comunicação instantânea para toda a comunidade académica
+                </div>
+              </div>
+              <span style={{ color: 'var(--isp-blue-600)', fontWeight: 'bold' }}>→</span>
+            </Link>
+
+            <Link
+              to="/chatbot"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.85rem',
+                padding: '0.85rem',
+                background: 'var(--isp-purple-50)',
+                border: '1px solid var(--isp-purple-100)',
+                borderRadius: 'var(--isp-radius-md)',
+                textDecoration: 'none',
+                color: 'var(--isp-slate-900)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>🤖</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-purple-600)' }}>
+                  Chatbot Académico
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
+                  Consulte dúvidas de investigação, normas APA e planos de estudo
+                </div>
+              </div>
+              <span style={{ color: 'var(--isp-purple-600)', fontWeight: 'bold' }}>→</span>
+            </Link>
+
+            <Link
+              to="/users"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.85rem',
+                padding: '0.85rem',
+                background: 'var(--isp-slate-50)',
+                border: '1px solid var(--isp-slate-200)',
+                borderRadius: 'var(--isp-radius-md)',
+                textDecoration: 'none',
+                color: 'var(--isp-slate-900)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>🔍</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-slate-800)' }}>
+                  Directório de Colegas &amp; Docentes
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
+                  Pesquise contactos institucionais e colegas de curso
+                </div>
+              </div>
+              <span style={{ color: 'var(--isp-slate-400)', fontWeight: 'bold' }}>→</span>
+            </Link>
+
+            <Link
+              to="/profile"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.85rem',
+                padding: '0.85rem',
+                background: 'var(--isp-slate-50)',
+                border: '1px solid var(--isp-slate-200)',
+                borderRadius: 'var(--isp-radius-md)',
+                textDecoration: 'none',
+                color: 'var(--isp-slate-900)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>👤</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-slate-800)' }}>
+                  O Meu Perfil &amp; Portfólio
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
+                  Edite dados pessoais, competências e certificados
+                </div>
+              </div>
+              <span style={{ color: 'var(--isp-slate-400)', fontWeight: 'bold' }}>→</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
