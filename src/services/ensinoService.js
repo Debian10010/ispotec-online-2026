@@ -1,135 +1,166 @@
 import { api } from './api';
 
 export const ensinoService = {
+  // Upload helper for attachments
+  async uploadAnexo(file) {
+    const formData = new FormData();
+    formData.append('ficheiro', file);
+    const res = await api.upload('/upload', formData);
+    return res.dados; // { url, nome, tamanho }
+  },
+
+  // 1. Projetos Educativos
+  async getProjetosEducativos() {
+    try {
+      const res = await api.get('/ensino/projetos-educativos');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[ensinoService.getProjetosEducativos]', error.message);
+      throw error;
+    }
+  },
+
+  async createProjetoEducativo(data) {
+    const res = await api.post('/ensino/projetos-educativos', data);
+    return res.dados;
+  },
+
+  async updateProjetoEducativo(id, data) {
+    const res = await api.put(`/ensino/projetos-educativos/${id}`, data);
+    return res.dados;
+  },
+
+  async deleteProjetoEducativo(id) {
+    const res = await api.delete(`/ensino/projetos-educativos/${id}`);
+    return !!res.sucesso;
+  },
+
+  // 2. Projetos Curriculares / UCs
+  async getUnidadesCurriculares(curso) {
+    try {
+      const query = curso && curso !== 'Todos' ? `?curso=${encodeURIComponent(curso)}` : '';
+      const res = await api.get(`/ensino/unidades-curriculares${query}`);
+      return res.dados || [];
+    } catch (error) {
+      console.error('[ensinoService.getUnidadesCurriculares]', error.message);
+      throw error;
+    }
+  },
+
+  async createUnidadeCurricular(data) {
+    const res = await api.post('/ensino/unidades-curriculares', data);
+    return res.dados;
+  },
+
+  async updateUnidadeCurricular(id, data) {
+    const res = await api.put(`/ensino/unidades-curriculares/${id}`, data);
+    return res.dados;
+  },
+
+  async deleteUnidadeCurricular(id) {
+    const res = await api.delete(`/ensino/unidades-curriculares/${id}`);
+    return !!res.sucesso;
+  },
+
+  // 3. Bibliotecas
+  async getBibliotecas() {
+    try {
+      const res = await api.get('/ensino/bibliotecas');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[ensinoService.getBibliotecas]', error.message);
+      throw error;
+    }
+  },
+
+  async createBiblioteca(data) {
+    const res = await api.post('/ensino/bibliotecas', data);
+    return res.dados;
+  },
+
+  async updateBiblioteca(id, data) {
+    const res = await api.put(`/ensino/bibliotecas/${id}`, data);
+    return res.dados;
+  },
+
+  async deleteBiblioteca(id) {
+    const res = await api.delete(`/ensino/bibliotecas/${id}`);
+    return !!res.sucesso;
+  },
+
+  // 4. Laboratórios
+  async getLaboratorios() {
+    try {
+      const res = await api.get('/ensino/laboratorios');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[ensinoService.getLaboratorios]', error.message);
+      throw error;
+    }
+  },
+
+  async createLaboratorio(data) {
+    const res = await api.post('/ensino/laboratorios', data);
+    return res.dados;
+  },
+
+  async updateLaboratorio(id, data) {
+    const res = await api.put(`/ensino/laboratorios/${id}`, data);
+    return res.dados;
+  },
+
+  async deleteLaboratorio(id) {
+    const res = await api.delete(`/ensino/laboratorios/${id}`);
+    return !!res.sucesso;
+  },
+
+  // 5. Eventos Científicos
+  async getEventos() {
+    try {
+      const res = await api.get('/ensino/eventos');
+      return res.dados || [];
+    } catch (error) {
+      console.error('[ensinoService.getEventos]', error.message);
+      throw error;
+    }
+  },
+
+  async createEvento(data) {
+    const res = await api.post('/ensino/eventos', data);
+    return res.dados;
+  },
+
+  async updateEvento(id, data) {
+    const res = await api.put(`/ensino/eventos/${id}`, data);
+    return res.dados;
+  },
+
+  async deleteEvento(id) {
+    const res = await api.delete(`/ensino/eventos/${id}`);
+    return !!res.sucesso;
+  },
+
+  // Legacy Cursos & Unidades
   async getCursos() {
     try {
       const res = await api.get('/ensino/cursos');
       return res.dados || [];
     } catch (error) {
-      console.error('[ensinoService.getCursos error]', error.message);
       return [];
     }
   },
-
-  async getCursoById(id) {
-    try {
-      const res = await api.get(`/ensino/cursos/${id}`);
-      return res.dados || null;
-    } catch (error) {
-      console.error('[ensinoService.getCursoById error]', error.message);
-      return null;
-    }
-  },
-
   async createCurso(data) {
-    try {
-      const res = await api.post('/ensino/cursos', data);
-      return res.dados;
-    } catch (error) {
-      console.error('[ensinoService.createCurso error]', error.message);
-      throw error;
-    }
+    const res = await api.post('/ensino/cursos', data);
+    return res.dados;
   },
-
   async updateCurso(id, data) {
-    try {
-      const res = await api.put(`/ensino/cursos/${id}`, data);
-      return res.dados;
-    } catch (error) {
-      console.error('[ensinoService.updateCurso error]', error.message);
-      throw error;
-    }
+    const res = await api.put(`/ensino/cursos/${id}`, data);
+    return res.dados;
   },
-
   async deleteCurso(id) {
-    try {
-      const res = await api.delete(`/ensino/cursos/${id}`);
-      return !!res.sucesso;
-    } catch (error) {
-      console.error('[ensinoService.deleteCurso error]', error.message);
-      return false;
-    }
+    const res = await api.delete(`/ensino/cursos/${id}`);
+    return !!res.sucesso;
   },
-
-  async getUnidades() {
-    try {
-      const res = await api.get('/ensino/unidades');
-      return res.dados || [];
-    } catch (error) {
-      console.error('[ensinoService.getUnidades error]', error.message);
-      return [];
-    }
-  },
-
-  async createUnidade(data) {
-    try {
-      const res = await api.post('/ensino/unidades', data);
-      return res.dados;
-    } catch (error) {
-      console.error('[ensinoService.createUnidade error]', error.message);
-      throw error;
-    }
-  },
-
-  async getProgresso() {
-    try {
-      const res = await api.get('/ensino/progresso');
-      return res.dados || [];
-    } catch (error) {
-      console.error('[ensinoService.getProgresso error]', error.message);
-      return [];
-    }
-  },
-
-  async updateProgresso(data) {
-    try {
-      const res = await api.put('/ensino/progresso', data);
-      return res.dados;
-    } catch (error) {
-      console.error('[ensinoService.updateProgresso error]', error.message);
-      throw error;
-    }
-  },
-
-  async getCertificacoes() {
-    try {
-      const res = await api.get('/ensino/certificacoes');
-      return res.dados || [];
-    } catch (error) {
-      console.error('[ensinoService.getCertificacoes error]', error.message);
-      return [];
-    }
-  },
-
-  async createCertificacao(data) {
-    try {
-      const res = await api.post('/ensino/certificacoes', data);
-      return res.dados;
-    } catch (error) {
-      console.error('[ensinoService.createCertificacao error]', error.message);
-      throw error;
-    }
-  },
-
-  async getAvaliacoes() {
-    try {
-      const res = await api.get('/ensino/avaliacoes');
-      return res.dados || [];
-    } catch (error) {
-      console.error('[ensinoService.getAvaliacoes error]', error.message);
-      return [];
-    }
-  },
-
-  async createAvaliacao(data) {
-    try {
-      const res = await api.post('/ensino/avaliacoes', data);
-      return res.dados;
-    } catch (error) {
-      console.error('[ensinoService.createAvaliacao error]', error.message);
-      throw error;
-    }
-  }
 };
 
 export default ensinoService;
