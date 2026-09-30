@@ -927,7 +927,7 @@ export default function Investigacao() {
         }
       `}</style>
 
-      <div className="container inv-container">
+      <div className="inv-container">
         {/* Header Investigação */}
         <div className="inv-hero">
           <div className="inv-badge-top">

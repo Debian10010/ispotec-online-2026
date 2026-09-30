@@ -420,7 +420,7 @@ export default function HomeSchool() {
         }
       `}</style>
 
-      <div className="container">
+      <div style={{width:'100%',paddingBottom:'2rem'}}>
         {/* Header Grupo de Estudos */}
         <div className="hs-header">
           <div className="hs-badge-top">

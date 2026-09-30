@@ -1001,7 +1001,7 @@ export default function Extensao() {
         }
       `}</style>
 
-      <div className="container ext-container">
+      <div className="ext-container">
         {/* Header Extensão */}
         <div className="ext-hero">
           <div className="ext-badge-top">

@@ -94,8 +94,8 @@ const css = `
     display: flex; flex-direction: column; justify-content: space-between;
   }
   .ensino-card:hover { transform:translateY(-3px); box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); }
-  .ensino-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.25rem; margin-bottom:2rem; }
-  .ensino-grid-2 { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:1.25rem; margin-bottom:2rem; }
+  .ensino-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.25rem; margin-bottom:2rem; }
+  .ensino-grid-2 { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:1.25rem; margin-bottom:2rem; }
   .card-icon { width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.35rem; margin-bottom:0.85rem; }
   .card-icon.blue { background:#dbeafe; }
   .card-icon.green { background:#d1fae5; }
@@ -1140,7 +1140,7 @@ export default function Ensino() {
   return (
     <>
       <style>{css}</style>
-      <div className="container" style={{paddingTop:'1.5rem',paddingBottom:'2rem'}}>
+      <div style={{paddingTop:'1.5rem',paddingBottom:'2rem',width:'100%'}}>
         <div className="ensino-layout">
           {/* Sidebar */}
           <aside className="ensino-sidebar">
