@@ -331,85 +331,87 @@ export default function Home() {
       </section>
 
       <div className="container">
-        {/* 4 Core Academic Modules Section */}
-        <section style={{ margin: '3rem 0 1rem 0' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <span style={{
-              fontSize: '0.78rem',
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              color: 'var(--isp-blue-600)',
-              background: 'var(--isp-blue-50)',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '20px',
-              display: 'inline-block',
-              marginBottom: '0.5rem'
-            }}>
-              Estrutura Institucional
-            </span>
-            <h2 className="features-title" style={{ margin: '0 0 0.5rem 0' }}>
-              4 Módulos Centrais ISPOTEC
-            </h2>
-            <p className="features-subtitle" style={{ margin: 0 }}>
-              Ensino de excelência, extensão comunitária e investigação científica de vanguarda
-            </p>
-          </div>
+        {/* 4 Core Academic Modules Section - Apenas utilizadores autenticados */}
+        {isAuthenticated && (
+          <section style={{ margin: '3rem 0 1rem 0' }}>
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <span style={{
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                color: 'var(--isp-blue-600)',
+                background: 'var(--isp-blue-50)',
+                padding: '0.35rem 0.85rem',
+                borderRadius: '20px',
+                display: 'inline-block',
+                marginBottom: '0.5rem'
+              }}>
+                Estrutura Institucional
+              </span>
+              <h2 className="features-title" style={{ margin: '0 0 0.5rem 0' }}>
+                4 Módulos Centrais ISPOTEC
+              </h2>
+              <p className="features-subtitle" style={{ margin: 0 }}>
+                Ensino de excelência, extensão comunitária e investigação científica de vanguarda
+              </p>
+            </div>
 
-          <div className="enterprise-module-grid">
-            <Link to="/ensino" className="enterprise-module-card">
-              <div className="module-card-top">
-                <div className="module-card-icon" style={{ background: '#dbeafe', color: '#1d4ed8' }}>🎓</div>
-                <span className="module-card-badge" style={{ background: '#eff6ff', color: '#1d4ed8' }}>8 Secções</span>
-              </div>
-              <h3 className="module-card-title">Ensino</h3>
-              <p className="module-card-desc">Projetos Educativos e Curriculares, Bibliotecas Digitais, Laboratórios, Estatísticas Académicas e Eventos Científicos.</p>
-              <div className="module-card-footer">
-                <span>Conhecer Ensino</span>
-                <span>→</span>
-              </div>
-            </Link>
+            <div className="enterprise-module-grid">
+              <Link to="/ensino" className="enterprise-module-card">
+                <div className="module-card-top">
+                  <div className="module-card-icon" style={{ background: '#dbeafe', color: '#1d4ed8' }}>🎓</div>
+                  <span className="module-card-badge" style={{ background: '#eff6ff', color: '#1d4ed8' }}>8 Secções</span>
+                </div>
+                <h3 className="module-card-title">Ensino</h3>
+                <p className="module-card-desc">Projetos Educativos e Curriculares, Bibliotecas Digitais, Laboratórios, Estatísticas Académicas e Eventos Científicos.</p>
+                <div className="module-card-footer">
+                  <span>Conhecer Ensino</span>
+                  <span>→</span>
+                </div>
+              </Link>
 
-            <Link to="/extensao" className="enterprise-module-card">
-              <div className="module-card-top">
-                <div className="module-card-icon" style={{ background: '#d1fae5', color: '#059669' }}>🤝</div>
-                <span className="module-card-badge" style={{ background: '#ecfdf5', color: '#059669' }}>6 Centros de Práticas</span>
-              </div>
-              <h3 className="module-card-title">Extensão</h3>
-              <p className="module-card-desc">Centros de Práticas Médicas, Empresariais, Conflitos, Tecnológicas, Psicológicas e Saúde Pública associados aos cursos.</p>
-              <div className="module-card-footer">
-                <span>Conhecer Extensão</span>
-                <span>→</span>
-              </div>
-            </Link>
+              <Link to="/extensao" className="enterprise-module-card">
+                <div className="module-card-top">
+                  <div className="module-card-icon" style={{ background: '#d1fae5', color: '#059669' }}>🤝</div>
+                  <span className="module-card-badge" style={{ background: '#ecfdf5', color: '#059669' }}>6 Centros de Práticas</span>
+                </div>
+                <h3 className="module-card-title">Extensão</h3>
+                <p className="module-card-desc">Centros de Práticas Médicas, Empresariais, Conflitos, Tecnológicas, Psicológicas e Saúde Pública associados aos cursos.</p>
+                <div className="module-card-footer">
+                  <span>Conhecer Extensão</span>
+                  <span>→</span>
+                </div>
+              </Link>
 
-            <Link to="/investigacao" className="enterprise-module-card">
-              <div className="module-card-top">
-                <div className="module-card-icon" style={{ background: '#ede9fe', color: '#7c3aed' }}>🔬</div>
-                <span className="module-card-badge" style={{ background: '#f5f3ff', color: '#7c3aed' }}>6 Laboratórios</span>
-              </div>
-              <h3 className="module-card-title">Investigação</h3>
-              <p className="module-card-desc">Laboratórios científicos de Farmacologia, Exames Médicos, Microbiologia, Saúde Digital, IA e Medicina Dentária.</p>
-              <div className="module-card-footer">
-                <span>Conhecer Investigação</span>
-                <span>→</span>
-              </div>
-            </Link>
+              <Link to="/investigacao" className="enterprise-module-card">
+                <div className="module-card-top">
+                  <div className="module-card-icon" style={{ background: '#ede9fe', color: '#7c3aed' }}>🔬</div>
+                  <span className="module-card-badge" style={{ background: '#f5f3ff', color: '#7c3aed' }}>6 Laboratórios</span>
+                </div>
+                <h3 className="module-card-title">Investigação</h3>
+                <p className="module-card-desc">Laboratórios científicos de Farmacologia, Exames Médicos, Microbiologia, Saúde Digital, IA e Medicina Dentária.</p>
+                <div className="module-card-footer">
+                  <span>Conhecer Investigação</span>
+                  <span>→</span>
+                </div>
+              </Link>
 
-            <Link to="/grupo-de-estudos" className="enterprise-module-card">
-              <div className="module-card-top">
-                <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>👥</div>
-                <span className="module-card-badge" style={{ background: '#fffbeb', color: '#d97706' }}>Colaborativo</span>
-              </div>
-              <h3 className="module-card-title">Grupo de Estudos</h3>
-              <p className="module-card-desc">Espaço comunitário de entreajuda, partilha de apontamentos, exercícios e discussões académicas entre pares.</p>
-              <div className="module-card-footer">
-                <span>Aceder aos Grupos</span>
-                <span>→</span>
-              </div>
-            </Link>
-          </div>
-        </section>
+              <Link to="/grupo-de-estudos" className="enterprise-module-card">
+                <div className="module-card-top">
+                  <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>👥</div>
+                  <span className="module-card-badge" style={{ background: '#fffbeb', color: '#d97706' }}>Colaborativo</span>
+                </div>
+                <h3 className="module-card-title">Grupo de Estudos</h3>
+                <p className="module-card-desc">Espaço comunitário de entreajuda, partilha de apontamentos, exercícios e discussões académicas entre pares.</p>
+                <div className="module-card-footer">
+                  <span>Aceder aos Grupos</span>
+                  <span>→</span>
+                </div>
+              </Link>
+            </div>
+          </section>
+        )}
 
         {/* Features Section */}
         <section className="features">
