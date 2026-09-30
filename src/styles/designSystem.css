@@ -90,7 +90,7 @@
   background-color: var(--isp-slate-50);
   color: var(--isp-slate-800);
   font-family: var(--isp-font-sans);
-  overflow-x: hidden;
+  /* NOTE: overflow-x is on .app-main-wrapper (not here) to keep position:sticky working */
   position: relative;
 }
 
@@ -436,6 +436,7 @@
   transition: margin-left var(--isp-transition-base);
   min-width: 0;
   position: relative;
+  overflow-x: hidden;
 }
 
 .app-shell.sidebar-is-collapsed .app-main-wrapper {

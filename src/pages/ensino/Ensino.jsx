@@ -4,12 +4,33 @@ import { useAuth } from '../../context/AuthContext';
 
 // ── shared styles ─────────────────────────────────────────────────────────────
 const css = `
-  .ensino-layout { display: flex; gap: 1.5rem; align-items: flex-start; }
+  /* ── Two-column Grid Layout ─────────────────────────────────────────────────
+     CSS Grid (not flex) guarantees the sidebar column NEVER leaves white space:
+     col-2 (content) fills exactly 1fr of what remains after the 240px track.
+     align-items: start is mandatory — rows must NOT stretch the sidebar card.
+  */
+  .ensino-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    width: 100%;
+  }
+
+  /* ── Contextual Sidebar — correct sticky ────────────────────────────────────
+     top = header height (64px) + breathing room (1rem).
+     The sidebar card height equals its content — no artificial height added.
+     overflow: visible avoids creating a new scroll context on the element.
+  */
   .ensino-sidebar {
-    width: 240px; flex-shrink: 0;
-    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-    padding: 1.25rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
-    position: sticky; top: 80px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 0;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06);
+    position: sticky;
+    top: calc(64px + 1rem);
+    overflow: visible;
   }
   .ensino-sidebar-title {
     font-size: 0.72rem; font-weight: 700; color: #94a3b8;
@@ -27,7 +48,14 @@ const css = `
     background: #eff6ff; color: #0055a4; font-weight: 700;
     border-left-color: #0055a4;
   }
-  .ensino-content { flex: 1; min-width: 0; }
+  /* ── Content area ────────────────────────────────────────────────────────────
+     min-width: 0 prevents grid blowout when content is wider than the track.
+     padding-bottom clears the floating chatbot + WhatsApp buttons (~90px).
+  */
+  .ensino-content {
+    min-width: 0;
+    padding-bottom: 6rem;
+  }
   .ensino-header {
     background: linear-gradient(135deg, #0055a4 0%, #003366 100%);
     color: #fff; padding: 2.25rem 1.75rem; border-radius: 12px;
@@ -139,11 +167,68 @@ const css = `
   .cal-item:last-child { border-bottom:none; }
   .cal-item-label { color:#374151; }
   .cal-item-date { color:#0055a4; font-weight:600; }
+  /* ── Accordion toggle button — hidden on desktop, revealed on tablet/mobile ── */
+  .ensino-accordion-toggle { display: none; }
+
+  /* ── On desktop (>960px) nav items are ALWAYS visible regardless of JS state ── */
+  @media(min-width:961px){
+    .ensino-accordion-body { display: block !important; }
+  }
+
   @media(max-width:960px){
-    .ensino-layout { flex-direction:column; }
-    .ensino-sidebar { width:100%; position:static; }
-    .ensino-sidebar { display:flex; flex-wrap:wrap; padding:0.75rem; }
-    .ensino-nav-item { padding:0.45rem 0.85rem; }
+    .ensino-layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .ensino-sidebar {
+      position: static;
+      width: 100%;
+      border-radius: 12px;
+      padding: 0;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .ensino-accordion-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: #0055a4;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      font-family: inherit;
+      border-radius: 12px 12px 0 0;
+    }
+    .ensino-accordion-toggle:hover { background: #004080; }
+    .ensino-accordion-body {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      padding: 0.6rem;
+      background: #fff;
+      border-radius: 0 0 12px 12px;
+    }
+    .ensino-accordion-body.collapsed { display: none; }
+    .ensino-nav-item {
+      flex: 0 0 auto;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid transparent;
+      font-size: 0.82rem;
+    }
+    .ensino-nav-item.active {
+      background: #eff6ff;
+      color: #0055a4;
+      border-color: #bfdbfe;
+      border-left-color: #0055a4;
+    }
+    .ensino-sidebar-title { display: none; }
   }
   @media(max-width:600px){
     .ensino-header { padding:1.5rem 1.1rem; }
@@ -1108,6 +1193,7 @@ export default function Ensino() {
   const [searchParams, setSearchParams] = useSearchParams();
   const paramSeccao = searchParams.get('seccao') || searchParams.get('tab') || 'projetos-educativos';
   const [seccao, setSeccao] = useState(paramSeccao);
+  const [accordionOpen, setAccordionOpen] = useState(false);
 
   useEffect(() => {
     if (paramSeccao && paramSeccao !== seccao) {
@@ -1117,6 +1203,7 @@ export default function Ensino() {
 
   const handleSelectSeccao = (key) => {
     setSeccao(key);
+    setAccordionOpen(false); // close accordion after selecting on mobile
     const params = new URLSearchParams(searchParams);
     params.set('seccao', key);
     setSearchParams(params);
@@ -1137,30 +1224,50 @@ export default function Ensino() {
     }
   };
 
+  const activeSeccaoLabel = SECCOES.find(s => s.key === seccao)?.label || 'Módulo Ensino';
+
   return (
     <>
       <style>{css}</style>
-      <div style={{paddingTop:'1.5rem',paddingBottom:'2rem',width:'100%'}}>
+      <div style={{paddingTop:'1.5rem',width:'100%'}}>
         <div className="ensino-layout">
-          {/* Sidebar */}
+
+          {/* ── Contextual Sidebar (sticky on desktop, accordion on tablet/mobile) */}
           <aside className="ensino-sidebar">
+            {/* Desktop title */}
             <div className="ensino-sidebar-title">Módulo Ensino</div>
-            {SECCOES.map(s => (
-              <button
-                key={s.key}
-                className={`ensino-nav-item${seccao===s.key?' active':''}`}
-                onClick={()=>handleSelectSeccao(s.key)}
-                style={{background:'none',border:'none',width:'100%',textAlign:'left',cursor:'pointer',font:'inherit'}}
-              >
-                <span>{s.icon}</span> {s.label}
-              </button>
-            ))}
+
+            {/* Accordion toggle — only visible on tablet/mobile via CSS */}
+            <button
+              className="ensino-accordion-toggle"
+              onClick={() => setAccordionOpen(prev => !prev)}
+              aria-expanded={accordionOpen}
+              aria-label="Menu do módulo Ensino"
+            >
+              <span>📚 {activeSeccaoLabel}</span>
+              <span style={{fontSize:'0.75rem',opacity:0.85}}>{accordionOpen ? '▲ Fechar' : '▼ Secções'}</span>
+            </button>
+
+            {/* Nav items — always visible on desktop; accordion body on mobile */}
+            <div className={`ensino-accordion-body${accordionOpen ? '' : ' collapsed'}`}
+                 style={{display: undefined /* let CSS control visibility */}}>
+              {SECCOES.map(s => (
+                <button
+                  key={s.key}
+                  className={`ensino-nav-item${seccao === s.key ? ' active' : ''}`}
+                  onClick={() => handleSelectSeccao(s.key)}
+                >
+                  <span>{s.icon}</span> {s.label}
+                </button>
+              ))}
+            </div>
           </aside>
 
-          {/* Content */}
+          {/* ── Main Content */}
           <main className="ensino-content">
             {renderContent()}
           </main>
+
         </div>
       </div>
     </>
