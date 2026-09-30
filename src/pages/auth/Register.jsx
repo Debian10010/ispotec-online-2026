@@ -65,145 +65,166 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-        <img 
-          src="/assets/img/logo-ispotec.png" 
-          alt="ISPOTEC Online"
-          style={{ maxHeight: '120px' }}
-        />
-      </div>
+    <div style={{ padding: '2.5rem 1rem 4rem', minHeight: 'calc(100vh - 160px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '520px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <img 
+            src="/assets/img/logo-ispotec.png" 
+            alt="ISPOTEC Online"
+            style={{ height: '72px', width: 'auto', marginBottom: '1rem' }}
+          />
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--isp-navy-950)', margin: '0 0 0.35rem' }}>
+            Registo Académico
+          </h1>
+          <p style={{ fontSize: '0.88rem', color: 'var(--isp-slate-500)', margin: 0 }}>
+            Crie a sua conta de membro na comunidade ISPOTEC Online
+          </p>
+        </div>
 
-      <div className="container">
-        <div style={{
-          maxWidth: '600px',
-          margin: '2rem auto 4rem',
-          background: 'var(--white)',
-          padding: '2rem',
-          borderRadius: '8px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{ textAlign: 'center', color: 'var(--primary-blue)', marginBottom: '2rem' }}>
-            Registar-se na ISPOTEC Online
-          </h2>
-
-          {erro && <div className="alert alert-error">{erro}</div>}
+        <div className="card" style={{ padding: '2rem', boxShadow: 'var(--isp-shadow-lg)', border: '1px solid var(--isp-slate-200)' }}>
+          {erro && (
+            <div className="alert alert-error" role="alert">
+              <span>⚠️</span>
+              <span>{erro}</span>
+            </div>
+          )}
 
           {sucesso ? (
-            <div className="alert alert-success">
-              {sucesso}
-              <p style={{ marginTop: '0.5rem' }}>
-                Pode <Link to="/auth/login" style={{ color: '#155724', fontWeight: 'bold' }}>fazer login aqui</Link> quando sua conta for aprovada.
-              </p>
+            <div className="alert alert-success" style={{ display: 'block', textAlign: 'center', padding: '1.5rem' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Registo Submetido com Sucesso!</h3>
+              <p style={{ fontSize: '0.88rem', margin: '0 0 1rem' }}>{sucesso}</p>
+              <Link to="/auth/login" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                Ir para Iniciar Sessão
+              </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="nome">Nome Completo:</label>
+                <label htmlFor="nome">Nome Completo</label>
                 <input 
                   type="text" 
                   id="nome" 
                   name="nome" 
                   value={formData.nome}
                   onChange={handleChange}
+                  placeholder="Ex: Ana Maria Silva"
                   required 
+                  autoComplete="name"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="email">Email Institucional:</label>
+                <label htmlFor="email">Email Institucional</label>
                 <input 
                   type="email" 
                   id="email" 
                   name="email" 
                   value={formData.email}
                   onChange={handleChange}
+                  placeholder="exemplo@ispotec.online"
                   required 
+                  autoComplete="email"
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="tipo">Tipo de Utilizador:</label>
-                <select 
-                  id="tipo" 
-                  name="tipo" 
-                  value={formData.tipo}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleccione o tipo...</option>
-                  <option value="estudante">Estudante</option>
-                  <option value="docente">Docente</option>
-                  <option value="especialista">Especialista</option>
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label htmlFor="tipo">Perfil de Acesso</label>
+                  <select 
+                    id="tipo" 
+                    name="tipo" 
+                    value={formData.tipo}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Seleccione...</option>
+                    <option value="estudante">Estudante</option>
+                    <option value="docente">Docente</option>
+                    <option value="especialista">Especialista (Admin)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="nivel_academico">Nível Académico</label>
+                  <select 
+                    id="nivel_academico" 
+                    name="nivel_academico"
+                    value={formData.nivel_academico}
+                    onChange={handleChange}
+                  >
+                    <option value="">Seleccione...</option>
+                    <option value="licenciatura">Licenciatura</option>
+                    <option value="mestrado">Mestrado</option>
+                    <option value="doutoramento">Doutoramento</option>
+                    <option value="tecnico">Técnico</option>
+                  </select>
+                </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="curso">Curso/Área:</label>
+                <label htmlFor="curso">Curso ou Especialidade</label>
                 <input 
                   type="text" 
                   id="curso" 
                   name="curso" 
                   value={formData.curso}
                   onChange={handleChange}
+                  placeholder="Ex: Engenharia Informática, Gestão..."
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="nivel_academico">Nível Académico:</label>
-                <select 
-                  id="nivel_academico" 
-                  name="nivel_academico"
-                  value={formData.nivel_academico}
-                  onChange={handleChange}
-                >
-                  <option value="">Seleccione o nível...</option>
-                  <option value="licenciatura">Licenciatura</option>
-                  <option value="mestrado">Mestrado</option>
-                  <option value="doutoramento">Doutoramento</option>
-                  <option value="tecnico">Técnico</option>
-                </select>
-              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label htmlFor="password">Palavra-passe</label>
+                  <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Min. 8 caracteres"
+                    required 
+                    autoComplete="new-password"
+                  />
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Password:</label>
-                <input 
-                  type="password" 
-                  id="password" 
-                  name="password" 
-                  value={formData.password}
-                  onChange={handleChange}
-                  title="Mínimo 8 caracteres"
-                  required 
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="confirm_password">Confirmar Password:</label>
-                <input 
-                  type="password" 
-                  id="confirm_password" 
-                  name="confirm_password" 
-                  value={formData.confirm_password}
-                  onChange={handleChange}
-                  required 
-                />
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label htmlFor="confirm_password">Confirmar Palavra-passe</label>
+                  <input 
+                    type="password" 
+                    id="confirm_password" 
+                    name="confirm_password" 
+                    value={formData.confirm_password}
+                    onChange={handleChange}
+                    placeholder="Repita a palavra-passe"
+                    required 
+                    autoComplete="new-password"
+                  />
+                </div>
               </div>
 
               <button 
                 type="submit" 
-                className="btn btn-success" 
-                style={{ width: '100%', padding: '1rem', fontWeight: 'bold' }}
+                className="btn btn-primary" 
+                style={{ width: '100%', padding: '0.8rem', fontSize: '0.95rem' }}
                 disabled={loading}
               >
-                {loading ? 'A registar...' : 'Registar'}
+                {loading ? 'A registar conta...' : 'Submeter Registo'}
               </button>
             </form>
           )}
 
-          <p style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-            Já tem conta? <Link to="/auth/login" style={{ color: 'var(--secondary-blue)', textDecoration: 'none', fontWeight: 'bold' }}>Entrar aqui</Link>
-          </p>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--isp-slate-100)', textAlign: 'center', fontSize: '0.88rem', color: 'var(--isp-slate-600)' }}>
+            Já tem uma conta registada?{' '}
+            <Link to="/auth/login" style={{ color: 'var(--isp-blue-600)', textDecoration: 'none', fontWeight: 700 }}>
+              Iniciar sessão
+            </Link>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.78rem', color: 'var(--isp-slate-400)' }}>
+          © {new Date().getFullYear()} ISPOTEC • Instituto Superior Politécnico de Tecnologias e Ciências
         </div>
       </div>
     </div>

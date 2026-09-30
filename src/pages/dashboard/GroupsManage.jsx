@@ -58,21 +58,30 @@ export default function GroupsManage() {
 
   return (
     <div className="container" style={{ paddingBottom: '3rem' }}>
-      <h1 style={{ marginTop: '2rem', marginBottom: '2rem' }}>Gestão de Disciplinas e Grupos</h1>
+      <div className="page-header" style={{ marginTop: '2rem' }}>
+        <h1 className="page-title">Gestão de Disciplinas e Grupos</h1>
+        <p className="page-description">Organização curricular e acompanhamento das turmas académicas</p>
+      </div>
 
-      {mensagem && <div className="alert alert-success">{mensagem}</div>}
-      {erro && <div className="alert alert-error">{erro}</div>}
+      {mensagem && (
+        <div className="alert alert-success" role="alert">
+          <span>✓</span>
+          <span>{mensagem}</span>
+        </div>
+      )}
+      {erro && (
+        <div className="alert alert-error" role="alert">
+          <span>⚠️</span>
+          <span>{erro}</span>
+        </div>
+      )}
 
       {/* Formulário de Criação – apenas Docente e Admin */}
       {canAdd && (
-        <div style={{
-          background: 'var(--white)',
-          padding: '2rem',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1.5rem' }}>Criar Nova Disciplina/Grupo</h3>
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--isp-navy-950)', marginBottom: '1.25rem' }}>
+            Criar Nova Disciplina / Grupo
+          </h3>
 
           <form onSubmit={handleCreate}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
@@ -131,20 +140,15 @@ export default function GroupsManage() {
       )}
 
       {/* Lista de Grupos */}
-      <div style={{
-        background: 'var(--white)',
-        borderRadius: '8px',
-        overflowX: 'auto',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-          <thead style={{ backgroundColor: 'var(--primary-blue)', color: 'var(--white)' }}>
+      <div className="table-responsive">
+        <table className="table">
+          <thead>
             <tr>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Disciplina</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Descrição</th>
-              <th style={{ padding: '1rem', textAlign: 'center' }}>Membros</th>
-              <th style={{ padding: '1rem', textAlign: 'center' }}>Posts</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Ações</th>
+              <th>Disciplina</th>
+              <th>Descrição</th>
+              <th style={{ textAlign: 'center' }}>Membros</th>
+              <th style={{ textAlign: 'center' }}>Posts</th>
+              <th style={{ textAlign: 'right' }}>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -184,19 +188,18 @@ export default function GroupsManage() {
                       {g.total_posts}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                     <Link 
                       to={`/dashboard/group-view?id=${g.id}`} 
-                      className="btn btn-primary" 
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', marginRight: '0.5rem' }}
+                      className="btn btn-sm btn-primary" 
+                      style={{ marginRight: '0.5rem' }}
                     >
-                      Ver
+                      Aceder
                     </Link>
                     {canDelete && (
                       <button 
                         type="button" 
-                        className="btn btn-danger" 
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                        className="btn btn-sm btn-danger" 
                         onClick={() => handleDelete(g.id)}
                       >
                         Eliminar
@@ -210,8 +213,11 @@ export default function GroupsManage() {
         </table>
       </div>
 
-      <div style={{ marginTop: '2rem' }}>
-        <Link to="/dashboard" className="btn btn-primary">Voltar ao Dashboard</Link>
+      <div style={{ marginTop: '1.5rem' }}>
+        <Link to="/dashboard" className="btn btn-secondary">
+          <span>←</span>
+          <span>Voltar ao Dashboard</span>
+        </Link>
       </div>
     </div>
   );

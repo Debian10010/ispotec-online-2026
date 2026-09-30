@@ -31,59 +31,71 @@ export default function UsersPending() {
 
   return (
     <div className="container" style={{ paddingBottom: '3rem' }}>
-      <h1 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Utilizadores Pendentes de Aprovação</h1>
-      <p style={{ color: '#666', marginBottom: '2rem' }}>
-        Total: <strong>{pendentes.length}</strong> utilizadores
-      </p>
+      <div className="page-header" style={{ marginTop: '2rem' }}>
+        <h1 className="page-title">Aprovação de Utilizadores</h1>
+        <p className="page-description">Validação de novos registos na plataforma • Total pendente: <strong>{pendentes.length}</strong></p>
+      </div>
 
       {mensagem && (
-        <div className="alert alert-success">{mensagem}</div>
+        <div className="alert alert-success" role="alert">
+          <span>✓</span>
+          <span>{mensagem}</span>
+        </div>
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>A carregar...</div>
+        <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--isp-slate-500)' }}>
+          A carregar pedidos de adesão...
+        </div>
       ) : pendentes.length === 0 ? (
-        <div className="alert alert-info">Não há utilizadores pendentes de aprovação.</div>
+        <div className="empty-state">
+          <span className="empty-state-icon">✅</span>
+          <h3 className="empty-state-title">Nenhum registo pendente</h3>
+          <p className="empty-state-desc">Todos os pedidos de registo foram processados e autorizados pela administração.</p>
+          <Link to="/dashboard" className="btn btn-secondary">
+            Voltar ao Dashboard
+          </Link>
+        </div>
       ) : (
-        <div style={{
-          background: 'var(--white)',
-          borderRadius: '8px',
-          overflowX: 'auto',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-        }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-            <thead style={{ backgroundColor: 'var(--primary-blue)', color: 'var(--white)' }}>
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
               <tr>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Nome</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Tipo</th>
-                <th style={{ padding: '1rem', textAlign: 'left' }}>Curso</th>
-                <th style={{ padding: '1rem', textAlign: 'center' }}>Ações</th>
+                <th>Nome Completo</th>
+                <th>Email</th>
+                <th>Perfil Solicitado</th>
+                <th>Curso / Especialidade</th>
+                <th style={{ textAlign: 'right' }}>Ações de Decisão</th>
               </tr>
             </thead>
             <tbody>
               {pendentes.map(p => (
-                <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem' }}>{p.nome}</td>
-                  <td style={{ padding: '1rem' }}>{p.email}</td>
-                  <td style={{ padding: '1rem' }}><strong>{p.tipo ? p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1) : '-'}</strong></td>
-                  <td style={{ padding: '1rem' }}>{p.curso || '-'}</td>
-                  <td style={{ padding: '1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                <tr key={p.id}>
+                  <td style={{ fontWeight: 600, color: 'var(--isp-slate-900)' }}>{p.nome}</td>
+                  <td style={{ color: 'var(--isp-slate-600)' }}>{p.email}</td>
+                  <td>
+                    <span className={`badge badge-warning user-badge-${p.tipo}`}>
+                      {p.tipo ? p.tipo.charAt(0).toUpperCase() + p.tipo.slice(1) : '-'}
+                    </span>
+                  </td>
+                  <td>{p.curso || '—'}</td>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                     <button 
                       type="button" 
-                      className="btn btn-success" 
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', marginRight: '0.5rem' }}
+                      className="btn btn-sm btn-success" 
+                      style={{ marginRight: '0.5rem' }}
                       onClick={() => handleAction(p.id, 'aprovado')}
                     >
-                      Aprovar
+                      <span>✓</span>
+                      <span>Aprovar</span>
                     </button>
                     <button 
                       type="button" 
-                      className="btn btn-danger" 
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                      className="btn btn-sm btn-danger" 
                       onClick={() => handleAction(p.id, 'bloqueado')}
                     >
-                      Rejeitar
+                      <span>✕</span>
+                      <span>Rejeitar</span>
                     </button>
                   </td>
                 </tr>
@@ -93,8 +105,11 @@ export default function UsersPending() {
         </div>
       )}
 
-      <div style={{ marginTop: '2rem' }}>
-        <Link to="/dashboard" className="btn btn-primary">Voltar ao Dashboard</Link>
+      <div style={{ marginTop: '1.5rem' }}>
+        <Link to="/dashboard" className="btn btn-secondary">
+          <span>←</span>
+          <span>Voltar ao Dashboard</span>
+        </Link>
       </div>
     </div>
   );

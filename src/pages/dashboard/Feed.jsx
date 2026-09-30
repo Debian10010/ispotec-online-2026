@@ -227,8 +227,8 @@ export default function Feed() {
 
       <div className="container">
         <div className="feed-header">
-          <h1 className="feed-title">📰 Feed Global</h1>
-          <p className="feed-subtitle">Publicações recentes de toda a comunidade ISPOTEC</p>
+          <h1 className="feed-title">📰 Feed Académico</h1>
+          <p className="feed-subtitle">Publicações e comunicações da comunidade ISPOTEC</p>
         </div>
 
         <div className="feed-container">

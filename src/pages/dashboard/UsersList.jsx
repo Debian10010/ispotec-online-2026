@@ -46,80 +46,84 @@ export default function UsersList() {
 
   return (
     <div className="container" style={{ paddingBottom: '3rem' }}>
-      <h1 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Utilizadores Registados</h1>
+      <div className="page-header" style={{ marginTop: '2rem' }}>
+        <h1 className="page-title">Gestão de Utilizadores</h1>
+        <p className="page-description">Consulta e filtragem de utilizadores registados na plataforma ISPOTEC</p>
+      </div>
 
-      <div style={{
-        background: 'var(--white)',
-        padding: '1.5rem',
-        borderRadius: '8px',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1rem' }}>Filtros</h3>
-        <form onSubmit={handleFilter} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <select 
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-            style={{ padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '5px', minWidth: '200px' }}
-          >
-            <option value="">Todos os tipos</option>
-            <option value="estudante">Estudante</option>
-            <option value="docente">Docente</option>
-            <option value="especialista">Especialista</option>
-          </select>
-          <button type="submit" className="btn btn-primary">Filtrar</button>
+      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem' }}>
+        <form onSubmit={handleFilter} style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1', minWidth: '220px' }}>
+            <label htmlFor="tipo-filter" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--isp-slate-600)', marginBottom: '0.35rem', display: 'block' }}>
+              Filtrar por Perfil
+            </label>
+            <select 
+              id="tipo-filter"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              className="isp-select"
+            >
+              <option value="">Todos os perfis</option>
+              <option value="estudante">Estudante</option>
+              <option value="docente">Docente</option>
+              <option value="especialista">Especialista (Admin)</option>
+            </select>
+          </div>
+          <div style={{ alignSelf: 'flex-end' }}>
+            <button type="submit" className="btn btn-primary">
+              <span>🔍</span>
+              <span>Filtrar</span>
+            </button>
+          </div>
         </form>
       </div>
 
-      <div style={{
-        background: 'var(--white)',
-        borderRadius: '8px',
-        overflowX: 'auto',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-          <thead style={{ backgroundColor: 'var(--primary-blue)', color: 'var(--white)' }}>
+      <div className="table-responsive">
+        <table className="table">
+          <thead>
             <tr>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Nome</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Tipo</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Curso</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-              <th style={{ padding: '1rem', textAlign: 'left' }}>Data Registo</th>
+              <th>Nome Completo</th>
+              <th>Email</th>
+              <th>Perfil</th>
+              <th>Curso / Especialidade</th>
+              <th>Estado</th>
+              <th>Data de Registo</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                <td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: 'var(--isp-slate-500)' }}>
                   A carregar utilizadores...
                 </td>
               </tr>
             ) : utilizadores.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                  Nenhum utilizador encontrado
+                <td colSpan="6">
+                  <div className="empty-state" style={{ border: 'none', padding: '2.5rem 1rem' }}>
+                    <span className="empty-state-icon">👥</span>
+                    <h3 className="empty-state-title">Nenhum utilizador encontrado</h3>
+                    <p className="empty-state-desc">Não foram encontrados registos correspondentes aos filtros seleccionados.</p>
+                  </div>
                 </td>
               </tr>
             ) : (
               utilizadores.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem' }}>{u.nome}</td>
-                  <td style={{ padding: '1rem' }}>{u.email}</td>
-                  <td style={{ padding: '1rem' }}><strong>{u.tipo ? u.tipo.charAt(0).toUpperCase() + u.tipo.slice(1) : '-'}</strong></td>
-                  <td style={{ padding: '1rem' }}>{u.curso || '-'}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{
-                      padding: '0.3rem 0.8rem',
-                      borderRadius: '3px',
-                      fontSize: '0.9rem',
-                      backgroundColor: u.status === 'aprovado' ? '#d4edda' : '#f8d7da',
-                      color: u.status === 'aprovado' ? '#155724' : '#721c24'
-                    }}>
+                <tr key={u.id}>
+                  <td style={{ fontWeight: 600, color: 'var(--isp-slate-900)' }}>{u.nome}</td>
+                  <td style={{ color: 'var(--isp-slate-600)' }}>{u.email}</td>
+                  <td>
+                    <span className={`badge badge-info user-badge-${u.tipo}`}>
+                      {u.tipo ? u.tipo.charAt(0).toUpperCase() + u.tipo.slice(1) : '-'}
+                    </span>
+                  </td>
+                  <td>{u.curso || '—'}</td>
+                  <td>
+                    <span className={`badge ${u.status === 'aprovado' ? 'badge-success' : 'badge-warning'}`}>
                       {u.status ? u.status.charAt(0).toUpperCase() + u.status.slice(1) : '-'}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{formatDate(u.data_registo)}</td>
+                  <td style={{ fontSize: '0.84rem', color: 'var(--isp-slate-500)' }}>{formatDate(u.data_registo)}</td>
                 </tr>
               ))
             )}
@@ -127,8 +131,11 @@ export default function UsersList() {
         </table>
       </div>
 
-      <div style={{ marginTop: '2rem' }}>
-        <Link to="/dashboard" className="btn btn-primary">Voltar ao Dashboard</Link>
+      <div style={{ marginTop: '1.5rem' }}>
+        <Link to="/dashboard" className="btn btn-secondary">
+          <span>←</span>
+          <span>Voltar ao Dashboard</span>
+        </Link>
       </div>
     </div>
   );

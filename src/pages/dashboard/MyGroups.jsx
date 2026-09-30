@@ -64,13 +64,14 @@ export default function MyGroups() {
         }
         
         .page-hero {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            background: linear-gradient(135deg, var(--isp-navy-950) 0%, var(--isp-navy-800) 100%);
             color: var(--white);
             padding: 2.5rem 2rem;
-            border-radius: var(--radius);
+            border-radius: var(--isp-radius-lg);
             margin-bottom: 2.5rem;
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .page-hero::before {

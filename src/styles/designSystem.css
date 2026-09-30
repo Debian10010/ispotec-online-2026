@@ -1053,10 +1053,277 @@
 }
 
 /* ========================================================
-   UNIVERSAL RESPONSIVE COMPONENT SAFEGUARDS
+   UNIVERSAL ENTERPRISE COMPONENT DESIGN SYSTEM
    ======================================================== */
 
-.table-responsive, .app-table-container {
+/* Typography & Page Headers */
+.page-header, .isp-page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title, .isp-page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--isp-navy-950);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+  line-height: 1.25;
+}
+
+.page-description, .isp-page-desc {
+  font-size: 0.95rem;
+  color: var(--isp-slate-500);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Enterprise Buttons */
+.btn, .isp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border-radius: var(--isp-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--isp-transition-fast);
+  white-space: nowrap;
+}
+
+.btn:disabled, .isp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-primary, .isp-btn-primary {
+  background: var(--isp-blue-600);
+  color: var(--isp-white) !important;
+  border-color: var(--isp-blue-700);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover, .isp-btn-primary:hover {
+  background: var(--isp-blue-700);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary, .isp-btn-secondary {
+  background: var(--isp-white);
+  color: var(--isp-slate-700) !important;
+  border-color: var(--isp-slate-300);
+  box-shadow: var(--isp-shadow-xs);
+}
+
+.btn-secondary:hover, .isp-btn-secondary:hover {
+  background: var(--isp-slate-50);
+  color: var(--isp-slate-900) !important;
+  border-color: var(--isp-slate-400);
+}
+
+.btn-outline, .isp-btn-outline {
+  background: transparent;
+  color: var(--isp-blue-600) !important;
+  border-color: var(--isp-blue-500);
+}
+
+.btn-outline:hover, .isp-btn-outline:hover {
+  background: var(--isp-blue-50);
+  color: var(--isp-blue-700) !important;
+}
+
+.btn-success, .isp-btn-success {
+  background: var(--isp-green-600);
+  color: var(--isp-white) !important;
+  border-color: var(--isp-green-700, #047857);
+}
+
+.btn-success:hover, .isp-btn-success:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.btn-danger, .isp-btn-danger {
+  background: var(--isp-rose-600);
+  color: var(--isp-white) !important;
+  border-color: #be123c;
+}
+
+.btn-danger:hover, .isp-btn-danger:hover {
+  background: #be123c;
+  transform: translateY(-1px);
+}
+
+.btn-sm, .isp-btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  border-radius: var(--isp-radius-sm);
+}
+
+/* Enterprise Cards */
+.card, .isp-card {
+  background: var(--isp-white);
+  border: 1px solid var(--isp-slate-200);
+  border-radius: var(--isp-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--isp-shadow-sm);
+  transition: box-shadow var(--isp-transition-base);
+}
+
+.card:hover, .isp-card:hover {
+  box-shadow: var(--isp-shadow-md);
+}
+
+.card-header, .isp-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--isp-slate-100);
+}
+
+.card-title, .isp-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--isp-navy-900);
+  margin: 0;
+}
+
+/* Enterprise Forms */
+.form-group, .isp-form-group {
+  margin-bottom: 1.25rem;
+}
+
+label, .isp-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--isp-slate-700);
+  margin-bottom: 0.4rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+select,
+textarea,
+.isp-input,
+.isp-select,
+.isp-textarea {
+  width: 100%;
+  padding: 0.7rem 0.95rem;
+  font-size: 0.92rem;
+  color: var(--isp-slate-900);
+  background-color: var(--isp-white);
+  border: 1px solid var(--isp-slate-300);
+  border-radius: var(--isp-radius-md);
+  box-shadow: var(--isp-shadow-xs);
+  transition: border-color var(--isp-transition-fast), box-shadow var(--isp-transition-fast);
+  font-family: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.isp-input:focus,
+.isp-select:focus,
+.isp-textarea:focus {
+  outline: none;
+  border-color: var(--isp-blue-500);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Enterprise Badges & Pills */
+.badge, .isp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: var(--isp-radius-full);
+  text-transform: capitalize;
+}
+
+.badge-primary, .isp-badge-primary {
+  background: var(--isp-blue-50);
+  color: var(--isp-blue-700);
+  border: 1px solid var(--isp-blue-100);
+}
+
+.badge-success, .isp-badge-success, .user-badge-aprovado, .user-badge-docente {
+  background: var(--isp-green-50);
+  color: var(--isp-green-600);
+  border: 1px solid var(--isp-green-100);
+}
+
+.badge-warning, .isp-badge-warning, .user-badge-pendente, .user-badge-estudante {
+  background: var(--isp-amber-50);
+  color: var(--isp-amber-600);
+  border: 1px solid var(--isp-amber-100);
+}
+
+.badge-danger, .isp-badge-danger {
+  background: var(--isp-rose-50);
+  color: var(--isp-rose-600);
+  border: 1px solid var(--isp-rose-100);
+}
+
+.badge-info, .isp-badge-info, .user-badge-especialista {
+  background: var(--isp-purple-50);
+  color: var(--isp-purple-600);
+  border: 1px solid var(--isp-purple-100);
+}
+
+/* Enterprise Alerts */
+.alert, .isp-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: var(--isp-radius-md);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.alert-success, .isp-alert-success {
+  background-color: var(--isp-green-50);
+  color: #065f46;
+  border: 1px solid var(--isp-green-100);
+}
+
+.alert-error, .alert-danger, .isp-alert-danger {
+  background-color: var(--isp-rose-50);
+  color: #9f1239;
+  border: 1px solid var(--isp-rose-100);
+}
+
+.alert-warning, .isp-alert-warning {
+  background-color: var(--isp-amber-50);
+  color: #92400e;
+  border: 1px solid var(--isp-amber-100);
+}
+
+.alert-info, .isp-alert-info {
+  background-color: var(--isp-blue-50);
+  color: #1e40af;
+  border: 1px solid var(--isp-blue-100);
+}
+
+/* Enterprise Tables */
+.table-responsive, .app-table-container, .isp-table-wrapper {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -1064,11 +1331,72 @@
   border-radius: var(--isp-radius-md);
   border: 1px solid var(--isp-slate-200);
   background: var(--isp-white);
+  box-shadow: var(--isp-shadow-xs);
 }
 
-table {
+table, .isp-table {
   width: 100%;
   border-collapse: collapse;
+  text-align: left;
+}
+
+table thead th, .isp-table thead th {
+  background: var(--isp-slate-50);
+  color: var(--isp-slate-700);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--isp-slate-200);
+  white-space: nowrap;
+}
+
+table tbody td, .isp-table tbody td {
+  padding: 0.95rem 1.25rem;
+  font-size: 0.88rem;
+  color: var(--isp-slate-800);
+  border-bottom: 1px solid var(--isp-slate-100);
+  vertical-align: middle;
+}
+
+table tbody tr:last-child td, .isp-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr:hover, .isp-table tbody tr:hover {
+  background: var(--isp-slate-50);
+}
+
+/* Empty States */
+.empty-state, .isp-empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: var(--isp-white);
+  border-radius: var(--isp-radius-lg);
+  border: 1px dashed var(--isp-slate-300);
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-icon, .isp-empty-icon {
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.empty-state-title, .isp-empty-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--isp-navy-900);
+  margin-bottom: 0.4rem;
+}
+
+.empty-state-desc, .isp-empty-desc {
+  font-size: 0.88rem;
+  color: var(--isp-slate-500);
+  max-width: 440px;
+  margin: 0 auto 1.25rem;
+  line-height: 1.5;
 }
 
 img, video {
