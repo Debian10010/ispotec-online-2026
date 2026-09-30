@@ -16,7 +16,7 @@ export default function GroupView() {
   const [searchParams] = useSearchParams();
   const groupId = searchParams.get('id');
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, canAdd } = useAuth();
 
   const [grupo, setGrupo] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -441,41 +441,43 @@ export default function GroupView() {
         <div className="content-grid">
           {/* Main Content */}
           <div>
-            {/* Post Form */}
-            <div className="post-form-card">
-              <div className="post-form-title">✏️ Criar Nova Publicação</div>
-              <form onSubmit={handleCreatePost}>
-                <div className="form-group">
-                  <input 
-                    type="text" 
-                    placeholder="Título da publicação..." 
-                    value={novoTitulo}
-                    onChange={(e) => setNovoTitulo(e.target.value)}
+            {/* Post Form – apenas Docente e Admin */}
+            {canAdd && (
+              <div className="post-form-card">
+                <div className="post-form-title">✏️ Criar Nova Publicação</div>
+                <form onSubmit={handleCreatePost}>
+                  <div className="form-group">
+                    <input 
+                      type="text" 
+                      placeholder="Título da publicação..." 
+                      value={novoTitulo}
+                      onChange={(e) => setNovoTitulo(e.target.value)}
+                      required 
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <select 
+                      value={novoTipo}
+                      onChange={(e) => setNovoTipo(e.target.value)}
+                      style={{ padding: '0.6rem' }}
+                    >
+                      <option value="discussao">💬 Discussão</option>
+                      <option value="material">📚 Material</option>
+                      <option value="artigo">📄 Artigo</option>
+                      <option value="projeto">🚀 Projeto</option>
+                    </select>
+                    <button type="submit" className="btn btn-success">Publicar</button>
+                  </div>
+                  <textarea 
+                    rows="3" 
+                    placeholder="Escreva o conteúdo..." 
+                    value={novoConteudo}
+                    onChange={(e) => setNovoConteudo(e.target.value)}
                     required 
                   />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <select 
-                    value={novoTipo}
-                    onChange={(e) => setNovoTipo(e.target.value)}
-                    style={{ padding: '0.6rem' }}
-                  >
-                    <option value="discussao">💬 Discussão</option>
-                    <option value="material">📚 Material</option>
-                    <option value="artigo">📄 Artigo</option>
-                    <option value="projeto">🚀 Projeto</option>
-                  </select>
-                  <button type="submit" className="btn btn-success">Publicar</button>
-                </div>
-                <textarea 
-                  rows="3" 
-                  placeholder="Escreva o conteúdo..." 
-                  value={novoConteudo}
-                  onChange={(e) => setNovoConteudo(e.target.value)}
-                  required 
-                />
-              </form>
-            </div>
+                </form>
+              </div>
+            )}
 
             {/* Posts */}
             <div className="posts-section-title">
@@ -533,21 +535,23 @@ export default function GroupView() {
                         </div>
                       ))}
 
-                      <form 
-                        className="comment-form" 
-                        onSubmit={(e) => handleAddComment(e, p.id)}
-                      >
-                        <input 
-                          type="text" 
-                          placeholder="Escreva um comentário..." 
-                          value={commentInputs[p.id] || ''}
-                          onChange={(e) => setCommentInputs(prev => ({ ...prev, [p.id]: e.target.value }))}
-                          required 
-                        />
-                        <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem 1rem' }}>
-                          Enviar
-                        </button>
-                      </form>
+                      {canAdd && (
+                        <form 
+                          className="comment-form" 
+                          onSubmit={(e) => handleAddComment(e, p.id)}
+                        >
+                          <input 
+                            type="text" 
+                            placeholder="Escreva um comentário..." 
+                            value={commentInputs[p.id] || ''}
+                            onChange={(e) => setCommentInputs(prev => ({ ...prev, [p.id]: e.target.value }))}
+                            required 
+                          />
+                          <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem 1rem' }}>
+                            Enviar
+                          </button>
+                        </form>
+                      )}
                     </div>
                   </div>
                 );

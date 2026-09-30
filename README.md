@@ -2,6 +2,13 @@
 
 Aplicação web institucional da Rede Social Académica do **Instituto Superior Politécnico e de Tecnologias (ISPOTEC)**, convertida com máxima fidelidade visual, de rotas e comportamental a partir da versão original em PHP para **React + Vite**, totalmente pronta para implantação na **Vercel**.
 
+## Repositórios
+
+| Camada | Repositório |
+|--------|-------------|
+| 🖥️ **Front-End** (React + Vite) | [github.com/Debian10010/ispotec-online-2026](https://github.com/Debian10010/ispotec-online-2026.git) |
+| ⚙️ **Back-End** (PHP + MySQL) | [github.com/Debian10010/Back-End-ispotec-online-2026](https://github.com/Debian10010/Back-End-ispotec-online-2026.git) |
+
 ---
 
 ## 1. Como Instalar
@@ -135,6 +142,14 @@ ispotec.online/
 
 A aplicação foi projetada com estrita separação entre a camada de apresentação (UI) e os serviços de dados.
 
+### Repositórios
+
+* **Front-End:** [https://github.com/Debian10010/ispotec-online-2026.git](https://github.com/Debian10010/ispotec-online-2026.git)
+* **Back-End:** [https://github.com/Debian10010/Back-End-ispotec-online-2026.git](https://github.com/Debian10010/Back-End-ispotec-online-2026.git)
+
+### Passos para ligar ao backend real
+
 Para ligar a um backend real (REST API ou GraphQL) posteriormente:
-1. Altere as funções na pasta `src/services/` (ex: `authService.js`, `userService.js`, etc.) para realizar chamadas `fetch()` ou `axios.get()` para o seu servidor.
-2. A interface e os componentes de páginas não precisam de ser reescritos, pois consomem as mesmas interfaces assíncronas fornecidas pelos serviços.
+1. Clone o repositório back-end e configure o servidor PHP + MySQL conforme o `README` do back-end.
+2. Altere as funções na pasta `src/services/` (ex: `authService.js`, `userService.js`, etc.) para realizar chamadas `fetch()` ou `axios.get()` para o seu servidor.
+3. A interface e os componentes de páginas não precisam de ser reescritos, pois consomem as mesmas interfaces assíncronas fornecidas pelos serviços.

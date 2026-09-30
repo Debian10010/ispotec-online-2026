@@ -378,31 +378,40 @@ export default function Dashboard() {
         ) : (
           /* Painel do Utilizador Normal */
           <>
-            <h2 className="section-title">Módulos da Plataforma</h2>
+            <h2 className="section-title">Módulos Principais da Plataforma</h2>
             <div className="action-grid">
-              <Link to="/ensino/micro-credenciais" className="action-card action-blue">
+              <Link to="/ensino" className="action-card action-blue">
                 <div className="action-icon">🎓</div>
                 <div className="action-content">
-                  <div className="action-title">Ensino — Micro-Credenciais</div>
-                  <div className="action-desc">Competências técnicas, humanas e digitais com certificações internacionais</div>
+                  <div className="action-title">Ensino</div>
+                  <div className="action-desc">Projetos educativos, curriculares, bibliotecas, laboratórios e estatísticas</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
 
-              <Link to="/extensao-investigacao/laboratorio-virtual" className="action-card action-green">
+              <Link to="/extensao" className="action-card action-green">
+                <div className="action-icon">🤝</div>
+                <div className="action-content">
+                  <div className="action-title">Extensão</div>
+                  <div className="action-desc">Centros de Práticas, projetos comunitários e parceiros institucionais</div>
+                </div>
+                <div className="action-arrow">→</div>
+              </Link>
+
+              <Link to="/investigacao" className="action-card action-purple">
                 <div className="action-icon">🔬</div>
                 <div className="action-content">
-                  <div className="action-title">Extensão &amp; Investigação — Laboratório Virtual</div>
-                  <div className="action-desc">Plataformas imersivas, simulações médicas, laboratórios científicos e IA</div>
+                  <div className="action-title">Investigação</div>
+                  <div className="action-desc">Laboratórios científicos de ponta, pesquisas, publicações e investigadores</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>
 
-              <Link to="/homeschool" className="action-card action-orange">
-                <div className="action-icon">🏠</div>
+              <Link to="/grupo-de-estudos" className="action-card action-orange">
+                <div className="action-icon">👥</div>
                 <div className="action-content">
-                  <div className="action-title">Home School</div>
-                  <div className="action-desc">Meus Grupos de estudo e disciplinas colaborativas</div>
+                  <div className="action-title">Grupo de Estudos</div>
+                  <div className="action-desc">Grupos de estudo colaborativos e partilha académica entre estudantes</div>
                 </div>
                 <div className="action-arrow">→</div>
               </Link>

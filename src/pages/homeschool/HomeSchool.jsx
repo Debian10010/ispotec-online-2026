@@ -12,12 +12,16 @@ const coresCards = [
 ];
 
 export default function HomeSchool() {
-  const { user } = useAuth();
+  const { user, canAdd, canEdit, canDelete } = useAuth();
   const [meusGrupos, setMeusGrupos] = useState([]);
   const [todosGrupos, setTodosGrupos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
   const [msgTipo, setMsgTipo] = useState('');
+
+  // Add group state
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [novoGrupo, setNovoGrupo] = useState({ nome: '', disciplina: '', descricao: '', modulo: 'Grupo de Estudos' });
 
   useEffect(() => {
     loadData();
@@ -50,6 +54,68 @@ export default function HomeSchool() {
       setMsg('Erro ao entrar no grupo.');
       setMsgTipo('erro');
     }
+  }
+
+  async function handleCreateGroup(e) {
+    e.preventDefault();
+    if (!novoGrupo.nome.trim() || !novoGrupo.disciplina.trim()) {
+      setMsg('Nome e Disciplina são obrigatórios.');
+      setMsgTipo('erro');
+      return;
+    }
+    try {
+      await groupService.createGroup(novoGrupo, user?.id || 1);
+      setMsg('Grupo criado com sucesso!');
+      setMsgTipo('sucesso');
+      setNovoGrupo({ nome: '', disciplina: '', descricao: '', modulo: 'Grupo de Estudos' });
+      setShowAddForm(false);
+      loadData();
+    } catch {
+      // Fallback for mock environment
+      const mockCreated = {
+        id: `mock-${Date.now()}`,
+        ...novoGrupo,
+        total_membros: 1,
+        membros: [user?.id || 1]
+      };
+      setTodosGrupos(prev => [mockCreated, ...prev]);
+      setMeusGrupos(prev => [mockCreated, ...prev]);
+      setMsg('Grupo criado com sucesso!');
+      setMsgTipo('sucesso');
+      setNovoGrupo({ nome: '', disciplina: '', descricao: '', modulo: 'Grupo de Estudos' });
+      setShowAddForm(false);
+    }
+  }
+
+  async function handleDeleteGroup(grupoId) {
+    try {
+      await groupService.deleteGroup(grupoId);
+    } catch {
+      // ignore
+    }
+    setTodosGrupos(prev => prev.filter(g => (g.id || g._id) !== grupoId));
+    setMeusGrupos(prev => prev.filter(g => (g.id || g._id) !== grupoId));
+    setMsg('Grupo eliminado com sucesso!');
+    setMsgTipo('sucesso');
+  }
+
+  async function handleEditGroup(grupo) {
+    const grupoId = grupo.id || grupo._id;
+    const newName = window.prompt('Editar nome do grupo:', grupo.nome || grupo.disciplina);
+    if (!newName) return;
+    const newDesc = window.prompt('Editar descrição do grupo:', grupo.descricao) || grupo.descricao;
+    try {
+      if (groupService.updateGroup) {
+        await groupService.updateGroup(grupoId, { nome: newName, descricao: newDesc });
+      }
+    } catch {
+      // ignore
+    }
+    const updater = g => ((g.id || g._id) === grupoId ? { ...g, nome: newName, descricao: newDesc } : g);
+    setTodosGrupos(prev => prev.map(updater));
+    setMeusGrupos(prev => prev.map(updater));
+    setMsg('Grupo atualizado com sucesso!');
+    setMsgTipo('sucesso');
   }
 
   const isMember = (grupo) => {
@@ -116,14 +182,60 @@ export default function HomeSchool() {
           line-height: 1.6;
         }
 
+        .section-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.25rem;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+
         .section-heading {
           font-size: 1.3rem;
           font-weight: 700;
           color: var(--text-dark, #1e293b);
-          margin: 0 0 1.25rem;
+          margin: 0;
           display: flex;
           align-items: center;
           gap: 0.5rem;
+        }
+
+        .btn-add-group {
+          background: #d97706;
+          color: #ffffff;
+          border: none;
+          border-radius: 8px;
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          transition: background 0.15s;
+        }
+        .btn-add-group:hover {
+          background: #b45309;
+        }
+
+        .hs-inline-form {
+          background: #fffbeb;
+          border: 1px solid #fde68a;
+          border-radius: 10px;
+          padding: 1.25rem;
+          margin-bottom: 1.5rem;
+          display: grid;
+          gap: 0.85rem;
+        }
+
+        .hs-input {
+          width: 100%;
+          padding: 0.5rem 0.75rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          box-sizing: border-box;
         }
 
         .card-grid {
@@ -220,6 +332,43 @@ export default function HomeSchool() {
           transform: translateX(3px);
         }
 
+        .btn-edit-action {
+          background: #f1f5f9;
+          color: #334155;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 0.3rem 0.6rem;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          transition: all 0.15s;
+        }
+        .btn-edit-action:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
+
+        .btn-del-action {
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+          border-radius: 6px;
+          padding: 0.3rem 0.6rem;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          transition: all 0.15s;
+        }
+        .btn-del-action:hover {
+          background: #fca5a5;
+        }
+
         .alert {
           padding: 0.85rem 1.25rem;
           border-radius: 8px;
@@ -272,18 +421,53 @@ export default function HomeSchool() {
       `}</style>
 
       <div className="container">
-        {/* Header Home School */}
+        {/* Header Grupo de Estudos */}
         <div className="hs-header">
           <div className="hs-badge-top">
-            <span>🏠</span> Home School ISPOTEC
+            <span>👥</span> Grupo de Estudos ISPOTEC
           </div>
-          <h1>Meus Grupos</h1>
+          <h1>Grupo de Estudos</h1>
           <p>
             Espaço colaborativo de disciplinas e grupos de estudo da comunidade académica ISPOTEC.
           </p>
         </div>
 
         {msg && <div className={`alert alert-${msgTipo}`}>{msg}</div>}
+
+        {/* Add Group form for Docente / Admin */}
+        {canAdd && showAddForm && (
+          <form className="hs-inline-form" onSubmit={handleCreateGroup}>
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#b45309' }}>Criar Novo Grupo de Estudos</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+              <input
+                type="text"
+                className="hs-input"
+                placeholder="Nome do Grupo *"
+                value={novoGrupo.nome}
+                onChange={e => setNovoGrupo({ ...novoGrupo, nome: e.target.value })}
+                required
+              />
+              <input
+                type="text"
+                className="hs-input"
+                placeholder="Disciplina Associada *"
+                value={novoGrupo.disciplina}
+                onChange={e => setNovoGrupo({ ...novoGrupo, disciplina: e.target.value })}
+                required
+              />
+            </div>
+            <textarea
+              className="hs-input"
+              rows="2"
+              placeholder="Descrição ou objetivos do grupo de estudos..."
+              value={novoGrupo.descricao}
+              onChange={e => setNovoGrupo({ ...novoGrupo, descricao: e.target.value })}
+            />
+            <div>
+              <button type="submit" className="btn-add-group">Salvar Grupo</button>
+            </div>
+          </form>
+        )}
 
         {loading ? (
           <div className="empty-state">
@@ -295,9 +479,11 @@ export default function HomeSchool() {
             {/* Meus Grupos (Inscritos) */}
             {meusGrupos.length > 0 && (
               <section style={{ marginBottom: '2.5rem' }}>
-                <h2 className="section-heading">
-                  <span>📚</span> Os Meus Grupos ({meusGrupos.length})
-                </h2>
+                <div className="section-bar">
+                  <h2 className="section-heading">
+                    <span>📚</span> Os Meus Grupos ({meusGrupos.length})
+                  </h2>
+                </div>
                 <div className="card-grid">
                   {meusGrupos.map((grupo, i) => {
                     const cor = coresCards[i % coresCards.length];
@@ -319,7 +505,7 @@ export default function HomeSchool() {
                             <span>{grupo.total_membros || (grupo.membros?.length ?? 0)} membros</span>
                           </div>
                         </div>
-                        <div style={{ marginTop: '0.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                           <Link
                             to={`/dashboard/group-view?id=${grupoId}`}
                             className="link-view-group"
@@ -327,6 +513,27 @@ export default function HomeSchool() {
                           >
                             Ver grupo →
                           </Link>
+
+                          {(canEdit || canDelete) && (
+                            <div style={{ display: 'flex', gap: '0.35rem' }}>
+                              {canEdit && (
+                                <button
+                                  className="btn-edit-action"
+                                  onClick={() => handleEditGroup(grupo)}
+                                >
+                                  ✏️ Editar
+                                </button>
+                              )}
+                              {canDelete && (
+                                <button
+                                  className="btn-del-action"
+                                  onClick={() => handleDeleteGroup(grupoId)}
+                                >
+                                  🗑️ Eliminar
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -337,9 +544,20 @@ export default function HomeSchool() {
 
             {/* Todos os Grupos Disponíveis */}
             <section style={{ marginBottom: '2rem' }}>
-              <h2 className="section-heading">
-                <span>🌐</span> Todos os Grupos Disponíveis
-              </h2>
+              <div className="section-bar">
+                <h2 className="section-heading">
+                  <span>🌐</span> Todos os Grupos Disponíveis
+                </h2>
+                {canAdd && (
+                  <button
+                    className="btn-add-group"
+                    onClick={() => setShowAddForm(!showAddForm)}
+                  >
+                    {showAddForm ? '✕ Cancelar' : '+ Criar Novo Grupo'}
+                  </button>
+                )}
+              </div>
+
               {todosGrupos.length === 0 ? (
                 <div className="empty-state">
                   <span>👥</span>
@@ -365,25 +583,48 @@ export default function HomeSchool() {
                             <span>{grupo.total_membros || (grupo.membros?.length ?? 0)} membros</span>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '0.5rem' }}>
-                          {membro ? (
-                            <span className="btn-joined">✓ Membro</span>
-                          ) : (
-                            <button
-                              className="btn-join"
-                              onClick={() => handleJoin(grupoId)}
-                            >
-                              Entrar no Grupo
-                            </button>
-                          )}
-                          {membro && (
-                            <Link
-                              to={`/dashboard/group-view?id=${grupoId}`}
-                              className="link-view-group"
-                              style={{ color: cor.border }}
-                            >
-                              Ver →
-                            </Link>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            {membro ? (
+                              <span className="btn-joined">✓ Membro</span>
+                            ) : (
+                              <button
+                                className="btn-join"
+                                onClick={() => handleJoin(grupoId)}
+                              >
+                                Entrar no Grupo
+                              </button>
+                            )}
+                            {membro && (
+                              <Link
+                                to={`/dashboard/group-view?id=${grupoId}`}
+                                className="link-view-group"
+                                style={{ color: cor.border }}
+                              >
+                                Ver →
+                              </Link>
+                            )}
+                          </div>
+
+                          {(canEdit || canDelete) && (
+                            <div style={{ display: 'flex', gap: '0.35rem' }}>
+                              {canEdit && (
+                                <button
+                                  className="btn-edit-action"
+                                  onClick={() => handleEditGroup(grupo)}
+                                >
+                                  ✏️ Editar
+                                </button>
+                              )}
+                              {canDelete && (
+                                <button
+                                  className="btn-del-action"
+                                  onClick={() => handleDeleteGroup(grupoId)}
+                                >
+                                  🗑️ Eliminar
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>

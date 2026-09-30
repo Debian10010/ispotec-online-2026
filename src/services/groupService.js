@@ -51,6 +51,16 @@ export const groupService = {
     }
   },
 
+  async updateGroup(groupId, data) {
+    try {
+      const res = await api.put(`/groups/${groupId}`, data);
+      return res.dados;
+    } catch (error) {
+      console.error('[groupService.updateGroup error]', error.message);
+      return null;
+    }
+  },
+
   async joinGroup(groupId) {
     try {
       const res = await api.post(`/groups/${groupId}/join`);

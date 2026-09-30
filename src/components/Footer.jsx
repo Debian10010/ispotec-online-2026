@@ -19,17 +19,21 @@ export default function Footer() {
               <h4 className="footer-title">Contactos Rápidos</h4>
               <div className="footer-links">
                 <a 
-                  href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+                  href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
                   target="_blank" 
                   rel="noreferrer"
                   className="footer-contact-link"
                 >
                   <span className="footer-icon">💬</span>
-                  <span>WhatsApp: +258 87 072 6974</span>
+                  <span>WhatsApp: 878787442</span>
                 </a>
-                <a href="tel:+258840726974" className="footer-contact-link">
+                <a href="tel:+258877906666" className="footer-contact-link">
                   <span className="footer-icon">📱</span>
-                  <span>Telefone: +258 84 072 6974</span>
+                  <span>Telefone: 877906666</span>
+                </a>
+                <a href="tel:+258873045610" className="footer-contact-link">
+                  <span className="footer-icon">📱</span>
+                  <span>Telefone: 873045610</span>
                 </a>
                 <a href="mailto:ifoptec.politecnica@gmail.com" className="footer-contact-link">
                   <span className="footer-icon">✉️</span>

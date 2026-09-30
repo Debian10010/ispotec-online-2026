@@ -37,7 +37,15 @@ export function AuthProvider({ children }) {
   };
 
   const isAuthenticated = !!user;
-  const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
+  const userTipo = user?.tipo || 'estudante';
+  const isAdmin = !!user && (userTipo === 'especialista' || userTipo === 'admin');
+  const isDocente = !!user && userTipo === 'docente';
+  const isEstudante = !user || userTipo === 'estudante';
+
+  // Role permissions for modules
+  const canAdd = isDocente || isAdmin;
+  const canEdit = isDocente || isAdmin;
+  const canDelete = isAdmin;
 
   return (
     <AuthContext.Provider
@@ -49,7 +57,12 @@ export function AuthProvider({ children }) {
         logout,
         updateCurrentUser,
         isAuthenticated,
-        isAdmin
+        isAdmin,
+        isDocente,
+        isEstudante,
+        canAdd,
+        canEdit,
+        canDelete
       }}
     >
       {children}

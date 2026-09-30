@@ -352,7 +352,15 @@ export default function App() {
           path="/ensino"
           element={
             <ProtectedRoute>
-              <MicroCredenciais />
+              <Ensino />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ensino/index.php"
+          element={
+            <ProtectedRoute>
+              <Ensino />
             </ProtectedRoute>
           }
         />
@@ -372,35 +380,54 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/extensao-investigacao"
-          element={
-            <ProtectedRoute>
-              <LaboratorioVirtual />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/extensao-investigacao/laboratorio-virtual"
-          element={
-            <ProtectedRoute>
-              <LaboratorioVirtual />
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/extensao"
           element={
             <ProtectedRoute>
-              <LaboratorioVirtual />
+              <Extensao />
             </ProtectedRoute>
           }
         />
         <Route
+          path="/extensao/index.php"
+          element={
+            <ProtectedRoute>
+              <Extensao />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/investigacao"
           element={
             <ProtectedRoute>
-              <LaboratorioVirtual />
+              <Investigacao />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investigacao/index.php"
+          element={
+            <ProtectedRoute>
+              <Investigacao />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/grupo-de-estudos"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/grupo-de-estudos/index.php"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
             </ProtectedRoute>
           }
         />
@@ -417,6 +444,24 @@ export default function App() {
           element={
             <ProtectedRoute>
               <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Legacy combined route preservation */}
+        <Route
+          path="/extensao-investigacao"
+          element={
+            <ProtectedRoute>
+              <LaboratorioVirtual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/extensao-investigacao/laboratorio-virtual"
+          element={
+            <ProtectedRoute>
+              <LaboratorioVirtual />
             </ProtectedRoute>
           }
         />

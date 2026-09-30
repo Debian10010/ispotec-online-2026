@@ -1,5 +1,9 @@
 # AGENTS.md - ISPOTEC.ONLINE
 
+## Repositórios
+- **Front-End**: `https://github.com/Debian10010/ispotec-online-2026.git`
+- **Back-End**: `https://github.com/Debian10010/Back-End-ispotec-online-2026.git`
+
 ## Arquitetura
 - **Stack**: PHP 7.4+ puro + MySQL/MariaDB
 - **Servidor**: Apache (XAMPP local), sem framework

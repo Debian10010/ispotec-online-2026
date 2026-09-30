@@ -22,14 +22,18 @@
                     <div class="footer-column">
                         <h4 class="footer-title">Contactos Rápidos</h4>
                         <div class="footer-links">
-                            <a href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+                            <a href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
                                target="_blank" class="footer-contact-link">
                                 <span class="footer-icon">💬</span>
-                                <span>WhatsApp: +258 87 072 6974</span>
+                                <span>WhatsApp: 878787442</span>
                             </a>
-                            <a href="tel:+258840726974" class="footer-contact-link">
+                            <a href="tel:+258877906666" class="footer-contact-link">
                                 <span class="footer-icon">📱</span>
-                                <span>Telefone: +258 84 072 6974</span>
+                                <span>Telefone: 877906666</span>
+                            </a>
+                            <a href="tel:+258873045610" class="footer-contact-link">
+                                <span class="footer-icon">📱</span>
+                                <span>Telefone: 873045610</span>
                             </a>
                             <a href="mailto:ifoptec.politecnica@gmail.com" class="footer-contact-link">
                                 <span class="footer-icon">✉️</span>
@@ -133,7 +137,7 @@
 
     <!-- Botão WhatsApp Fixo -->
     <?php if (isset($_SESSION['user_id'])): ?>
-        <a href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+        <a href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
            target="_blank" class="whatsapp-fixed" title="Contactar via WhatsApp">
             💬
         </a>

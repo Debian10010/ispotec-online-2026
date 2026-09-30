@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { groupService } from '../../services/groupService';
 
 export default function GroupsManage() {
-  const { user } = useAuth();
+  const { user, canAdd, canDelete } = useAuth();
   const [grupos, setGrupos] = useState([]);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
@@ -63,70 +63,72 @@ export default function GroupsManage() {
       {mensagem && <div className="alert alert-success">{mensagem}</div>}
       {erro && <div className="alert alert-error">{erro}</div>}
 
-      {/* Formulário de Criação */}
-      <div style={{
-        background: 'var(--white)',
-        padding: '2rem',
-        borderRadius: '8px',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1.5rem' }}>Criar Nova Disciplina/Grupo</h3>
+      {/* Formulário de Criação – apenas Docente e Admin */}
+      {canAdd && (
+        <div style={{
+          background: 'var(--white)',
+          padding: '2rem',
+          borderRadius: '8px',
+          marginBottom: '2rem',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1.5rem' }}>Criar Nova Disciplina/Grupo</h3>
 
-        <form onSubmit={handleCreate}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+          <form onSubmit={handleCreate}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+              <div className="form-group">
+                <label htmlFor="nome">Nome da Disciplina:</label>
+                <input 
+                  type="text" 
+                  id="nome" 
+                  name="nome" 
+                  value={formData.nome}
+                  onChange={handleChange}
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="disciplina">Disciplina:</label>
+                <input 
+                  type="text" 
+                  id="disciplina" 
+                  name="disciplina" 
+                  value={formData.disciplina}
+                  onChange={handleChange}
+                  required 
+                />
+              </div>
+            </div>
+
             <div className="form-group">
-              <label htmlFor="nome">Nome da Disciplina:</label>
-              <input 
-                type="text" 
-                id="nome" 
-                name="nome" 
-                value={formData.nome}
+              <label htmlFor="descricao">Descrição:</label>
+              <textarea 
+                id="descricao" 
+                name="descricao" 
+                rows="3"
+                value={formData.descricao}
                 onChange={handleChange}
-                required 
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="disciplina">Disciplina:</label>
+              <label htmlFor="modulo">Módulo:</label>
               <input 
                 type="text" 
-                id="disciplina" 
-                name="disciplina" 
-                value={formData.disciplina}
+                id="modulo" 
+                name="modulo" 
+                value={formData.modulo}
                 onChange={handleChange}
-                required 
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="descricao">Descrição:</label>
-            <textarea 
-              id="descricao" 
-              name="descricao" 
-              rows="3"
-              value={formData.descricao}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="modulo">Módulo:</label>
-            <input 
-              type="text" 
-              id="modulo" 
-              name="modulo" 
-              value={formData.modulo}
-              onChange={handleChange}
-            />
-          </div>
-
-          <button type="submit" className="btn btn-success" style={{ padding: '0.8rem 2rem' }}>
-            Criar Grupo
-          </button>
-        </form>
-      </div>
+            <button type="submit" className="btn btn-success" style={{ padding: '0.8rem 2rem' }}>
+              Criar Grupo
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Lista de Grupos */}
       <div style={{
@@ -190,14 +192,16 @@ export default function GroupsManage() {
                     >
                       Ver
                     </Link>
-                    <button 
-                      type="button" 
-                      className="btn btn-danger" 
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
-                      onClick={() => handleDelete(g.id)}
-                    >
-                      Eliminar
-                    </button>
+                    {canDelete && (
+                      <button 
+                        type="button" 
+                        className="btn btn-danger" 
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                        onClick={() => handleDelete(g.id)}
+                      >
+                        Eliminar
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))

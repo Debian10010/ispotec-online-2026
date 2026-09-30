@@ -817,20 +817,28 @@ require_once CLASSES_PATH . 'User.php';
                                             <span>Telefones</span>
                                         </div>
                                         <div class="contact-items">
-                                            <a href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+                                            <a href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
                                                target="_blank" class="contact-item contact-item-link">
                                                 <div class="contact-icon" style="background: rgba(37, 211, 102, 0.1); color: #25D366;">💬</div>
                                                 <div class="contact-details">
-                                                    <div class="contact-title">WhatsApp</div>
-                                                    <div class="contact-info">+258 87 072 6974</div>
+                                                    <div class="contact-title">WhatsApp / Chamadas</div>
+                                                    <div class="contact-info">878787442</div>
                                                 </div>
                                                 <div class="external-icon">↗</div>
                                             </a>
-                                            <a href="tel:+258840726974" class="contact-item contact-item-link">
+                                            <a href="tel:+258877906666" class="contact-item contact-item-link">
                                                 <div class="contact-icon" style="background: rgba(0, 123, 255, 0.1); color: #007bff;">📱</div>
                                                 <div class="contact-details">
-                                                    <div class="contact-title">Telefone</div>
-                                                    <div class="contact-info">+258 84 072 6974</div>
+                                                    <div class="contact-title">Linha Geral 2</div>
+                                                    <div class="contact-info">877906666</div>
+                                                </div>
+                                                <div class="external-icon">↗</div>
+                                            </a>
+                                            <a href="tel:+258873045610" class="contact-item contact-item-link">
+                                                <div class="contact-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">📱</div>
+                                                <div class="contact-details">
+                                                    <div class="contact-title">Linha Geral 3</div>
+                                                    <div class="contact-info">873045610</div>
                                                 </div>
                                                 <div class="external-icon">↗</div>
                                             </a>
@@ -976,7 +984,7 @@ require_once CLASSES_PATH . 'User.php';
         </script>
 
         <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+            <a href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
                target="_blank" class="whatsapp-fixed" title="Contactar via WhatsApp">
                 💬
             </a>

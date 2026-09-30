@@ -2,6 +2,10 @@
   "name": "ispotec-online",
   "version": "1.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Debian10010/ispotec-online-2026.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

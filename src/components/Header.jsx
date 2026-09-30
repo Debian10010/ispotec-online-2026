@@ -82,9 +82,10 @@ export default function Header() {
               {isAuthenticated ? (
                 <>
                   <li><Link to="/dashboard" onClick={closeMenu}>Dashboard</Link></li>
-                  <li><Link to="/ensino/micro-credenciais" onClick={closeMenu}>Ensino</Link></li>
-                  <li><Link to="/extensao-investigacao/laboratorio-virtual" onClick={closeMenu}>Extensão &amp; Investigação</Link></li>
-                  <li><Link to="/homeschool" onClick={closeMenu}>Home School</Link></li>
+                  <li><Link to="/ensino" onClick={closeMenu}>Ensino</Link></li>
+                  <li><Link to="/extensao" onClick={closeMenu}>Extensão</Link></li>
+                  <li><Link to="/investigacao" onClick={closeMenu}>Investigação</Link></li>
+                  <li><Link to="/grupo-de-estudos" onClick={closeMenu}>Grupo de Estudos</Link></li>
                   <li><Link to="/dashboard/chat-global" onClick={closeMenu} style={{ fontWeight: '600', color: '#38bdf8' }}>💬 Chat Geral</Link></li>
                   <li><Link to="/users" onClick={closeMenu}>Utilizadores</Link></li>
 
@@ -107,11 +108,11 @@ export default function Header() {
                         <div className="contact-group">
                           <div className="group-title">
                             <span>📞</span>
-                            <span>Telefones</span>
+                            <span>Telefones Oficiais</span>
                           </div>
                           <div className="contact-items">
                             <a 
-                              href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+                              href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
                               target="_blank" 
                               rel="noreferrer"
                               className="contact-item contact-item-link"
@@ -119,20 +120,32 @@ export default function Header() {
                             >
                               <div className="contact-icon" style={{ background: 'rgba(37, 211, 102, 0.1)', color: '#25D366' }}>💬</div>
                               <div className="contact-details">
-                                <div className="contact-title">WhatsApp</div>
-                                <div className="contact-info">+258 87 072 6974</div>
+                                <div className="contact-title">WhatsApp / Chamadas</div>
+                                <div className="contact-info">878787442</div>
                               </div>
                               <div className="external-icon">↗</div>
                             </a>
                             <a 
-                              href="tel:+258840726974" 
+                              href="tel:+258877906666" 
                               className="contact-item contact-item-link"
                               onClick={closeMenu}
                             >
                               <div className="contact-icon" style={{ background: 'rgba(0, 123, 255, 0.1)', color: '#007bff' }}>📱</div>
                               <div className="contact-details">
-                                <div className="contact-title">Telefone</div>
-                                <div className="contact-info">+258 84 072 6974</div>
+                                <div className="contact-title">Linha Geral 2</div>
+                                <div className="contact-info">877906666</div>
+                              </div>
+                              <div className="external-icon">↗</div>
+                            </a>
+                            <a 
+                              href="tel:+258873045610" 
+                              className="contact-item contact-item-link"
+                              onClick={closeMenu}
+                            >
+                              <div className="contact-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}>📱</div>
+                              <div className="contact-details">
+                                <div className="contact-title">Linha Geral 3</div>
+                                <div className="contact-info">873045610</div>
                               </div>
                               <div className="external-icon">↗</div>
                             </a>
@@ -246,7 +259,7 @@ export default function Header() {
       </header>
 
       <a 
-        href="https://api.whatsapp.com/send/?phone=258870726974&text&type=phone_number&app_absent=0" 
+        href="https://api.whatsapp.com/send/?phone=258878787442&text&type=phone_number&app_absent=0" 
         target="_blank" 
         rel="noreferrer"
         className="whatsapp-fixed" 
