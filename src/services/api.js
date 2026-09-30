@@ -11,11 +11,19 @@ export const getInitialApiUrl = () => {
     if (!isLocal) {
       return 'https://back-end-ispotec-online-2026.vercel.app/api';
     }
+    const port = window.location.port === '5173' ? '5000' : (window.location.port || '5000');
+    return `${window.location.protocol}//${window.location.hostname}:${port}/api`;
   }
-  return 'http://localhost:5000/api';
+  return 'https://back-end-ispotec-online-2026.vercel.app/api';
 };
 
 export const getBackendBaseUrl = () => {
+  if (import.meta.env.VITE_STORAGE_URL) {
+    return import.meta.env.VITE_STORAGE_URL.replace(/\/+$/, '');
+  }
+  if (import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, '');
+  }
   const apiUrl = getInitialApiUrl();
   return apiUrl.replace(/\/api\/?$/, '');
 };
@@ -31,9 +39,9 @@ export const getFileUrl = (path) => {
   const backendBase = getBackendBaseUrl();
   const isLocal = typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-  // If in production and path points to localhost, rewrite it to production backend
-  if (!isLocal && (path.includes('localhost:5000') || path.includes('127.0.0.1:5000'))) {
-    return path.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/g, backendBase);
+  // If in production and path points to any localhost/127.0.0.1 address, rewrite it to production backend
+  if (!isLocal && (path.includes('localhost') || path.includes('127.0.0.1'))) {
+    return path.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, backendBase);
   }
 
   // If already absolute valid URL (e.g. https://... or blob: or data:)
@@ -42,8 +50,8 @@ export const getFileUrl = (path) => {
   }
 
   if (path.startsWith('http://')) {
-    if (!isLocal && (path.includes('localhost:5000') || path.includes('127.0.0.1:5000'))) {
-      return path.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/g, backendBase);
+    if (!isLocal && (path.includes('localhost') || path.includes('127.0.0.1'))) {
+      return path.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, backendBase);
     }
     return path;
   }
