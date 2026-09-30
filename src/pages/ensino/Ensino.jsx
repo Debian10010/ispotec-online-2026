@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ensinoService } from '../../services/ensinoService';
 import { getFileUrl } from '../../services/api';
+import AttachmentDisplay from '../../components/AttachmentDisplay';
 
 // ── shared styles ─────────────────────────────────────────────────────────────
 const css = `
@@ -275,20 +276,7 @@ function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, 
 
 // ── Attachment Preview / Download Link ────────────────────────────────────────
 function AttachmentBadge({ url, nome }) {
-  if (!url) return null;
-  const fullUrl = getFileUrl(url);
-  return (
-    <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9' }}>
-      <a
-        href={fullUrl}
-        target="_blank"
-        rel="noreferrer"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: '#0055a4', fontWeight: 600, textDecoration: 'none' }}
-      >
-        <span>📎</span> {nome || 'Ver Documento Anexo'}
-      </a>
-    </div>
-  );
+  return <AttachmentDisplay url={url} nome={nome} primaryColor="#0055a4" />;
 }
 
 // ── Section 1: Projetos Educativos (REAL BACKEND) ─────────────────────────────
@@ -721,14 +709,7 @@ function ProjetosCurriculares({ canAdd, canEdit, canDelete }) {
                     <td><span className="card-badge badge-green">{u.tipo}</span></td>
                     <td>
                       {u.anexo_url ? (
-                        <a
-                          href={getFileUrl(u.anexo_url)}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ color: '#0055a4', fontWeight: 600, fontSize: '0.8rem' }}
-                        >
-                          📎 {u.anexo_nome || 'Ficheiro'}
-                        </a>
+                        <AttachmentDisplay url={u.anexo_url} nome={u.anexo_nome} primaryColor="#0055a4" />
                       ) : (
                         <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Sem anexo</span>
                       )}

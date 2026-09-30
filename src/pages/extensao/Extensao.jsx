@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { extensaoService } from '../../services/extensaoService';
 import { getFileUrl } from '../../services/api';
+import AttachmentDisplay from '../../components/AttachmentDisplay';
 
 // ── Shared Empty State ────────────────────────────────────────────────────────
 function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, onAdd, btnText = "+ Adicionar Registo" }) {
@@ -24,20 +25,7 @@ function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, 
 
 // ── Attachment Badge ──────────────────────────────────────────────────────────
 function AttachmentBadge({ url, nome }) {
-  if (!url) return null;
-  const fullUrl = getFileUrl(url);
-  return (
-    <div style={{ marginTop: '0.5rem', paddingTop: '0.4rem', borderTop: '1px solid #f1f5f9' }}>
-      <a
-        href={fullUrl}
-        target="_blank"
-        rel="noreferrer"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: '#059669', fontWeight: 600, textDecoration: 'none' }}
-      >
-        <span>📎</span> {nome || 'Ver Documento Anexo'}
-      </a>
-    </div>
-  );
+  return <AttachmentDisplay url={url} nome={nome} primaryColor="#059669" />;
 }
 
 export default function Extensao() {

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { groupService } from '../../services/groupService';
 import { chatService } from '../../services/chatService';
 import { getFileUrl as resolveFileUrl } from '../../services/api';
+import { isImageUrl, getCleanFileName } from '../../components/AttachmentDisplay';
 
 export default function ChatGrupo() {
   const [searchParams] = useSearchParams();
@@ -452,14 +453,19 @@ export default function ChatGrupo() {
 
                     {m.conteudo && <div className="msg-text">{m.conteudo}</div>}
 
-                    {m.tipo_mensagem === 'imagem' && m.ficheiro_path && (
-                      <div className="msg-media">
-                        <img src={getFileUrl(m.ficheiro_path)} alt="Anexo" />
+                    {m.ficheiro_path && (isImageUrl(m.ficheiro_path, m.ficheiro_nome) || m.tipo_mensagem === 'imagem') && (
+                      <div className="msg-media" style={{ marginTop: '0.4rem', borderRadius: '8px', overflow: 'hidden' }}>
+                        <img
+                          src={getFileUrl(m.ficheiro_path)}
+                          alt={getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
+                          style={{ maxWidth: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', cursor: 'pointer', borderRadius: '8px' }}
+                          onClick={() => window.open(getFileUrl(m.ficheiro_path), '_blank')}
+                        />
                       </div>
                     )}
 
-                    {m.tipo_mensagem === 'audio' && (
-                      <div className="msg-media">
+                    {m.tipo_mensagem === 'audio' && m.ficheiro_path && (
+                      <div className="msg-media" style={{ marginTop: '0.4rem' }}>
                         <audio controls style={{ maxWidth: '100%' }}>
                           <source src={getFileUrl(m.ficheiro_path)} />
                           O seu navegador não suporta áudio.
@@ -467,9 +473,9 @@ export default function ChatGrupo() {
                       </div>
                     )}
 
-                    {m.tipo_mensagem === 'documento' && (
-                      <a href={getFileUrl(m.ficheiro_path)} className="msg-file-link" download target="_blank" rel="noreferrer">
-                        📎 {m.ficheiro_nome || 'Ficheiro anexo'}
+                    {m.ficheiro_path && !isImageUrl(m.ficheiro_path, m.ficheiro_nome) && m.tipo_mensagem !== 'audio' && (
+                      <a href={getFileUrl(m.ficheiro_path)} className="msg-file-link" download target="_blank" rel="noreferrer" style={{ marginTop: '0.4rem' }}>
+                        📄 {getCleanFileName(m.ficheiro_path, m.ficheiro_nome)} ↗
                       </a>
                     )}
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
 import { getFileUrl as resolveFileUrl } from '../../services/api';
+import { isImageUrl, getCleanFileName } from '../../components/AttachmentDisplay';
 
 const QUICK_EMOJIS = ['👍', '👏', '💡', '📚', '📢', '🚀', '🎓', '✨', '🔥', '🤝'];
 
@@ -828,9 +829,13 @@ export default function ChatGlobal() {
 
                       {m.conteudo && <div className="msg-body-text">{m.conteudo}</div>}
 
-                      {m.tipo_mensagem === 'imagem' && m.ficheiro_path && (
-                        <div className="msg-media-attachment">
-                          <img src={getFileUrl(m.ficheiro_path)} alt="Imagem partilhada" loading="lazy" />
+                      {m.ficheiro_path && (isImageUrl(m.ficheiro_path, m.ficheiro_nome) || m.tipo_mensagem === 'imagem') && (
+                        <div className="msg-media-attachment" style={{ cursor: 'pointer' }} onClick={() => window.open(getFileUrl(m.ficheiro_path), '_blank')}>
+                          <img
+                            src={getFileUrl(m.ficheiro_path)}
+                            alt={getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
+                            loading="lazy"
+                          />
                         </div>
                       )}
 
@@ -843,7 +848,7 @@ export default function ChatGlobal() {
                         </div>
                       )}
 
-                      {m.tipo_mensagem === 'documento' && (
+                      {m.ficheiro_path && !isImageUrl(m.ficheiro_path, m.ficheiro_nome) && m.tipo_mensagem !== 'audio' && (
                         <a
                           href={getFileUrl(m.ficheiro_path)}
                           className="msg-file-download"
@@ -851,7 +856,7 @@ export default function ChatGlobal() {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          📄 {m.ficheiro_nome || 'Documento Anexo'}
+                          📄 {getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
                           {m.ficheiro_tamanho ? ` (${(m.ficheiro_tamanho / 1024).toFixed(0)} KB)` : ''} ↗
                         </a>
                       )}
