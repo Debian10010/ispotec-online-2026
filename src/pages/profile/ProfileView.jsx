@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { portfolioService } from '../../services/portfolioService';
+import { getFileUrl } from '../../services/api';
 
 export default function ProfileView() {
   const [searchParams] = useSearchParams();
@@ -152,7 +153,7 @@ export default function ProfileView() {
           <div className="card" style={{ textAlign: 'center' }}>
             <div className="profile-avatar">
               {userData.foto_perfil ? (
-                <img src={userData.foto_perfil} alt={userData.nome} />
+                <img src={getFileUrl(userData.foto_perfil)} alt={userData.nome} />
               ) : (
                 <div className="avatar-placeholder">
                   {userData.nome.charAt(0).toUpperCase()}
@@ -235,7 +236,7 @@ export default function ProfileView() {
                         </p>
                       )}
                       <a 
-                        href={item.ficheiro || '#'} 
+                        href={getFileUrl(item.ficheiro) || '#'} 
                         target="_blank" 
                         rel="noreferrer" 
                         style={{ color: 'var(--secondary-blue)', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}

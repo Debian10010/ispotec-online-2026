@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { groupService } from '../../services/groupService';
 import { chatService } from '../../services/chatService';
+import { getFileUrl as resolveFileUrl } from '../../services/api';
 
 export default function ChatGrupo() {
   const [searchParams] = useSearchParams();
@@ -26,14 +27,7 @@ export default function ChatGrupo() {
 
   const getFileUrl = (path) => {
     if (!path || path === '#') return '#';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) return path;
-    let base = import.meta.env.VITE_API_URL;
-    if (!base) {
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      base = isLocal ? 'http://localhost:5000/api' : 'https://back-end-ispotec-online-2026.vercel.app/api';
-    }
-    const backendBase = base.replace(/\/api\/?$/, '');
-    return `${backendBase}${path.startsWith('/') ? '' : '/'}${path}`;
+    return resolveFileUrl(path);
   };
 
   const loadData = async () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { investigacaoService } from '../../services/investigacaoService';
+import { getFileUrl } from '../../services/api';
 
 // ── Shared Empty State ────────────────────────────────────────────────────────
 function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, onAdd, btnText = "+ Adicionar Registo" }) {
@@ -24,7 +25,7 @@ function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, 
 // ── Attachment Badge ──────────────────────────────────────────────────────────
 function AttachmentBadge({ url, nome }) {
   if (!url) return null;
-  const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+  const fullUrl = getFileUrl(url);
   return (
     <div style={{ marginTop: '0.5rem', paddingTop: '0.4rem', borderTop: '1px solid #f1f5f9' }}>
       <a

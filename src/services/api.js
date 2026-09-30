@@ -2,7 +2,7 @@
 // 1. Explicit environment variable (VITE_API_URL) takes highest priority.
 // 2. If running on production (e.g. Vercel domain or not localhost), fallback to the deployed backend URL.
 // 3. In local development (localhost / 127.0.0.1), fallback to local backend at http://localhost:5000/api.
-const getInitialApiUrl = () => {
+export const getInitialApiUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
@@ -15,11 +15,48 @@ const getInitialApiUrl = () => {
   return 'http://localhost:5000/api';
 };
 
+export const getBackendBaseUrl = () => {
+  const apiUrl = getInitialApiUrl();
+  return apiUrl.replace(/\/api\/?$/, '');
+};
+
+/**
+ * Resolves any attachment or uploaded file path into a valid, reachable URL.
+ * - In production: Rewrites legacy or accidental 'http://localhost:5000' URLs to the production Vercel backend.
+ * - Prepends production backend base to relative paths (e.g. /uploads/...)
+ * - In local development: Points to local backend at http://localhost:5000
+ */
+export const getFileUrl = (path) => {
+  if (!path || path === '#' || typeof path !== 'string') return '';
+  const backendBase = getBackendBaseUrl();
+  const isLocal = typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  // If in production and path points to localhost, rewrite it to production backend
+  if (!isLocal && (path.includes('localhost:5000') || path.includes('127.0.0.1:5000'))) {
+    return path.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/g, backendBase);
+  }
+
+  // If already absolute valid URL (e.g. https://... or blob: or data:)
+  if (path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) {
+    return path;
+  }
+
+  if (path.startsWith('http://')) {
+    if (!isLocal && (path.includes('localhost:5000') || path.includes('127.0.0.1:5000'))) {
+      return path.replace(/http:\/\/(localhost|127\.0\.0\.1):5000/g, backendBase);
+    }
+    return path;
+  }
+
+  // Relative path (e.g. /uploads/...)
+  return `${backendBase}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
 const API_BASE_URL = getInitialApiUrl();
 
 class ApiClient {
   constructor(baseUrl) {
-    this.baseUrl = (baseUrl || 'http://localhost:5000/api').replace(/\/+$/, '');
+    this.baseUrl = (baseUrl || API_BASE_URL).replace(/\/+$/, '');
   }
 
   getToken() {

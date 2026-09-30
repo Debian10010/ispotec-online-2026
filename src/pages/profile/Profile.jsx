@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { portfolioService } from '../../services/portfolioService';
+import { getFileUrl } from '../../services/api';
 
 export default function Profile() {
   const { user, updateCurrentUser } = useAuth();
@@ -80,12 +81,13 @@ export default function Profile() {
     setMensagem('Foto de perfil actualizada!');
   };
 
-  const fotoUrl = user?.foto_perfil || 
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.nome || 'User')}&background=4361ee&color=fff&size=256`;
+  const fotoUrl = user?.foto_perfil 
+    ? getFileUrl(user.foto_perfil)
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.nome || 'User')}&background=4361ee&color=fff&size=256`;
 
   const openFoto = () => {
     if (user?.foto_perfil) {
-      setModalFotoUrl(user.foto_perfil);
+      setModalFotoUrl(getFileUrl(user.foto_perfil));
       setShowModal(true);
     }
   };
@@ -379,7 +381,7 @@ export default function Profile() {
                         {item.categoria ? item.categoria.charAt(0).toUpperCase() + item.categoria.slice(1) : 'Geral'}
                       </small>
                     </div>
-                    <a href={item.ficheiro || '#'} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-blue)', textDecoration: 'none', fontWeight: 'bold' }}>
+                    <a href={getFileUrl(item.ficheiro) || '#'} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-blue)', textDecoration: 'none', fontWeight: 'bold' }}>
                       🔗
                     </a>
                   </div>

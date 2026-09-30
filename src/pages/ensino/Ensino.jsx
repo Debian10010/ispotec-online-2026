@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ensinoService } from '../../services/ensinoService';
+import { getFileUrl } from '../../services/api';
 
 // ── shared styles ─────────────────────────────────────────────────────────────
 const css = `
@@ -275,7 +276,7 @@ function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, 
 // ── Attachment Preview / Download Link ────────────────────────────────────────
 function AttachmentBadge({ url, nome }) {
   if (!url) return null;
-  const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+  const fullUrl = getFileUrl(url);
   return (
     <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9' }}>
       <a
@@ -721,7 +722,7 @@ function ProjetosCurriculares({ canAdd, canEdit, canDelete }) {
                     <td>
                       {u.anexo_url ? (
                         <a
-                          href={u.anexo_url.startsWith('http') ? u.anexo_url : `http://localhost:5000${u.anexo_url}`}
+                          href={getFileUrl(u.anexo_url)}
                           target="_blank"
                           rel="noreferrer"
                           style={{ color: '#0055a4', fontWeight: 600, fontSize: '0.8rem' }}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
+import { getFileUrl as resolveFileUrl } from '../../services/api';
 
 const QUICK_EMOJIS = ['👍', '👏', '💡', '📚', '📢', '🚀', '🎓', '✨', '🔥', '🤝'];
 
@@ -27,14 +28,7 @@ export default function ChatGlobal() {
 
   const getFileUrl = (path) => {
     if (!path || path === '#') return '#';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) return path;
-    let base = import.meta.env.VITE_API_URL;
-    if (!base) {
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      base = isLocal ? 'http://localhost:5000/api' : 'https://back-end-ispotec-online-2026.vercel.app/api';
-    }
-    const backendBase = base.replace(/\/api\/?$/, '');
-    return `${backendBase}${path.startsWith('/') ? '' : '/'}${path}`;
+    return resolveFileUrl(path);
   };
 
   const loadMessages = useCallback(async (isManual = false) => {
