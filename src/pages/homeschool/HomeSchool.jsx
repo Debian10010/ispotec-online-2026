@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { homeSchoolService, CURSOS_ISPOTEC, MODULOS_POR_CURSO } from '../../services/homeSchoolService';
+import { homeSchoolService, CURSOS_ISPOTEC, MODULOS_POR_CURSO } from '../../services/homeschoolService';
 
 export default function HomeSchool() {
   const { user } = useAuth();

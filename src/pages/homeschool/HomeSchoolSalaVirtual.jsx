@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { homeSchoolService } from '../../services/homeSchoolService';
+import { homeSchoolService } from '../../services/homeschoolService';
 
 export default function HomeSchoolSalaVirtual() {
   const { groupId } = useParams();

@@ -480,5 +480,6 @@ export const homeSchoolService = {
   }
 };
 
+export const homeschoolService = homeSchoolService;
 export default homeSchoolService;
 
