@@ -291,13 +291,18 @@ const defaultSalaConteudo = {
 };
 
 export const homeSchoolService = {
-  // Retorna todas as salas/grupos do Home School combinando com os grupos existentes no backend
+  // Retorna todas as salas/grupos do Home School a partir do backend com fallback
   async getSalas(user = null) {
-    let baseGroups = [];
+    let backendSalas = [];
     try {
-      baseGroups = await groupService.getAllGroups();
-    } catch {
-      baseGroups = [];
+      const res = await api.get('/homeschool/salas');
+      if (res && res.dados && Array.isArray(res.dados) && res.dados.length > 0) {
+        backendSalas = res.dados;
+        localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(backendSalas));
+        return backendSalas;
+      }
+    } catch (e) {
+      console.warn('[homeSchoolService.getSalas backend fallback]', e.message);
     }
 
     // Carregar dados locais customizados caso existam
@@ -307,120 +312,116 @@ export const homeSchoolService = {
       if (raw) storedGroups = JSON.parse(raw);
     } catch (_) {}
 
-    // Combinar grupos
-    const combined = [...storedGroups];
-
-    // Se baseGroups tiver itens não presentes em storedGroups, adicionar
-    baseGroups.forEach(bg => {
-      const id = bg.id || bg._id;
-      if (!combined.some(c => (c.id || c._id) === id)) {
-        combined.push({
-          id: id,
-          nome: bg.nome || bg.disciplina,
-          disciplina: bg.disciplina || bg.nome,
-          curso: bg.modulo || 'Licenciatura em Tecnologias de Informação',
-          modulo: bg.disciplina || 'Programação Web',
-          docente: 'Docente ISPOTEC',
-          ano: '2026',
-          semestre: '1º Semestre',
-          codigo: `HS-${(bg.nome || 'GRP').substring(0, 3).toUpperCase()}-2026`,
-          descricao: bg.descricao || 'Sala de aula virtual híbrida da disciplina no ISPOTEC Home School.',
-          estado: 'Ativo',
-          dataInicio: '2026-02-15',
-          dataTermino: '2026-06-30',
-          membros: bg.membros || [],
-          total_membros: bg.total_membros || (bg.membros ? bg.membros.length : 12)
-        });
-      }
-    });
-
-    // Se a lista estiver vazia (primeiro acesso ou backend offline), carregar salas padrão
-    if (combined.length === 0) {
-      const salasDefault = [
-        {
-          id: 'sala-ti-pw-2026a',
-          nome: 'Programação Web — Grupo A',
-          curso: 'Licenciatura em Tecnologias de Informação',
-          modulo: 'Programação Web',
-          disciplina: 'Programação Web',
-          docente: 'Prof. Dr. António Silva',
-          ano: '2026',
-          semestre: '1º Semestre',
-          codigo: 'TI-PW-2026A',
-          descricao: 'Ambiente de aprendizagem híbrida para desenvolvimento de aplicações web modernas, frontend e backend.',
-          estado: 'Ativo',
-          dataInicio: '2026-02-15',
-          dataTermino: '2026-06-30',
-          membros: ['user-1', 'user-2', 'docente-1'],
-          total_membros: 28
-        },
-        {
-          id: 'sala-ti-redes-2026',
-          nome: 'Redes de Computadores & Cibersegurança — Turma 1',
-          curso: 'Licenciatura em Tecnologias de Informação',
-          modulo: 'Redes de Computadores',
-          disciplina: 'Redes de Computadores',
-          docente: 'Prof. Eng. Manuel Cossa',
-          ano: '2026',
-          semestre: '1º Semestre',
-          codigo: 'TI-RC-2026B',
-          descricao: 'Sala virtual para simulações de redes, configuração de protocolos e práticas de segurança digital.',
-          estado: 'Ativo',
-          dataInicio: '2026-02-15',
-          dataTermino: '2026-06-30',
-          membros: ['user-1'],
-          total_membros: 24
-        },
-        {
-          id: 'sala-enf-anat-2026',
-          nome: 'Anatomia e Fisiologia Humana — Grupo Saúde',
-          curso: 'Licenciatura em Enfermagem Geral',
-          modulo: 'Anatomia e Fisiologia Humana',
-          disciplina: 'Anatomia e Fisiologia Humana',
-          docente: 'Dra. Maria Helena Mabunda',
-          ano: '2026',
-          semestre: '1º Semestre',
-          codigo: 'ENF-AF-2026',
-          descricao: 'Sala de aula virtual com atlas 3D de anatomia, casos clínicos simulados e roteiros de enfermagem.',
-          estado: 'Ativo',
-          dataInicio: '2026-02-15',
-          dataTermino: '2026-06-30',
-          membros: ['user-2'],
-          total_membros: 35
-        },
-        {
-          id: 'sala-gest-mark-2026',
-          nome: 'Marketing Estratégico & Gestão Digital',
-          curso: 'Licenciatura em Gestão de Empresas',
-          modulo: 'Marketing Estratégico',
-          disciplina: 'Marketing Estratégico',
-          docente: 'Prof. Msc. Carlos Mondlane',
-          ano: '2026',
-          semestre: '1º Semestre',
-          codigo: 'GES-ME-2026',
-          descricao: 'Ambiente híbrido para análise de mercados, estudos de caso empresariais e planos de marketing.',
-          estado: 'Ativo',
-          dataInicio: '2026-02-15',
-          dataTermino: '2026-06-30',
-          membros: [],
-          total_membros: 19
-        }
-      ];
-      localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(salasDefault));
-      return salasDefault;
+    if (storedGroups && storedGroups.length > 0) {
+      return storedGroups;
     }
 
-    return combined;
+    // Carregar salas padrão caso primeira utilização
+    const salasDefault = [
+      {
+        id: 'sala-ti-pw-2026a',
+        nome: 'Programação Web — Grupo A',
+        curso: 'Licenciatura em Tecnologias de Informação',
+        modulo: 'Programação Web',
+        disciplina: 'Programação Web',
+        docente: 'Prof. Dr. António Silva',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'TI-PW-2026A',
+        descricao: 'Ambiente de aprendizagem híbrida para desenvolvimento de aplicações web modernas, frontend e backend.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-1', 'user-2', 'docente-1'],
+        total_membros: 28,
+        ...defaultSalaConteudo
+      },
+      {
+        id: 'sala-ti-redes-2026',
+        nome: 'Redes de Computadores & Cibersegurança — Turma 1',
+        curso: 'Licenciatura em Tecnologias de Informação',
+        modulo: 'Redes de Computadores',
+        disciplina: 'Redes de Computadores',
+        docente: 'Prof. Eng. Manuel Cossa',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'TI-RC-2026B',
+        descricao: 'Sala virtual para simulações de redes, configuração de protocolos e práticas de segurança digital.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-1'],
+        total_membros: 24,
+        ...defaultSalaConteudo
+      },
+      {
+        id: 'sala-enf-anat-2026',
+        nome: 'Anatomia e Fisiologia Humana — Grupo Saúde',
+        curso: 'Licenciatura em Enfermagem Geral',
+        modulo: 'Anatomia e Fisiologia Humana',
+        disciplina: 'Anatomia e Fisiologia Humana',
+        docente: 'Dra. Maria Helena Mabunda',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'ENF-AF-2026',
+        descricao: 'Sala de aula virtual com atlas 3D de anatomia, casos clínicos simulados e roteiros de enfermagem.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-2'],
+        total_membros: 35,
+        ...defaultSalaConteudo
+      },
+      {
+        id: 'sala-gest-mark-2026',
+        nome: 'Marketing Estratégico & Gestão Digital',
+        curso: 'Licenciatura em Gestão de Empresas',
+        modulo: 'Marketing Estratégico',
+        disciplina: 'Marketing Estratégico',
+        docente: 'Prof. Msc. Carlos Mondlane',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'GES-ME-2026',
+        descricao: 'Ambiente híbrido para análise de mercados, estudos de caso empresariais e planos de marketing.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: [],
+        total_membros: 19,
+        ...defaultSalaConteudo
+      }
+    ];
+    localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(salasDefault));
+    return salasDefault;
   },
 
   // Retorna uma sala específica pelo ID
   async getSalaById(id) {
+    try {
+      const res = await api.get(`/homeschool/salas/${id}`);
+      if (res && res.dados) {
+        return res.dados;
+      }
+    } catch (_) {}
+
     const salas = await this.getSalas();
     return salas.find(s => (s.id || s._id) === id) || salas[0] || null;
   },
 
   // Salva ou atualiza uma sala/grupo
   async saveSala(salaData) {
+    try {
+      if (salaData.id && !salaData.id.startsWith('sala-')) {
+        const res = await api.put(`/homeschool/salas/${salaData.id}`, salaData);
+        if (res && res.dados) return res.dados;
+      } else {
+        const res = await api.post('/homeschool/salas', salaData);
+        if (res && res.dados) return res.dados;
+      }
+    } catch (e) {
+      console.warn('[homeSchoolService.saveSala backend fallback]', e.message);
+    }
+
     const salas = await this.getSalas();
     const id = salaData.id || salaData._id || `sala-${Date.now()}`;
     const index = salas.findIndex(s => (s.id || s._id) === id);
@@ -445,13 +446,17 @@ export const homeSchoolService = {
 
   // Eliminar uma sala
   async deleteSala(id) {
+    try {
+      await api.delete(`/homeschool/salas/${id}`);
+    } catch (_) {}
+
     const salas = await this.getSalas();
     const filtered = salas.filter(s => (s.id || s._id) !== id);
     localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(filtered));
     return true;
   },
 
-  // Conteúdo completo da Sala Virtual (Plano analítico, manuais, guias, plano social, links, microcredenciais, laboratório, aulas)
+  // Conteúdo completo da Sala Virtual
   getSalaConteudo(salaId) {
     try {
       const raw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${salaId}`);
@@ -465,6 +470,8 @@ export const homeSchoolService = {
   saveSalaConteudo(salaId, conteudo) {
     try {
       localStorage.setItem(`${STORAGE_KEY_PREFIX}${salaId}`, JSON.stringify(conteudo));
+      // Try async background update to backend
+      api.put(`/homeschool/salas/${salaId}`, conteudo).catch(() => {});
       return true;
     } catch (e) {
       console.error('Erro ao guardar conteúdo da sala:', e);
@@ -474,3 +481,4 @@ export const homeSchoolService = {
 };
 
 export default homeSchoolService;
+
