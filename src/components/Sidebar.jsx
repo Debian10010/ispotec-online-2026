@@ -104,52 +104,50 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* ================= ACADEMIC (4 MAIN MODULES) - APENAS UTILIZADORES AUTENTICADOS ================= */}
-        {isAuthenticated && (
-          <div className="sidebar-section">
-            <div className="sidebar-section-title">Académico</div>
+        {/* ================= ACADEMIC (4 MAIN MODULES: Ensino, Extensão, Investigação, Home School) ================= */}
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">Académico</div>
 
-            <Link
-              to="/ensino"
-              className={`sidebar-nav-item ${isActive('/ensino') ? 'active' : ''}`}
-              onClick={handleNavClick}
-              data-tooltip="Ensino"
-            >
-              <span className="sidebar-item-icon">🎓</span>
-              <span className="sidebar-item-label">Ensino</span>
-            </Link>
+          <Link
+            to="/ensino"
+            className={`sidebar-nav-item ${isActive('/ensino') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Ensino"
+          >
+            <span className="sidebar-item-icon">🎓</span>
+            <span className="sidebar-item-label">Ensino</span>
+          </Link>
 
-            <Link
-              to="/extensao"
-              className={`sidebar-nav-item ${isActive('/extensao') ? 'active' : ''}`}
-              onClick={handleNavClick}
-              data-tooltip="Extensão"
-            >
-              <span className="sidebar-item-icon">🤝</span>
-              <span className="sidebar-item-label">Extensão</span>
-            </Link>
+          <Link
+            to="/extensao"
+            className={`sidebar-nav-item ${isActive('/extensao') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Extensão"
+          >
+            <span className="sidebar-item-icon">🤝</span>
+            <span className="sidebar-item-label">Extensão</span>
+          </Link>
 
-            <Link
-              to="/investigacao"
-              className={`sidebar-nav-item ${isActive('/investigacao') ? 'active' : ''}`}
-              onClick={handleNavClick}
-              data-tooltip="Investigação"
-            >
-              <span className="sidebar-item-icon">🔬</span>
-              <span className="sidebar-item-label">Investigação</span>
-            </Link>
+          <Link
+            to="/investigacao"
+            className={`sidebar-nav-item ${isActive('/investigacao') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Investigação"
+          >
+            <span className="sidebar-item-icon">🔬</span>
+            <span className="sidebar-item-label">Investigação</span>
+          </Link>
 
-            <Link
-              to="/homeschool"
-              className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
-              onClick={handleNavClick}
-              data-tooltip="Home School"
-            >
-              <span className="sidebar-item-icon">🏫</span>
-              <span className="sidebar-item-label">Home School</span>
-            </Link>
-          </div>
-        )}
+          <Link
+            to="/homeschool"
+            className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Home School"
+          >
+            <span className="sidebar-item-icon">🏫</span>
+            <span className="sidebar-item-label">Home School</span>
+          </Link>
+        </div>
 
         {/* ================= COMMUNICATION ================= */}
         <div className="sidebar-section">

@@ -354,19 +354,19 @@ export default function Dashboard() {
             </div>
           </Link>
 
-          {/* Grupo de Estudos */}
-          <Link to="/grupo-de-estudos" className="enterprise-module-card">
+          {/* Home School */}
+          <Link to="/homeschool" className="enterprise-module-card">
             <div className="module-card-top">
               <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
-                👥
+                🏫
               </div>
               <span className="module-card-badge" style={{ background: '#fffbeb', color: '#d97706' }}>
-                Comunidade
+                Híbrido
               </span>
             </div>
-            <h3 className="module-card-title">Grupo de Estudos</h3>
+            <h3 className="module-card-title">Home School</h3>
             <p className="module-card-desc">
-              Ambiente de estudo colaborativo, partilha de apontamentos, discussões académicas e entreajuda contínua entre estudantes e docentes.
+              Ambiente oficial de aprendizagem híbrida e salas de aula virtuais. Acompanhe aulas teóricas e práticas, manuais, guias e laboratórios digitais.
             </p>
             <div className="module-card-footer">
               <span>Aceder ao Módulo</span>
