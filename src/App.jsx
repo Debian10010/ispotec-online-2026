@@ -29,6 +29,7 @@ import Extensao from './pages/extensao/Extensao';
 import Investigacao from './pages/investigacao/Investigacao';
 import LaboratorioVirtual from './pages/laboratorio/LaboratorioVirtual';
 import HomeSchool from './pages/homeschool/HomeSchool';
+import HomeSchoolSalaVirtual from './pages/homeschool/HomeSchoolSalaVirtual';
 
 export default function App() {
   return (
@@ -444,6 +445,38 @@ export default function App() {
           element={
             <ProtectedRoute>
               <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homeschool/sala/:groupId"
+          element={
+            <ProtectedRoute>
+              <HomeSchoolSalaVirtual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homeschool/sala"
+          element={
+            <ProtectedRoute>
+              <HomeSchoolSalaVirtual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homeschool/sala-virtual"
+          element={
+            <ProtectedRoute>
+              <HomeSchoolSalaVirtual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homeschool/grupo/:groupId"
+          element={
+            <ProtectedRoute>
+              <HomeSchoolSalaVirtual />
             </ProtectedRoute>
           }
         />

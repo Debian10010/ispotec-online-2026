@@ -140,13 +140,13 @@ export default function Sidebar({
             </Link>
 
             <Link
-              to="/grupo-de-estudos"
-              className={`sidebar-nav-item ${isActive('/grupo-de-estudos') || isActive('/homeschool') ? 'active' : ''}`}
+              to="/homeschool"
+              className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
               onClick={handleNavClick}
-              data-tooltip="Grupo de Estudos"
+              data-tooltip="Home School"
             >
-              <span className="sidebar-item-icon">👥</span>
-              <span className="sidebar-item-label">Grupo de Estudos</span>
+              <span className="sidebar-item-icon">🏫</span>
+              <span className="sidebar-item-label">Home School</span>
             </Link>
           </div>
         )}

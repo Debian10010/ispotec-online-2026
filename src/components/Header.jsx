@@ -46,7 +46,8 @@ export default function Header({
     if (path.startsWith('/ensino')) return 'Ensino';
     if (path.startsWith('/extensao')) return 'Extensão';
     if (path.startsWith('/investigacao')) return 'Investigação';
-    if (path.startsWith('/grupo-de-estudos') || path.startsWith('/homeschool')) return 'Grupo de Estudos';
+    if (path.startsWith('/homeschool/sala')) return 'Home School › Sala Virtual';
+    if (path.startsWith('/homeschool') || path.startsWith('/grupo-de-estudos')) return 'Home School';
     if (path.startsWith('/chatbot')) return 'Assistente Virtual IA';
     if (path.startsWith('/profile')) return 'O Meu Perfil';
     if (path.startsWith('/users')) return 'Directório de Utilizadores';
