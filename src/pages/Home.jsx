@@ -431,8 +431,8 @@ export default function Home() {
             
             <div className="feature-card">
               <div className="feature-icon purple">🤖</div>
-              <h3 className="feature-title">Chatbot Inteligente</h3>
-              <p className="feature-desc">Tire dúvidas académicas a qualquer hora com o nosso assistente virtual.</p>
+              <h3 className="feature-title">Consultor Inteligente do ISPOTEC</h3>
+              <p className="feature-desc">Tire dúvidas académicas, metodológicas e aceda ao assistente inteligente oficial 24/7.</p>
             </div>
             
             <div className="feature-card">

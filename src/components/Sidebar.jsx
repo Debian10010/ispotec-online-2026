@@ -168,13 +168,25 @@ export default function Sidebar({
 
           <Link
             to="/chatbot"
-            className={`sidebar-nav-item ${isActive('/chatbot') && !isActive('/chatbot/ias-estudo') ? 'active' : ''}`}
+            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/consultor-inteligente') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Chatbot Académico"
+            data-tooltip="Consultor Inteligente do ISPOTEC"
           >
             <span className="sidebar-item-icon">🤖</span>
-            <span className="sidebar-item-label">Chatbot Académico</span>
+            <span className="sidebar-item-label">Consultor Inteligente</span>
           </Link>
+
+          <a
+            href="https://asistente-ispotec.vercel.app/"
+            target="_blank"
+            rel="noreferrer"
+            className="sidebar-nav-item"
+            style={{ color: '#4f46e5' }}
+            data-tooltip="Aceder ao Consultor Inteligente (Web Externa)"
+          >
+            <span className="sidebar-item-icon">🌐</span>
+            <span className="sidebar-item-label">Consultor Web ↗</span>
+          </a>
 
           <button
             type="button"

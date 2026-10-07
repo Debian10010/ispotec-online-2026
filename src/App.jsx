@@ -235,7 +235,7 @@ export default function App() {
           } 
         />
 
-        {/* Chatbot Routes */}
+        {/* Consultor Inteligente / Chatbot Routes */}
         <Route 
           path="/chatbot" 
           element={
@@ -246,6 +246,22 @@ export default function App() {
         />
         <Route 
           path="/chatbot/index.php" 
+          element={
+            <ProtectedRoute>
+              <Chatbot />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/consultor-inteligente" 
+          element={
+            <ProtectedRoute>
+              <Chatbot />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/consultor-inteligente/index.php" 
           element={
             <ProtectedRoute>
               <Chatbot />

@@ -452,24 +452,64 @@ export default function Chatbot() {
           </aside>
 
           <main className="chatbot-main">
+            {/* Direct Link Banner to Assistant ISPOTEC */}
+            <div style={{
+              background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+              color: '#ffffff',
+              padding: '0.75rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.75rem',
+              fontSize: '0.85rem',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>🌐</span>
+                <span>
+                  <strong>Consultor ISPOTEC Dedicado:</strong> Aceda à versão web autónoma em tempo real.
+                </span>
+              </div>
+              <a 
+                href="https://asistente-ispotec.vercel.app/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  background: '#ffffff',
+                  color: '#4f46e5',
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '20px',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                  fontSize: '0.8rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+              >
+                Abrir Consultor Web ↗
+              </a>
+            </div>
+
             <div className="chat-header">
               <div className="avatar">🤖</div>
               <div>
                 <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Assistente ISPOTEC <span style={{ fontSize: '0.68rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>Groq IA</span>
+                  Consultor Inteligente do ISPOTEC <span style={{ fontSize: '0.68rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>Groq IA</span>
                 </h2>
-                <p>Tire suas dúvidas académicas em tempo real</p>
+                <p>Orientação académica, metodológica e de estudo em tempo real</p>
               </div>
             </div>
 
             <div className="chat-messages" ref={chatBoxRef}>
               {(!activeConv?.messages || activeConv.messages.length === 0) ? (
                 <div className="empty-chat">
-                  <div className="icon">📚</div>
-                  <h3>Olá! Sou o Assistente Académico de Estudos do ISPOTEC</h3>
+                  <div className="icon">🤖</div>
+                  <h3>Olá! Sou o Consultor Inteligente do ISPOTEC</h3>
                   <p>
                     Posso ajudar-te a compreender matérias, organizar os teus estudos,
-                    aprender técnicas de estudo e apoiar em diferentes Áreas Académicas.
+                    aprender técnicas de estudo, orientar na elaboração de trabalhos e apoiar em diferentes áreas académicas.
                   </p>
 
                   <div className="suggestions">
@@ -558,7 +598,16 @@ export default function Chatbot() {
           📋
         </button>
 
-        <div className="container" style={{ textAlign: 'center', marginTop: '1.5rem', marginBottom: '3rem' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem', marginBottom: '3rem' }}>
+          <a 
+            href="https://asistente-ispotec.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+            style={{ textDecoration: 'none', padding: '0.5rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <i>🌐</i> Abrir Consultor ISPOTEC Dedicado ↗
+          </a>
           <Link 
             to="/chatbot/ias-estudo" 
             className="btn btn-outline"
