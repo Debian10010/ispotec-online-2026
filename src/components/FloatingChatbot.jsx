@@ -12,7 +12,7 @@ export default function FloatingChatbot() {
     {
       id: 'welcome',
       tipo: 'resposta',
-      conteudo: 'Olá! Sou o Consultor Inteligente do ISPOTEC com IA.\n\nComo posso apoiar os seus estudos, pesquisas ou dúvidas académicas hoje?',
+      conteudo: 'Olá! Sou o Assistente Académico do ISPOTEC com IA.\n\nComo posso apoiar os seus estudos, pesquisas ou dúvidas académicas hoje?',
       data_criacao: new Date().toISOString()
     }
   ]);
@@ -523,11 +523,11 @@ export default function FloatingChatbot() {
         <div
           className="chatbot-callout"
           onClick={() => setIsOpen(true)}
-          title="Clique para testar o Consultor Inteligente do ISPOTEC"
+          title="Clique para testar o Assistente Académico"
         >
           <div className="chatbot-callout-text">
             <span>🤖</span>
-            <span>Consultor Inteligente do ISPOTEC</span>
+            <span>Assistente Académico</span>
             <span className="chatbot-callout-badge">Testar o assistente →</span>
           </div>
           <button
@@ -549,8 +549,8 @@ export default function FloatingChatbot() {
         type="button"
         className="floating-chatbot-btn"
         onClick={() => setIsOpen(prev => !prev)}
-        title="Consultor Inteligente do ISPOTEC — Testar o assistente"
-        aria-label="Abrir Consultor Inteligente IA"
+        title="Assistente Académico — Testar o assistente"
+        aria-label="Abrir Assistente Académico IA"
       >
         <span>🤖</span>
         <span className="ai-badge">IA</span>
@@ -558,16 +558,16 @@ export default function FloatingChatbot() {
 
       {/* Janela Flutuante do Chatbot */}
       {isOpen && (
-        <div className="floating-chatbot-window" role="dialog" aria-label="Consultor Inteligente do ISPOTEC">
+        <div className="floating-chatbot-window" role="dialog" aria-label="Assistente Académico do ISPOTEC">
           {/* Header */}
           <div className="floating-chat-header">
             <div className="floating-chat-title-group">
               <div className="floating-chat-avatar">🤖</div>
               <div>
                 <h3 className="floating-chat-name">
-                  Consultor Inteligente <small>ISPOTEC IA</small>
+                  Assistente Académico <small>ISPOTEC IA</small>
                 </h3>
-                <p className="floating-chat-status">Consultoria e apoio académico em tempo real</p>
+                <p className="floating-chat-status">Apoio e orientação de estudo em tempo real</p>
               </div>
             </div>
 
@@ -577,7 +577,7 @@ export default function FloatingChatbot() {
                 target="_blank"
                 rel="noreferrer"
                 className="floating-chat-action-btn"
-                title="Aceder à versão web dedicada do Consultor Inteligente (https://asistente-ispotec.vercel.app/)"
+                title="Aceder ao Consultor Inteligente do ISPOTEC (https://asistente-ispotec.vercel.app/)"
                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 🌐

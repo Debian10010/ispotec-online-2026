@@ -168,12 +168,12 @@ export default function Sidebar({
 
           <Link
             to="/chatbot"
-            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/consultor-inteligente') ? 'active' : ''}`}
+            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/assistente-academico') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Consultor Inteligente do ISPOTEC"
+            data-tooltip="Assistente Académico"
           >
             <span className="sidebar-item-icon">🤖</span>
-            <span className="sidebar-item-label">Consultor Inteligente</span>
+            <span className="sidebar-item-label">Assistente Académico</span>
           </Link>
 
           <a
@@ -182,10 +182,10 @@ export default function Sidebar({
             rel="noreferrer"
             className="sidebar-nav-item"
             style={{ color: '#4f46e5' }}
-            data-tooltip="Aceder ao Consultor Inteligente (Web Externa)"
+            data-tooltip="Consultor Inteligente do ISPOTEC (Web Externa)"
           >
             <span className="sidebar-item-icon">🌐</span>
-            <span className="sidebar-item-label">Consultor Web ↗</span>
+            <span className="sidebar-item-label">Consultor Inteligente do ISPOTEC ↗</span>
           </a>
 
           <button

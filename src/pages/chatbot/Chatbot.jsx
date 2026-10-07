@@ -452,7 +452,7 @@ export default function Chatbot() {
           </aside>
 
           <main className="chatbot-main">
-            {/* Direct Link Banner to Assistant ISPOTEC */}
+            {/* Direct Link Banner to Consultor Inteligente do ISPOTEC */}
             <div style={{
               background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
               color: '#ffffff',
@@ -467,7 +467,7 @@ export default function Chatbot() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '1.2rem' }}>🌐</span>
                 <span>
-                  <strong>Consultor ISPOTEC Dedicado:</strong> Aceda à versão web autónoma em tempo real.
+                  <strong>Consultor Inteligente do ISPOTEC:</strong> Aceda à plataforma web autónoma do assistente.
                 </span>
               </div>
               <a 
@@ -488,7 +488,7 @@ export default function Chatbot() {
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
               >
-                Abrir Consultor Web ↗
+                Abrir Consultor Inteligente do ISPOTEC ↗
               </a>
             </div>
 
@@ -496,7 +496,7 @@ export default function Chatbot() {
               <div className="avatar">🤖</div>
               <div>
                 <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Consultor Inteligente do ISPOTEC <span style={{ fontSize: '0.68rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>Groq IA</span>
+                  Assistente Académico <span style={{ fontSize: '0.68rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>Groq IA</span>
                 </h2>
                 <p>Orientação académica, metodológica e de estudo em tempo real</p>
               </div>
@@ -506,7 +506,7 @@ export default function Chatbot() {
               {(!activeConv?.messages || activeConv.messages.length === 0) ? (
                 <div className="empty-chat">
                   <div className="icon">🤖</div>
-                  <h3>Olá! Sou o Consultor Inteligente do ISPOTEC</h3>
+                  <h3>Olá! Sou o Assistente Académico do ISPOTEC</h3>
                   <p>
                     Posso ajudar-te a compreender matérias, organizar os teus estudos,
                     aprender técnicas de estudo, orientar na elaboração de trabalhos e apoiar em diferentes áreas académicas.
@@ -606,7 +606,7 @@ export default function Chatbot() {
             className="btn btn-primary"
             style={{ textDecoration: 'none', padding: '0.5rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
           >
-            <i>🌐</i> Abrir Consultor ISPOTEC Dedicado ↗
+            <i>🌐</i> Abrir Consultor Inteligente do ISPOTEC ↗
           </a>
           <Link 
             to="/chatbot/ias-estudo" 

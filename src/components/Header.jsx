@@ -48,7 +48,7 @@ export default function Header({
     if (path.startsWith('/investigacao')) return 'Investigação';
     if (path.startsWith('/homeschool/sala')) return 'Home School › Sala Virtual';
     if (path.startsWith('/homeschool') || path.startsWith('/grupo-de-estudos')) return 'Home School';
-    if (path.startsWith('/chatbot') || path.startsWith('/consultor-inteligente')) return 'Consultor Inteligente do ISPOTEC';
+    if (path.startsWith('/chatbot') || path.startsWith('/assistente-academico') || path.startsWith('/consultor-inteligente')) return 'Assistente Académico';
     if (path.startsWith('/profile')) return 'O Meu Perfil';
     if (path.startsWith('/users')) return 'Directório de Utilizadores';
     if (path.startsWith('/auth/login')) return 'Iniciar Sessão';

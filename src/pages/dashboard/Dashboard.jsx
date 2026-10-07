@@ -556,10 +556,10 @@ export default function Dashboard() {
               <span style={{ fontSize: '1.5rem' }}>🤖</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-purple-600)' }}>
-                  Consultor Inteligente do ISPOTEC
+                  Assistente Académico
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
-                  Consulte dúvidas de investigação, normas APA, planos de estudo e aceda à IA dedicada
+                  Consulte dúvidas de investigação, normas APA e planos de estudo com inteligência artificial
                 </div>
               </div>
               <span style={{ color: 'var(--isp-purple-600)', fontWeight: 'bold' }}>→</span>
