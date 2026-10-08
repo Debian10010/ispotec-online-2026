@@ -27,6 +27,77 @@ export const userService = {
     }
   },
 
+  async createUser(userData) {
+    try {
+      const res = await api.post('/users', userData);
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Utilizador criado com sucesso.',
+        dados: res.dados,
+      };
+    } catch (error) {
+      console.error('[userService.createUser error]', error.message);
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao criar utilizador.',
+      };
+    }
+  },
+
+  async deleteUser(userId) {
+    try {
+      const res = await api.delete(`/users/${userId}`);
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Utilizador eliminado com sucesso.',
+      };
+    } catch (error) {
+      console.error('[userService.deleteUser error]', error.message);
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao eliminar utilizador.',
+      };
+    }
+  },
+
+  async updateUserProfileByAdmin(userId, data) {
+    try {
+      const res = await api.put(`/users/${userId}`, {
+        email: data.email,
+        foto_perfil: data.foto_perfil,
+      });
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Perfil atualizado com sucesso.',
+        dados: res.dados,
+      };
+    } catch (error) {
+      console.error('[userService.updateUserProfileByAdmin error]', error.message);
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao atualizar perfil do utilizador.',
+      };
+    }
+  },
+
+  async resetPasswordByAdmin(userId, newPassword) {
+    try {
+      const res = await api.patch(`/users/${userId}/password`, {
+        password: newPassword,
+      });
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Palavra-passe alterada com sucesso.',
+      };
+    } catch (error) {
+      console.error('[userService.resetPasswordByAdmin error]', error.message);
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao alterar palavra-passe.',
+      };
+    }
+  },
+
   async updateStatus(userId, newStatus) {
     try {
       const res = await api.patch(`/users/${userId}/status`, { status: newStatus });

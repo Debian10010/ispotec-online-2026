@@ -133,6 +133,14 @@ class User {
         return $stmt->execute();
     }
 
+    // Atualizar Email e Foto (Edição restrita de perfil)
+    public function atualizarEmailEFoto($id, $email, $foto_perfil) {
+        $query = "UPDATE " . $this->table . " SET email = ?, foto_perfil = ?, data_atualizacao = NOW() WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ssi', $email, $foto_perfil, $id);
+        return $stmt->execute();
+    }
+
     // --- MÉTODOS PARA UPLOAD DE FOTO ---
 
     /**
