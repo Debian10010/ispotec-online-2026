@@ -496,7 +496,7 @@ export default function Chatbot() {
               <div className="avatar">🤖</div>
               <div>
                 <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Assistente Académico <span style={{ fontSize: '0.68rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>Groq IA</span>
+                  Assistente ISPOTEC
                 </h2>
                 <p>Orientação académica, metodológica e de estudo em tempo real</p>
               </div>
@@ -506,7 +506,7 @@ export default function Chatbot() {
               {(!activeConv?.messages || activeConv.messages.length === 0) ? (
                 <div className="empty-chat">
                   <div className="icon">🤖</div>
-                  <h3>Olá! Sou o Assistente Académico do ISPOTEC</h3>
+                  <h3>Olá! Sou o Assistente ISPOTEC</h3>
                   <p>
                     Posso ajudar-te a compreender matérias, organizar os teus estudos,
                     aprender técnicas de estudo, orientar na elaboração de trabalhos e apoiar em diferentes áreas académicas.
@@ -613,7 +613,7 @@ export default function Chatbot() {
             className="btn btn-outline"
             style={{ textDecoration: 'none', padding: '0.5rem 1.5rem' }}
           >
-            <i>🛠️</i> Explorar Mais Ferramentas IAs para Estudos
+            <i>🛠️</i> Explorar Mais Ferramentas para Estudos
           </Link>
         </div>
       </div>

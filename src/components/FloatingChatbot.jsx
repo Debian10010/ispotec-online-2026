@@ -12,7 +12,7 @@ export default function FloatingChatbot() {
     {
       id: 'welcome',
       tipo: 'resposta',
-      conteudo: 'Olá! Sou o Assistente Académico do ISPOTEC com IA.\n\nComo posso apoiar os seus estudos, pesquisas ou dúvidas académicas hoje?',
+      conteudo: 'Olá! Sou o Assistente ISPOTEC.\n\nComo posso apoiar os seus estudos, pesquisas ou dúvidas académicas hoje?',
       data_criacao: new Date().toISOString()
     }
   ]);
@@ -523,12 +523,12 @@ export default function FloatingChatbot() {
         <div
           className="chatbot-callout"
           onClick={() => setIsOpen(true)}
-          title="Clique para testar o Assistente Académico"
+          title="Clique para abrir o Assistente ISPOTEC"
         >
           <div className="chatbot-callout-text">
             <span>🤖</span>
-            <span>Assistente Académico</span>
-            <span className="chatbot-callout-badge">Testar o assistente →</span>
+            <span>Assistente ISPOTEC</span>
+            <span className="chatbot-callout-badge">Abrir assistente →</span>
           </div>
           <button
             type="button"
@@ -549,25 +549,24 @@ export default function FloatingChatbot() {
         type="button"
         className="floating-chatbot-btn"
         onClick={() => setIsOpen(prev => !prev)}
-        title="Assistente Académico — Testar o assistente"
-        aria-label="Abrir Assistente Académico IA"
+        title="Assistente ISPOTEC — Abrir o assistente"
+        aria-label="Abrir Assistente ISPOTEC"
       >
         <span>🤖</span>
-        <span className="ai-badge">IA</span>
       </button>
 
       {/* Janela Flutuante do Chatbot */}
       {isOpen && (
-        <div className="floating-chatbot-window" role="dialog" aria-label="Assistente Académico do ISPOTEC">
+        <div className="floating-chatbot-window" role="dialog" aria-label="Assistente ISPOTEC">
           {/* Header */}
           <div className="floating-chat-header">
             <div className="floating-chat-title-group">
               <div className="floating-chat-avatar">🤖</div>
               <div>
                 <h3 className="floating-chat-name">
-                  Assistente Académico <small>ISPOTEC IA</small>
+                  Assistente ISPOTEC
                 </h3>
-                <p className="floating-chat-status">Apoio e orientação de estudo em tempo real</p>
+                <p className="floating-chat-status">Apoio e orientação em tempo real</p>
               </div>
             </div>
 
@@ -648,7 +647,7 @@ export default function FloatingChatbot() {
 
             {loading && (
               <div className="floating-typing">
-                <span>A pensar com IA</span>
+                <span>A responder...</span>
                 <span className="floating-typing-dots">
                   <span></span>
                   <span></span>

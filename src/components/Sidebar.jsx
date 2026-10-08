@@ -168,12 +168,12 @@ export default function Sidebar({
 
           <Link
             to="/chatbot"
-            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/assistente-academico') ? 'active' : ''}`}
+            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/assistente-academico') || isActive('/assistente-ispotec') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Assistente Académico"
+            data-tooltip="Assistente ISPOTEC"
           >
             <span className="sidebar-item-icon">🤖</span>
-            <span className="sidebar-item-label">Assistente Académico</span>
+            <span className="sidebar-item-label">Assistente ISPOTEC</span>
           </Link>
 
           <a
