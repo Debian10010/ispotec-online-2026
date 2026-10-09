@@ -53,7 +53,7 @@ export default function ChatGlobal() {
   const isFirstLoad = useRef(true);
   const highlightedRef = useRef(false);
 
-  const isAdmin = user && (user.tipo === 'admin' || user.tipo === 'especialista');
+  const isAdmin = user && (['admin', 'especialista'].includes(String(user.tipo || '').toLowerCase().trim()));
 
   const getFileUrl = (path) => {
     if (!path || path === '#') return '#';
@@ -1121,39 +1121,65 @@ export default function ChatGlobal() {
             opacity: 0.9;
         }
 
-        @media (max-width: 768px) {
+        /* ===== RESPONSIVE — TABLET (max 860px) ===== */
+        @media (max-width: 860px) {
             .chat-container-page {
                 padding: 0 0.5rem;
-                margin-top: 1rem;
+                margin-top: 0.75rem;
+                margin-bottom: 2rem;
             }
             .chat-header-bar {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 0.75rem;
-                padding: 1.25rem;
+                gap: 0.65rem;
+                padding: 1.1rem 1.25rem;
+                border-radius: 12px 12px 0 0;
+            }
+            .chat-header-bar h1 {
+                font-size: 1.15rem;
             }
             .chat-header-actions {
                 width: 100%;
                 justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .chat-btn-action {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            .chat-community-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+                padding: 0.65rem 1rem;
+            }
+            .chat-search-input {
+                width: 100%;
+                min-width: unset;
+            }
+            .chat-main-box {
+                height: calc(100vh - 210px);
+                min-height: 400px;
             }
             .msg-row {
-                max-width: 92%;
+                max-width: 90%;
             }
+            /* Action menu repositioned above the bubble on tablet */
             .msg-mine .msg-actions-trigger {
                 left: auto;
                 right: 0;
-                top: -24px;
+                top: -30px;
             }
             .msg-other .msg-actions-trigger {
                 right: auto;
                 left: 0;
-                top: -24px;
+                top: -30px;
             }
-            .chat-main-box {
-                height: calc(100vh - 230px);
-            }
+            /* Input area wraps on tablet */
             .chat-compose-form {
                 flex-wrap: wrap;
+                gap: 0.5rem;
             }
             .chat-text-input {
                 order: 1;
@@ -1163,6 +1189,139 @@ export default function ChatGlobal() {
             .btn-submit-send {
                 order: 5;
                 flex: 1;
+            }
+            /* Mention dropdown full width on tablet */
+            .mention-dropdown-popup {
+                left: 0;
+                right: 0;
+                width: auto;
+                margin: 0 0.5rem;
+            }
+        }
+
+        /* ===== RESPONSIVE — MOBILE (max 480px) ===== */
+        @media (max-width: 480px) {
+            .chat-container-page {
+                padding: 0 0.25rem;
+                margin-top: 0.5rem;
+            }
+            .chat-header-bar {
+                padding: 0.85rem 1rem;
+                border-radius: 10px 10px 0 0;
+                gap: 0.5rem;
+            }
+            .chat-header-bar h1 {
+                font-size: 1rem;
+                gap: 0.4rem;
+            }
+            .chat-status-pill {
+                font-size: 0.68rem;
+                padding: 0.15rem 0.5rem;
+                margin-left: 0.25rem;
+            }
+            .chat-header-bar p {
+                font-size: 0.78rem;
+            }
+            .chat-header-actions {
+                gap: 0.4rem;
+            }
+            .chat-btn-action {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .chat-main-box {
+                height: calc(100vh - 190px);
+                min-height: 340px;
+                border-radius: 0 0 10px 10px;
+            }
+            .chat-messages-stream {
+                padding: 0.75rem 0.6rem;
+                gap: 0.75rem;
+            }
+            .msg-row {
+                max-width: 95%;
+                gap: 0.5rem;
+            }
+            .user-avatar-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+            .msg-bubble {
+                padding: 0.6rem 0.75rem;
+                min-width: 100px;
+                border-radius: 12px;
+            }
+            .msg-body-text {
+                font-size: 0.88rem;
+            }
+            .msg-header-meta {
+                font-size: 0.72rem;
+                flex-wrap: wrap;
+            }
+            /* Action buttons float above bubble on mobile */
+            .msg-actions-trigger {
+                top: -30px !important;
+                left: 0 !important;
+                right: auto !important;
+                border-radius: 14px;
+            }
+            .msg-mine .msg-actions-trigger {
+                left: auto !important;
+                right: 0 !important;
+            }
+            .msg-action-icon-btn {
+                padding: 5px 7px;
+                font-size: 0.9rem;
+            }
+            .chat-emoji-quickbar {
+                padding: 0.3rem 0.6rem;
+            }
+            .emoji-quick-btn {
+                font-size: 0.9rem;
+                padding: 0.15rem 0.35rem;
+            }
+            .chat-compose-area {
+                padding: 0.65rem 0.75rem;
+            }
+            .chat-text-input {
+                padding: 0.6rem 0.85rem;
+                font-size: 0.86rem;
+            }
+            .btn-submit-send {
+                padding: 0.6rem 1rem;
+                font-size: 0.84rem;
+            }
+            .tool-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            /* Reply banner compact */
+            .chat-reply-banner {
+                padding: 0.4rem 0.75rem;
+            }
+            .reply-banner-content {
+                font-size: 0.78rem;
+            }
+            /* Mention popup full-width on mobile */
+            .mention-dropdown-popup {
+                left: 0;
+                right: 0;
+                width: auto;
+                margin: 0;
+                bottom: 60px;
+                border-radius: 10px 10px 0 0;
+                max-height: 160px;
+            }
+            /* Modals full-width on mobile */
+            .modal-card-chat {
+                padding: 1.25rem;
+                border-radius: 12px;
+                max-height: 90vh;
+            }
+            .modal-actions-grid {
+                flex-direction: column;
             }
         }
       `}</style>
@@ -1215,7 +1374,10 @@ export default function ChatGlobal() {
         {/* Main Box */}
         <div className="chat-main-box">
           {/* Message Stream */}
-          <div className="chat-messages-stream">
+          <div
+            className="chat-messages-stream"
+            onClick={() => activeMenuMsgId && setActiveMenuMsgId(null)}
+          >
             {loading ? (
               <div className="empty-chat-state">
                 <div className="empty-chat-icon">⏳</div>
@@ -1250,7 +1412,10 @@ export default function ChatGlobal() {
 
                     <div className="msg-bubble-container">
                       {/* Action Menu (Reply, Edit, Delete) */}
-                      <div className={`msg-actions-trigger ${activeMenuMsgId === msgId ? 'mobile-active' : ''}`}>
+                      <div
+                        className={`msg-actions-trigger ${activeMenuMsgId === msgId ? 'mobile-active' : ''}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {/* Reply available for all users */}
                         <button
                           type="button"
@@ -1286,7 +1451,13 @@ export default function ChatGlobal() {
                         )}
                       </div>
 
-                      <div className="msg-bubble">
+                      <div
+                        className="msg-bubble"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveMenuMsgId((prev) => (prev === msgId ? null : msgId));
+                        }}
+                      >
                         <div className="msg-header-meta">
                           <span className="msg-author-name">
                             {isMine ? 'Eu' : (m.user_nome || 'Utilizador')}

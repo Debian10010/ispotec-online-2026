@@ -49,7 +49,7 @@ export default function ChatGrupo() {
   const cameraInputRef = useRef(null);
   const audioInputRef = useRef(null);
 
-  const isAdmin = user && (user.tipo === 'admin' || user.tipo === 'especialista');
+  const isAdmin = user && (['admin', 'especialista'].includes(String(user.tipo || '').toLowerCase().trim()));
 
   const getFileUrl = (path) => {
     if (!path || path === '#') return '#';
@@ -78,9 +78,8 @@ export default function ChatGrupo() {
     }
     setGrupo(g);
 
-    const isAdminUser = user && (user.tipo === 'especialista' || user.tipo === 'admin');
     const isMember = g.membros && g.membros.some((m) => String(m.id || m._id || m) === String(user?.id));
-    if (!isMember && !isAdminUser) {
+    if (!isMember && !isAdmin) {
       navigate('/dashboard/my-groups');
       return;
     }
@@ -787,15 +786,154 @@ export default function ChatGrupo() {
             text-decoration: none;
         }
         
-        @media (max-width: 768px) {
-            .chat-box { height: calc(100vh - 220px); }
-            .msg { max-width: 88%; }
-            .chat-input-row { flex-wrap: wrap; }
-            .chat-input-row input[type="text"] { flex: 1 1 100%; order: 1; margin-bottom: 0.5rem; }
-            .send-btn { order: 5; flex: 1; }
-            .chat-header-bar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-            .msg-mine .msg-actions-bar { left: auto; right: 0; top: -26px; }
-            .msg-other .msg-actions-bar { right: auto; left: 0; top: -26px; }
+        /* ===== RESPONSIVE — TABLET (max 860px) ===== */
+        @media (max-width: 860px) {
+            .chat-container {
+                padding: 0 0.5rem;
+                margin-top: 0.75rem;
+                margin-bottom: 2rem;
+            }
+            .chat-header-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+                padding: 1rem 1.25rem;
+            }
+            .chat-header-bar h1 {
+                font-size: 1.1rem;
+            }
+            .chat-box {
+                height: calc(100vh - 210px);
+                min-height: 380px;
+            }
+            .msg {
+                max-width: 88%;
+            }
+            /* Action menu repositioned above bubble on tablet */
+            .msg-mine .msg-actions-bar { left: auto; right: 0; top: -30px; }
+            .msg-other .msg-actions-bar { right: auto; left: 0; top: -30px; }
+            .chat-input-row {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                padding: 0.65rem 0.85rem;
+            }
+            .chat-input-row input[type="text"] {
+                flex: 1 1 100%;
+                order: 1;
+                margin-bottom: 0;
+            }
+            .send-btn {
+                order: 5;
+                flex: 1;
+            }
+            /* Mention dropdown */
+            .mention-popup {
+                left: 0;
+                right: 0;
+                width: auto;
+                margin: 0 0.5rem;
+            }
+        }
+
+        /* ===== RESPONSIVE — MOBILE (max 480px) ===== */
+        @media (max-width: 480px) {
+            .chat-container {
+                padding: 0 0.2rem;
+                margin-top: 0.4rem;
+            }
+            .chat-header-bar {
+                padding: 0.85rem 0.9rem;
+                border-radius: 10px 10px 0 0;
+                gap: 0.4rem;
+            }
+            .chat-header-bar h1 {
+                font-size: 0.95rem;
+            }
+            .chat-header-bar p {
+                font-size: 0.78rem;
+            }
+            .chat-header-bar a {
+                font-size: 0.78rem;
+            }
+            .chat-box {
+                height: calc(100vh - 185px);
+                min-height: 320px;
+                border-radius: 0 0 10px 10px;
+            }
+            .chat-messages {
+                padding: 0.6rem 0.5rem;
+                gap: 0.6rem;
+            }
+            .msg {
+                max-width: 94%;
+                padding: 0.6rem 0.75rem;
+                border-radius: 12px;
+            }
+            .msg-text {
+                font-size: 0.86rem;
+            }
+            .msg-author {
+                font-size: 0.7rem;
+            }
+            /* Action buttons above bubble on mobile */
+            .msg-actions-bar {
+                top: -30px !important;
+                left: 0 !important;
+                right: auto !important;
+            }
+            .msg-mine .msg-actions-bar {
+                left: auto !important;
+                right: 0 !important;
+            }
+            .msg-act-btn {
+                padding: 5px 7px;
+                font-size: 0.9rem;
+            }
+            .chat-input-row {
+                padding: 0.5rem 0.6rem;
+                gap: 0.4rem;
+            }
+            .chat-input-row input[type="text"] {
+                padding: 0.55rem 0.75rem;
+                font-size: 0.86rem;
+            }
+            .media-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 0.95rem;
+            }
+            .send-btn {
+                padding: 0.55rem 0.9rem;
+                font-size: 0.84rem;
+            }
+            /* Reply banner compact */
+            .reply-banner {
+                padding: 0.35rem 0.75rem;
+            }
+            .reply-banner-snippet {
+                max-width: 150px;
+            }
+            /* Mention popup full-width */
+            .mention-popup {
+                left: 0;
+                right: 0;
+                width: auto;
+                margin: 0;
+                bottom: 60px;
+                border-radius: 10px 10px 0 0;
+                max-height: 150px;
+            }
+            /* Modals */
+            .modal-box {
+                padding: 1.1rem;
+                border-radius: 12px;
+            }
+            .modal-btns {
+                flex-direction: column;
+            }
+            .capture-box {
+                padding: 1.1rem;
+            }
         }
       `}</style>
 
@@ -809,7 +947,10 @@ export default function ChatGrupo() {
         </div>
 
         <div className="chat-box">
-          <div className="chat-messages">
+          <div
+            className="chat-messages"
+            onClick={() => activeMenuMsgId && setActiveMenuMsgId(null)}
+          >
             {messages.length === 0 ? (
               <div className="empty-chat">
                 <div className="icon">💬</div>
@@ -831,7 +972,10 @@ export default function ChatGrupo() {
                     onTouchEnd={handleTouchEnd}
                   >
                     {/* Action buttons */}
-                    <div className={`msg-actions-bar ${activeMenuMsgId === msgId ? 'mobile-active' : ''}`}>
+                    <div
+                      className={`msg-actions-bar ${activeMenuMsgId === msgId ? 'mobile-active' : ''}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         type="button"
                         className="msg-act-btn"
@@ -862,7 +1006,13 @@ export default function ChatGrupo() {
                       )}
                     </div>
 
-                    <div className={`msg ${isMine ? 'msg-mine' : 'msg-other'}`}>
+                    <div
+                      className={`msg ${isMine ? 'msg-mine' : 'msg-other'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenuMsgId((prev) => (prev === msgId ? null : msgId));
+                      }}
+                    >
                       <div className="msg-author">
                         <span>{m.user_nome}</span>
                         <span className="msg-badge">
