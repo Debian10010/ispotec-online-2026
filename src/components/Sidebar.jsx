@@ -213,12 +213,12 @@ export default function Sidebar({
               <>
                 <Link
                   to="/dashboard/users-list"
-                  className={`sidebar-nav-item ${isActive('/dashboard/users-list') ? 'active' : ''}`}
+                  className={`sidebar-nav-item ${isActive('/dashboard/users-list') || isActive('/users-list') ? 'active' : ''}`}
                   onClick={handleNavClick}
-                  data-tooltip="Todos os Utilizadores"
+                  data-tooltip="Gestão de Utilizadores"
                 >
                   <span className="sidebar-item-icon">👥</span>
-                  <span className="sidebar-item-label">Utilizadores</span>
+                  <span className="sidebar-item-label">Gestão de Utilizadores</span>
                 </Link>
 
                 <Link

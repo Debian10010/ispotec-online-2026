@@ -37,7 +37,8 @@ export function AuthProvider({ children }) {
   };
 
   const isAuthenticated = !!user;
-  const userTipo = user?.tipo || 'estudante';
+  const rawRole = user?.tipo || user?.role || user?.perfil || 'estudante';
+  const userTipo = String(rawRole).toLowerCase().trim();
   const isAdmin = !!user && (userTipo === 'especialista' || userTipo === 'admin');
   const isDocente = !!user && userTipo === 'docente';
   const isEstudante = !user || userTipo === 'estudante';

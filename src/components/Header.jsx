@@ -9,7 +9,7 @@ export default function Header({
   onToggleMobileSidebar,
   onOpenContacts,
 }) {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -420,6 +420,19 @@ export default function Header({
                     <span>💬</span>
                     <span>Chat Geral</span>
                   </Link>
+
+                  {isAdmin && (
+                    <Link
+                      to="/dashboard/users-list"
+                      className="dropdown-item"
+                      onClick={() => setUserDropdownOpen(false)}
+                      role="menuitem"
+                      style={{ color: '#1d4ed8', fontWeight: 600 }}
+                    >
+                      <span>👥</span>
+                      <span>Gestão de Utilizadores</span>
+                    </Link>
+                  )}
 
                   <button
                     type="button"

@@ -18,7 +18,9 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  if (adminOnly && user.tipo !== 'especialista' && user.tipo !== 'admin') {
+  const rawRole = user?.tipo || user?.role || user?.perfil || 'estudante';
+  const userTipo = String(rawRole).toLowerCase().trim();
+  if (adminOnly && userTipo !== 'especialista' && userTipo !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
 
