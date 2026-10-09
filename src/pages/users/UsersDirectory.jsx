@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
+import { getFileUrl } from '../../services/api';
 
 const avatarColors = {
   A: '#ef4444', B: '#f97316', C: '#f59e0b', D: '#eab308',
@@ -161,7 +162,7 @@ export default function UsersDirectory() {
         
         .users-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -177,6 +178,7 @@ export default function UsersDirectory() {
             flex-direction: column;
             align-items: center;
             text-align: center;
+            width: 100%;
         }
         
         .user-card:hover {
@@ -196,6 +198,13 @@ export default function UsersDirectory() {
             font-weight: bold;
             margin-bottom: 1rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .user-avatar-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
         .user-name-title {
@@ -203,12 +212,14 @@ export default function UsersDirectory() {
             font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 0.25rem;
+            word-break: break-word;
         }
         
         .user-email-text {
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-bottom: 0.75rem;
+            word-break: break-all;
         }
         
         .user-role-badge {
@@ -232,6 +243,40 @@ export default function UsersDirectory() {
             display: flex;
             flex-direction: column;
             gap: 0.35rem;
+        }
+
+        @media (max-width: 768px) {
+            .users-page {
+                padding: 1.25rem 0 3rem;
+            }
+            .users-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .users-counter {
+                width: 100%;
+                justify-content: space-between;
+                padding: 0.6rem 1.25rem;
+            }
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .search-field {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+            }
+            .search-form button {
+                width: 100%;
+                padding: 0.75rem !important;
+            }
+            .users-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
         }
       `}</style>
 
@@ -292,16 +337,28 @@ export default function UsersDirectory() {
           </div>
         ) : (
           <div className="users-grid">
-            {utilizadores.map(u => (
-              <div className="user-card" key={u.id}>
-                <div 
-                  className="user-avatar-circle"
-                  style={{ background: getAvatarColor(u.nome) }}
-                >
-                  {u.nome ? u.nome.charAt(0).toUpperCase() : 'U'}
-                </div>
+            {utilizadores.map(u => {
+              const avatarSrc = u.foto_perfil ? getFileUrl(u.foto_perfil) : null;
+              return (
+                <div className="user-card" key={u.id}>
+                  <div 
+                    className="user-avatar-circle"
+                    style={{ background: getAvatarColor(u.nome) }}
+                  >
+                    {avatarSrc ? (
+                      <img 
+                        src={avatarSrc} 
+                        alt={u.nome}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      u.nome ? u.nome.charAt(0).toUpperCase() : 'U'
+                    )}
+                  </div>
 
-                <div className="user-name-title">{u.nome}</div>
+                  <div className="user-name-title">{u.nome}</div>
                 <div className="user-email-text">{u.email}</div>
 
                 <div className="user-role-badge" style={getBadgeStyle(u.tipo)}>
@@ -323,9 +380,10 @@ export default function UsersDirectory() {
                   Ver Perfil
                 </Link>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
+      )}
       </div>
     </>
   );

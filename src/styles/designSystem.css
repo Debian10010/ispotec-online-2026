@@ -1574,7 +1574,7 @@ img, video {
     font-size: 0.75rem !important;
   }
 
-  /* Modals on mobile */
+  /* Modals on mobile & tablet */
   div[style*="position: fixed"][style*="z-index: 1000"] > div,
   div[style*="position: fixed"][style*="zIndex: 1000"] > div {
     width: 95% !important;
@@ -1582,10 +1582,35 @@ img, video {
     padding: 1.25rem !important;
     margin: 0.5rem auto;
   }
+
+  /* Modal Form Two-Column Grids collapse to single column on mobile */
+  div[style*="position: fixed"][style*="z-index: 1000"] form div[style*="gridTemplateColumns"],
+  div[style*="position: fixed"][style*="zIndex: 1000"] form div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Dashboard Header Banner on Mobile */
+  .dashboard-container > div:first-child {
+    padding: 1.25rem !important;
+    gap: 1rem !important;
+  }
+
+  /* General Action Button Groups */
+  .btn-group-responsive {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
 }
 
 /* Small Mobile Phones (<= 480px) */
 @media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem !important;
+  }
+
   .kpi-grid {
     grid-template-columns: 1fr;
   }
@@ -1628,6 +1653,12 @@ img, video {
     padding: 0.65rem 0.75rem;
     font-size: 0.82rem;
   }
+
+  /* Compact Card Paddings on Mobile */
+  .card, .feature-card, .user-card, .enterprise-module-card {
+    padding: 1rem !important;
+  }
 }
+
 
 
