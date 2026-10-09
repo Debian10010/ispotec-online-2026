@@ -8,7 +8,7 @@ const DEFAULT_WELCOME_MESSAGES = [
     user_tipo: 'especialista',
     conteudo: '👋 Bem-vindos ao Chat Geral ISPOTEC! Este é o espaço de comunicação de toda a comunidade académica. Todos os estudantes, docentes e especialistas registados podem partilhar informações e colaborar aqui.',
     tipo_mensagem: 'texto',
-    data_criacao: new Date(Date.now() - 3600000 * 2).toISOString().replace('T', ' ').substring(0, 19)
+    data_criacao: new Date(Date.now() - 3600000 * 2).toISOString().replace('T', ' ').substring(0, 19),
   },
   {
     id: 'welcome-2',
@@ -17,8 +17,8 @@ const DEFAULT_WELCOME_MESSAGES = [
     user_tipo: 'docente',
     conteudo: '📚 Sejam bem-vindos ao novo ano letivo! Usem este canal para tirar dúvidas gerais, divulgar eventos e partilhar materiais de interesse comum.',
     tipo_mensagem: 'texto',
-    data_criacao: new Date(Date.now() - 3600000).toISOString().replace('T', ' ').substring(0, 19)
-  }
+    data_criacao: new Date(Date.now() - 3600000).toISOString().replace('T', ' ').substring(0, 19),
+  },
 ];
 
 export const chatService = {
@@ -26,11 +26,9 @@ export const chatService = {
     try {
       const res = await api.get('/chat/global');
       if (res && res.dados && Array.isArray(res.dados) && res.dados.length > 0) {
-        // Cache to local storage
         localStorage.setItem('ispotec_global_chat_messages', JSON.stringify(res.dados));
         return res.dados;
       }
-      // If empty backend, check localStorage or return defaults
       const local = localStorage.getItem('ispotec_global_chat_messages');
       if (local) {
         try {
@@ -51,7 +49,16 @@ export const chatService = {
     }
   },
 
-  async sendGlobalMessage({ conteudo, tipo_mensagem = 'texto', ficheiro_path = null, ficheiro_nome = null, ficheiro_tamanho = null, user = null }) {
+  async sendGlobalMessage({
+    conteudo,
+    tipo_mensagem = 'texto',
+    ficheiro_path = null,
+    ficheiro_nome = null,
+    ficheiro_tamanho = null,
+    reply_to = null,
+    mencoes = [],
+    user = null,
+  }) {
     try {
       const res = await api.post('/chat/global', {
         conteudo,
@@ -59,6 +66,8 @@ export const chatService = {
         ficheiro_path,
         ficheiro_nome,
         ficheiro_tamanho,
+        reply_to,
+        mencoes,
       });
       if (res && res.dados) {
         return res.dados;
@@ -78,7 +87,10 @@ export const chatService = {
       ficheiro_path,
       ficheiro_nome,
       ficheiro_tamanho,
-      data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      reply_to: reply_to && reply_to.message_id ? reply_to : null,
+      mencoes: mencoes || [],
+      editado: false,
+      data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
 
     const localMsgs = await this.getGlobalMessages();
@@ -98,7 +110,17 @@ export const chatService = {
     }
   },
 
-  async sendGroupMessage({ groupId, conteudo, tipo_mensagem = 'texto', ficheiro_path = null, ficheiro_nome = null, ficheiro_tamanho = null, user = null }) {
+  async sendGroupMessage({
+    groupId,
+    conteudo,
+    tipo_mensagem = 'texto',
+    ficheiro_path = null,
+    ficheiro_nome = null,
+    ficheiro_tamanho = null,
+    reply_to = null,
+    mencoes = [],
+    user = null,
+  }) {
     try {
       const res = await api.post(`/chat/group/${groupId}`, {
         conteudo,
@@ -106,6 +128,8 @@ export const chatService = {
         ficheiro_path,
         ficheiro_nome,
         ficheiro_tamanho,
+        reply_to,
+        mencoes,
       });
       return res.dados;
     } catch (error) {
@@ -113,7 +137,7 @@ export const chatService = {
       const newMsg = {
         id: 'local-' + Date.now(),
         group_id: groupId,
-        user_id: user?.id || 'local-user',
+        user_id: user?.id || user?._id || 'local-user',
         user_nome: user?.nome || 'Utilizador ISPOTEC',
         user_tipo: user?.tipo || 'estudante',
         conteudo: conteudo || '',
@@ -121,12 +145,59 @@ export const chatService = {
         ficheiro_path,
         ficheiro_nome,
         ficheiro_tamanho,
-        data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        reply_to: reply_to && reply_to.message_id ? reply_to : null,
+        mencoes: mencoes || [],
+        editado: false,
+        data_criacao: new Date().toISOString().replace('T', ' ').substring(0, 19),
       };
       const existing = await this.getGroupMessages(groupId);
       const updated = [...existing, newMsg];
       localStorage.setItem(`ispotec_group_chat_${groupId}`, JSON.stringify(updated));
       return newMsg;
+    }
+  },
+
+  async editMessage(messageId, conteudo, mencoes = []) {
+    try {
+      const res = await api.put(`/chat/messages/${messageId}`, {
+        conteudo,
+        mencoes,
+      });
+      return res.dados;
+    } catch (error) {
+      // Local fallback
+      console.warn('[chatService.editMessage fallback]', error.message);
+      const localGlobal = localStorage.getItem('ispotec_global_chat_messages');
+      if (localGlobal) {
+        try {
+          const list = JSON.parse(localGlobal);
+          const updated = list.map((m) =>
+            m.id === messageId || m._id === messageId
+              ? { ...m, conteudo, editado: true, data_edicao: new Date().toISOString() }
+              : m
+          );
+          localStorage.setItem('ispotec_global_chat_messages', JSON.stringify(updated));
+        } catch (_) {}
+      }
+      throw error;
+    }
+  },
+
+  async deleteMessage(messageId) {
+    try {
+      const res = await api.delete(`/chat/messages/${messageId}`);
+      return res;
+    } catch (error) {
+      console.warn('[chatService.deleteMessage fallback]', error.message);
+      const localGlobal = localStorage.getItem('ispotec_global_chat_messages');
+      if (localGlobal) {
+        try {
+          const list = JSON.parse(localGlobal);
+          const updated = list.filter((m) => m.id !== messageId && m._id !== messageId);
+          localStorage.setItem('ispotec_global_chat_messages', JSON.stringify(updated));
+        } catch (_) {}
+      }
+      throw error;
     }
   },
 
@@ -155,4 +226,3 @@ export const chatService = {
 };
 
 export default chatService;
-

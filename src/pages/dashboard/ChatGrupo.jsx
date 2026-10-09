@@ -3,12 +3,14 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { groupService } from '../../services/groupService';
 import { chatService } from '../../services/chatService';
+import { userService } from '../../services/userService';
 import { getFileUrl as resolveFileUrl } from '../../services/api';
 import { isImageUrl, getCleanFileName } from '../../components/AttachmentDisplay';
 
 export default function ChatGrupo() {
   const [searchParams] = useSearchParams();
   const groupId = searchParams.get('id');
+  const highlightMsgId = searchParams.get('highlightMsg');
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -18,17 +20,50 @@ export default function ChatGrupo() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [showAudioModal, setShowAudioModal] = useState(false);
-  const [audioTimer, setAudioTimer] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
+
+  // Reply state
+  const [replyingTo, setReplyingTo] = useState(null);
+
+  // Edit state
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Delete confirm state
+  const [deletingMsgId, setDeletingMsgId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Mention autocomplete
+  const [allUsers, setAllUsers] = useState([]);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionFilter, setMentionFilter] = useState('');
+  const [selectedMentions, setSelectedMentions] = useState([]);
+
+  // Active actions menu (long press mobile)
+  const [activeMenuMsgId, setActiveMenuMsgId] = useState(null);
+  const longPressTimer = useRef(null);
 
   const messagesEndRef = useRef(null);
+  const chatInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const audioInputRef = useRef(null);
 
+  const isAdmin = user && (user.tipo === 'admin' || user.tipo === 'especialista');
+
   const getFileUrl = (path) => {
     if (!path || path === '#') return '#';
     return resolveFileUrl(path);
+  };
+
+  const isWithin30Mins = (dateStr) => {
+    if (!dateStr) return false;
+    try {
+      const created = new Date(dateStr.replace(' ', 'T')).getTime();
+      return (Date.now() - created) <= 30 * 60 * 1000;
+    } catch {
+      return false;
+    }
   };
 
   const loadData = async () => {
@@ -43,9 +78,9 @@ export default function ChatGrupo() {
     }
     setGrupo(g);
 
-    const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
-    const isMember = g.membros && g.membros.some(m => String(m.id || m._id || m) === String(user?.id));
-    if (!isMember && !isAdmin) {
+    const isAdminUser = user && (user.tipo === 'especialista' || user.tipo === 'admin');
+    const isMember = g.membros && g.membros.some((m) => String(m.id || m._id || m) === String(user?.id));
+    if (!isMember && !isAdminUser) {
       navigate('/dashboard/my-groups');
       return;
     }
@@ -54,26 +89,89 @@ export default function ChatGrupo() {
     setMessages(msgs);
   };
 
+  const loadMessages = async () => {
+    const msgs = await chatService.getGroupMessages(groupId);
+    setMessages(msgs);
+  };
+
+  const loadUsersForMentions = async () => {
+    try {
+      const list = await userService.getAllUsers();
+      setAllUsers(list || []);
+    } catch (_) {}
+  };
+
   useEffect(() => {
     loadData();
+    loadUsersForMentions();
   }, [groupId, user]);
 
+  // Poll messages every 4 seconds
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    let interval = null;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setAudioTimer(prev => prev + 1);
-      }, 1000);
-    } else {
-      setAudioTimer(0);
-      clearInterval(interval);
-    }
+    if (!groupId) return;
+    const interval = setInterval(loadMessages, 4000);
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [groupId]);
+
+  // Auto scroll to bottom on new messages or handle highlight
+  useEffect(() => {
+    if (highlightMsgId && messages.length > 0) {
+      setTimeout(() => {
+        const el = document.getElementById(`msg-${highlightMsgId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight-pulsate-group');
+          setTimeout(() => el.classList.remove('highlight-pulsate-group'), 4000);
+        }
+      }, 300);
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, highlightMsgId]);
+
+  const scrollToMessage = (msgId) => {
+    const el = document.getElementById(`msg-${msgId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('highlight-pulsate-group');
+      setTimeout(() => el.classList.remove('highlight-pulsate-group'), 4000);
+    }
+  };
+
+  // Mention detection while typing
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setTexto(value);
+
+    const cursorPos = e.target.selectionStart;
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/@([a-zA-Z0-9À-ÿ_\s.-]*)$/);
+
+    if (atMatch) {
+      setShowMentionDropdown(true);
+      setMentionFilter(atMatch[1].toLowerCase());
+    } else {
+      setShowMentionDropdown(false);
+    }
+  };
+
+  const selectMentionUser = (targetUser) => {
+    const cursorPos = chatInputRef.current?.selectionStart || texto.length;
+    const textBeforeCursor = texto.slice(0, cursorPos);
+    const textAfterCursor = texto.slice(cursorPos);
+
+    const atIndex = textBeforeCursor.lastIndexOf('@');
+    if (atIndex !== -1) {
+      const newTextBefore = textBeforeCursor.slice(0, atIndex) + `@${targetUser.nome} `;
+      setTexto(newTextBefore + textAfterCursor);
+      setSelectedMentions((prev) => [
+        ...prev.filter((m) => m.user_id !== (targetUser.id || targetUser._id)),
+        { user_id: targetUser.id || targetUser._id, user_nome: targetUser.nome },
+      ]);
+    }
+    setShowMentionDropdown(false);
+    chatInputRef.current?.focus();
+  };
 
   const handleSend = async (e) => {
     e?.preventDefault();
@@ -98,17 +196,83 @@ export default function ChatGrupo() {
 
     await chatService.sendGroupMessage({
       groupId,
-      conteudo: texto,
+      conteudo: texto.trim(),
       tipo_mensagem,
       ficheiro_path,
       ficheiro_nome,
       ficheiro_tamanho,
+      reply_to: replyingTo,
+      mencoes: selectedMentions,
+      user,
     });
 
     setTexto('');
     setSelectedFile(null);
-    const msgs = await chatService.getGroupMessages(groupId);
-    setMessages(msgs);
+    setReplyingTo(null);
+    setSelectedMentions([]);
+    await loadMessages();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Reply trigger
+  const handleStartReply = (m) => {
+    setReplyingTo({
+      message_id: m.id || m._id,
+      user_nome: m.user_nome,
+      conteudo: m.conteudo || (m.ficheiro_nome ? `[Ficheiro] ${m.ficheiro_nome}` : ''),
+      tipo_mensagem: m.tipo_mensagem,
+    });
+    setActiveMenuMsgId(null);
+    chatInputRef.current?.focus();
+  };
+
+  // Edit trigger
+  const handleStartEdit = (m) => {
+    setEditingMessage(m);
+    setEditText(m.conteudo || '');
+    setActiveMenuMsgId(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMessage || !editText.trim() || savingEdit) return;
+    setSavingEdit(true);
+    try {
+      await chatService.editMessage(editingMessage.id || editingMessage._id, editText.trim());
+      setEditingMessage(null);
+      setEditText('');
+      await loadMessages();
+    } catch (err) {
+      alert(err.message || 'Erro ao guardar edição da mensagem.');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingMsgId || deleting) return;
+    setDeleting(true);
+    try {
+      await chatService.deleteMessage(deletingMsgId);
+      setDeletingMsgId(null);
+      await loadMessages();
+    } catch (err) {
+      alert(err.message || 'Erro ao eliminar mensagem.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Mobile long press handlers
+  const handleTouchStart = (msgId) => {
+    longPressTimer.current = setTimeout(() => {
+      setActiveMenuMsgId(msgId);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+    }
   };
 
   const handleCameraCapture = (e) => {
@@ -125,12 +289,6 @@ export default function ChatGrupo() {
     setShowAudioModal(false);
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-
   const formatMsgDate = (dateString) => {
     try {
       const d = new Date(dateString.replace(' ', 'T'));
@@ -141,6 +299,43 @@ export default function ChatGrupo() {
       return dateString;
     }
   };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const renderMessageContent = (content) => {
+    if (!content) return null;
+    const mentionRegex = /(@[a-zA-Z0-9À-ÿ_\s.-]{2,35})/g;
+    const parts = content.split(mentionRegex);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={i} style={{
+            background: 'rgba(37,99,235,0.15)',
+            color: '#1d4ed8',
+            fontWeight: 600,
+            padding: '0.05rem 0.3rem',
+            borderRadius: 4,
+            display: 'inline-block',
+            margin: '0 1px',
+          }}>
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
+  const filteredMentionUsers = allUsers.filter((u) => {
+    if (!mentionFilter) return true;
+    const name = (u.nome || '').toLowerCase();
+    return name.includes(mentionFilter);
+  });
 
   if (!grupo) {
     return <div className="container" style={{ padding: '3rem', textAlign: 'center' }}>A carregar...</div>;
@@ -153,6 +348,7 @@ export default function ChatGrupo() {
             max-width: 900px;
             margin: 2rem auto;
             padding: 0 1rem;
+            position: relative;
         }
         
         .chat-header-bar {
@@ -193,6 +389,8 @@ export default function ChatGrupo() {
             height: calc(100vh - 280px);
             min-height: 450px;
             border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
         }
         
         .chat-messages {
@@ -206,7 +404,7 @@ export default function ChatGrupo() {
         }
         
         .msg {
-            max-width: 75%;
+            max-width: 78%;
             padding: 0.75rem 1rem;
             border-radius: 1rem;
             position: relative;
@@ -257,16 +455,24 @@ export default function ChatGrupo() {
             font-size: 0.9rem;
             line-height: 1.4;
             word-break: break-word;
+            white-space: pre-wrap;
         }
         .msg-time {
             font-size: 0.65rem;
             opacity: 0.7;
             margin-top: 0.25rem;
             text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.3rem;
         }
-        .msg-media {
-            margin-top: 0.5rem;
+        .msg-edited-badge {
+            font-style: italic;
+            opacity: 0.75;
+            font-size: 0.6rem;
         }
+        .msg-media { margin-top: 0.5rem; }
         .msg-media img {
             max-width: 100%;
             max-height: 250px;
@@ -285,9 +491,83 @@ export default function ChatGrupo() {
         }
         .msg-mine .msg-file-link { color: white; }
         .msg-other .msg-file-link { color: var(--secondary-blue); background: var(--light-gray); }
-        
+
+        /* Quoted reply box */
+        .msg-quoted-box {
+            background: rgba(0,0,0,0.08);
+            border-left: 3px solid #60a5fa;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            margin-bottom: 0.45rem;
+            cursor: pointer;
+        }
+        .msg-mine .msg-quoted-box {
+            background: rgba(255,255,255,0.18);
+            border-left-color: #93c5fd;
+        }
+        .msg-quoted-author {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 2px;
+        }
+        .msg-mine .msg-quoted-author { color: #fde68a; }
+        .msg-quoted-text {
+            font-size: 0.73rem;
+            opacity: 0.85;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Message action hover buttons */
+        .msg-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .msg-actions-bar {
+            position: absolute;
+            top: 2px;
+            display: flex;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            padding: 2px 4px;
+            border: 1px solid #e2e8f0;
+            z-index: 10;
+        }
+        .msg-mine .msg-actions-bar { left: -90px; }
+        .msg-other .msg-actions-bar { right: -90px; }
+        .msg-wrapper:hover .msg-actions-bar,
+        .msg-actions-bar.mobile-active { opacity: 1; }
+        .msg-act-btn {
+            background: none;
+            border: none;
+            font-size: 0.85rem;
+            padding: 4px 6px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.15s;
+        }
+        .msg-act-btn:hover { background: #f1f5f9; color: #0f172a; transform: scale(1.15); }
+        .msg-act-btn.del:hover { color: #ef4444; background: #fee2e2; }
+
+        .highlight-pulsate-group .msg {
+            animation: pulseGlowGrp 1.5s ease-in-out 3;
+            border: 2px solid #f59e0b !important;
+        }
+        @keyframes pulseGlowGrp {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); box-shadow: 0 0 15px rgba(245,158,11,0.4); }
+            100% { transform: scale(1); }
+        }
+
         .chat-input-area {
-            padding: 0.75rem 1rem;
             background: white;
             border-top: 1px solid var(--border-color);
         }
@@ -295,6 +575,7 @@ export default function ChatGrupo() {
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            padding: 0.75rem 1rem;
         }
         .chat-input-row input[type="text"] {
             flex: 1;
@@ -332,6 +613,74 @@ export default function ChatGrupo() {
             font-weight: 600;
             cursor: pointer;
         }
+
+        /* Reply Banner */
+        .reply-banner {
+            background: #f1f5f9;
+            border-left: 4px solid #2563eb;
+            padding: 0.45rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .reply-banner-author {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 2px;
+        }
+        .reply-banner-snippet {
+            font-size: 0.73rem;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+        .reply-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .reply-close:hover { color: #ef4444; }
+
+        /* Mention Dropdown */
+        .mention-popup {
+            position: absolute;
+            bottom: 70px;
+            left: 15px;
+            width: 250px;
+            max-height: 180px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .mention-popup-hdr {
+            padding: 0.35rem 0.7rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        .mention-popup-row {
+            padding: 0.45rem 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.82rem;
+        }
+        .mention-popup-row:hover { background: #eff6ff; }
+
         .file-preview {
             display: flex;
             padding: 0.5rem 0.75rem;
@@ -341,6 +690,7 @@ export default function ChatGrupo() {
             font-size: 0.85rem;
             align-items: center;
             justify-content: space-between;
+            margin: 0 1rem 0.5rem;
         }
         
         .empty-chat {
@@ -387,14 +737,48 @@ export default function ChatGrupo() {
             font-weight: 600;
             color: white;
         }
-        .audio-timer {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ef4444;
-            text-align: center;
-            margin: 1rem 0;
+
+        /* Edit/Delete Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.7);
+            z-index: 1200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
         }
-        
+        .modal-box {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.2);
+        }
+        .modal-box h3 {
+            margin: 0 0 0.75rem;
+            color: #0f172a;
+        }
+        .modal-box p {
+            color: #64748b;
+            font-size: 0.88rem;
+            margin-bottom: 1rem;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 0.65rem;
+        }
+        .modal-btns button {
+            flex: 1;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         .back-link {
             display: block;
             text-align: center;
@@ -404,22 +788,14 @@ export default function ChatGrupo() {
         }
         
         @media (max-width: 768px) {
-            .chat-box {
-                height: calc(100vh - 220px);
-            }
-            .msg { max-width: 85%; }
+            .chat-box { height: calc(100vh - 220px); }
+            .msg { max-width: 88%; }
             .chat-input-row { flex-wrap: wrap; }
-            .chat-input-row input[type="text"] { 
-                flex: 1 1 100%; 
-                order: 1; 
-                margin-bottom: 0.5rem; 
-            }
+            .chat-input-row input[type="text"] { flex: 1 1 100%; order: 1; margin-bottom: 0.5rem; }
             .send-btn { order: 5; flex: 1; }
-            .chat-header-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
+            .chat-header-bar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .msg-mine .msg-actions-bar { left: auto; right: 0; top: -26px; }
+            .msg-other .msg-actions-bar { right: auto; left: 0; top: -26px; }
         }
       `}</style>
 
@@ -440,46 +816,107 @@ export default function ChatGrupo() {
                 <p>Nenhuma mensagem neste grupo ainda. Envie uma mensagem!</p>
               </div>
             ) : (
-              messages.map(m => {
-                const isMine = m.user_id === user?.id;
+              messages.map((m) => {
+                const msgId = m.id || m._id;
+                const isMine = m.user_id === user?.id || m.user_id === user?._id;
+                const canEdit = isAdmin || (isMine && isWithin30Mins(m.data_criacao));
+                const canDelete = isAdmin || (isMine && isWithin30Mins(m.data_criacao));
+
                 return (
-                  <div className={`msg ${isMine ? 'msg-mine' : 'msg-other'}`} key={m.id}>
-                    <div className="msg-author">
-                      <span>{m.user_nome}</span>
-                      <span className="msg-badge">
-                        {m.user_tipo ? m.user_tipo.charAt(0).toUpperCase() + m.user_tipo.slice(1) : ''}
-                      </span>
+                  <div
+                    className={`msg-wrapper ${isMine ? 'msg-mine' : 'msg-other'}`}
+                    key={msgId}
+                    id={`msg-${msgId}`}
+                    onTouchStart={() => handleTouchStart(msgId)}
+                    onTouchEnd={handleTouchEnd}
+                  >
+                    {/* Action buttons */}
+                    <div className={`msg-actions-bar ${activeMenuMsgId === msgId ? 'mobile-active' : ''}`}>
+                      <button
+                        type="button"
+                        className="msg-act-btn"
+                        title="Responder"
+                        onClick={() => handleStartReply(m)}
+                      >
+                        ↩️
+                      </button>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          className="msg-act-btn"
+                          title="Editar"
+                          onClick={() => handleStartEdit(m)}
+                        >
+                          ✏️
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          className="msg-act-btn del"
+                          title="Eliminar"
+                          onClick={() => setDeletingMsgId(msgId)}
+                        >
+                          🗑️
+                        </button>
+                      )}
                     </div>
 
-                    {m.conteudo && <div className="msg-text">{m.conteudo}</div>}
-
-                    {m.ficheiro_path && (isImageUrl(m.ficheiro_path, m.ficheiro_nome) || m.tipo_mensagem === 'imagem') && (
-                      <div className="msg-media" style={{ marginTop: '0.4rem', borderRadius: '8px', overflow: 'hidden' }}>
-                        <img
-                          src={getFileUrl(m.ficheiro_path)}
-                          alt={getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
-                          style={{ maxWidth: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', cursor: 'pointer', borderRadius: '8px' }}
-                          onClick={() => window.open(getFileUrl(m.ficheiro_path), '_blank')}
-                        />
+                    <div className={`msg ${isMine ? 'msg-mine' : 'msg-other'}`}>
+                      <div className="msg-author">
+                        <span>{m.user_nome}</span>
+                        <span className="msg-badge">
+                          {m.user_tipo ? m.user_tipo.charAt(0).toUpperCase() + m.user_tipo.slice(1) : ''}
+                        </span>
                       </div>
-                    )}
 
-                    {m.tipo_mensagem === 'audio' && m.ficheiro_path && (
-                      <div className="msg-media" style={{ marginTop: '0.4rem' }}>
-                        <audio controls style={{ maxWidth: '100%' }}>
-                          <source src={getFileUrl(m.ficheiro_path)} />
-                          O seu navegador não suporta áudio.
-                        </audio>
+                      {/* Quoted reply box */}
+                      {m.reply_to && m.reply_to.message_id && (
+                        <div
+                          className="msg-quoted-box"
+                          onClick={() => scrollToMessage(m.reply_to.message_id)}
+                          title="Ir para mensagem original"
+                        >
+                          <div className="msg-quoted-author">↩ {m.reply_to.user_nome}</div>
+                          <div className="msg-quoted-text">{m.reply_to.conteudo || '[Anexo]'}</div>
+                        </div>
+                      )}
+
+                      {m.conteudo && (
+                        <div className="msg-text">{renderMessageContent(m.conteudo)}</div>
+                      )}
+
+                      {m.ficheiro_path && (isImageUrl(m.ficheiro_path, m.ficheiro_nome) || m.tipo_mensagem === 'imagem') && (
+                        <div className="msg-media" style={{ marginTop: '0.4rem', borderRadius: '8px', overflow: 'hidden' }}>
+                          <img
+                            src={getFileUrl(m.ficheiro_path)}
+                            alt={getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
+                            style={{ maxWidth: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', cursor: 'pointer', borderRadius: '8px' }}
+                            onClick={() => window.open(getFileUrl(m.ficheiro_path), '_blank')}
+                          />
+                        </div>
+                      )}
+
+                      {m.tipo_mensagem === 'audio' && m.ficheiro_path && (
+                        <div className="msg-media" style={{ marginTop: '0.4rem' }}>
+                          <audio controls style={{ maxWidth: '100%' }}>
+                            <source src={getFileUrl(m.ficheiro_path)} />
+                            O seu navegador não suporta áudio.
+                          </audio>
+                        </div>
+                      )}
+
+                      {m.ficheiro_path && !isImageUrl(m.ficheiro_path, m.ficheiro_nome) && m.tipo_mensagem !== 'audio' && (
+                        <a href={getFileUrl(m.ficheiro_path)} className="msg-file-link" download target="_blank" rel="noreferrer" style={{ marginTop: '0.4rem' }}>
+                          📄 {getCleanFileName(m.ficheiro_path, m.ficheiro_nome)} ↗
+                        </a>
+                      )}
+
+                      <div className="msg-time">
+                        {m.editado && <span className="msg-edited-badge">(editada)</span>}
+                        <span>{formatMsgDate(m.data_criacao)}</span>
                       </div>
-                    )}
-
-                    {m.ficheiro_path && !isImageUrl(m.ficheiro_path, m.ficheiro_nome) && m.tipo_mensagem !== 'audio' && (
-                      <a href={getFileUrl(m.ficheiro_path)} className="msg-file-link" download target="_blank" rel="noreferrer" style={{ marginTop: '0.4rem' }}>
-                        📄 {getCleanFileName(m.ficheiro_path, m.ficheiro_nome)} ↗
-                      </a>
-                    )}
-
-                    <div className="msg-time">{formatMsgDate(m.data_criacao)}</div>
+                    </div>
                   </div>
                 );
               })
@@ -487,13 +924,33 @@ export default function ChatGrupo() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Mention autocomplete popup */}
+          {showMentionDropdown && filteredMentionUsers.length > 0 && (
+            <div className="mention-popup">
+              <div className="mention-popup-hdr">Mencionar (@)</div>
+              {filteredMentionUsers.slice(0, 6).map((u) => (
+                <div
+                  key={u.id || u._id}
+                  className="mention-popup-row"
+                  onClick={() => selectMentionUser(u)}
+                >
+                  <span>👤</span>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{u.nome}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{u.tipo}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="chat-input-area">
             {selectedFile && (
               <div className="file-preview">
                 <span>📎 {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)</span>
-                <button 
-                  type="button" 
-                  onClick={() => setSelectedFile(null)} 
+                <button
+                  type="button"
+                  onClick={() => setSelectedFile(null)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
                 >
                   ✕
@@ -501,17 +958,29 @@ export default function ChatGrupo() {
               </div>
             )}
 
+            {/* Reply Banner */}
+            {replyingTo && (
+              <div className="reply-banner">
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <div className="reply-banner-author">↩ A responder a {replyingTo.user_nome}</div>
+                  <div className="reply-banner-snippet">{replyingTo.conteudo}</div>
+                </div>
+                <button type="button" className="reply-close" onClick={() => setReplyingTo(null)}>✕</button>
+              </div>
+            )}
+
             <form className="chat-input-row" onSubmit={handleSend}>
-              <input 
-                type="text" 
-                placeholder="Escreva uma mensagem para o grupo..." 
+              <input
+                ref={chatInputRef}
+                type="text"
+                placeholder={replyingTo ? `A responder a ${replyingTo.user_nome}...` : "Escreva uma mensagem para o grupo (@ para mencionar)..."}
                 value={texto}
-                onChange={(e) => setTexto(e.target.value)}
+                onChange={handleInputChange}
               />
 
-              <input 
-                type="file" 
-                ref={fileInputRef} 
+              <input
+                type="file"
+                ref={fileInputRef}
                 style={{ display: 'none' }}
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
@@ -520,30 +989,15 @@ export default function ChatGrupo() {
                 }}
               />
 
-              <button 
-                type="button" 
-                className="media-btn attach" 
-                title="Anexar Ficheiro"
-                onClick={() => fileInputRef.current?.click()}
-              >
+              <button type="button" className="media-btn attach" title="Anexar Ficheiro" onClick={() => fileInputRef.current?.click()}>
                 📎
               </button>
 
-              <button 
-                type="button" 
-                className="media-btn camera" 
-                title="Tirar Foto"
-                onClick={() => setShowCameraModal(true)}
-              >
+              <button type="button" className="media-btn camera" title="Tirar Foto" onClick={() => setShowCameraModal(true)}>
                 📷
               </button>
 
-              <button 
-                type="button" 
-                className="media-btn audio" 
-                title="Gravar Áudio"
-                onClick={() => setShowAudioModal(true)}
-              >
+              <button type="button" className="media-btn audio" title="Gravar Áudio" onClick={() => setShowAudioModal(true)}>
                 🎤
               </button>
 
@@ -559,34 +1013,31 @@ export default function ChatGrupo() {
         </Link>
       </div>
 
-      {/* Camera Capture Modal */}
-      {showCameraModal && (
-        <div className="capture-modal">
-          <div className="capture-box">
-            <h3>📷 Captura de Imagem</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Tire uma foto utilizando a câmara do seu dispositivo ou selecione um ficheiro de imagem para o grupo.
-            </p>
-            <input 
-              type="file" 
-              ref={cameraInputRef} 
-              accept="image/*" 
-              capture="environment" 
-              style={{ display: 'none' }} 
-              onChange={handleCameraCapture} 
+      {/* Edit Modal */}
+      {editingMessage && (
+        <div className="modal-overlay" onClick={() => setEditingMessage(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h3>✏️ Editar Mensagem</h3>
+            <p>{isAdmin && editingMessage.user_id !== (user?.id || user?._id) ? 'A editar como Administrador.' : 'Edite o texto da sua mensagem (dentro de 30 minutos).'}</p>
+            <textarea
+              style={{ width: '100%', minHeight: '80px', padding: '0.7rem', border: '2px solid #cbd5e1', borderRadius: '8px', fontFamily: 'inherit', fontSize: '0.9rem', marginBottom: '1rem', outline: 'none' }}
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder="Edite a mensagem..."
             />
-            <div className="capture-btns">
-              <button 
-                type="button" 
-                style={{ background: '#10b981' }} 
-                onClick={() => cameraInputRef.current?.click()}
+            <div className="modal-btns">
+              <button
+                type="button"
+                style={{ background: '#2563eb', color: 'white' }}
+                onClick={handleSaveEdit}
+                disabled={savingEdit || !editText.trim()}
               >
-                Tirar / Selecionar Foto
+                {savingEdit ? 'A guardar...' : 'Guardar'}
               </button>
-              <button 
-                type="button" 
-                style={{ background: '#64748b' }} 
-                onClick={() => setShowCameraModal(false)}
+              <button
+                type="button"
+                style={{ background: '#e2e8f0', color: '#475569' }}
+                onClick={() => setEditingMessage(null)}
               >
                 Cancelar
               </button>
@@ -595,7 +1046,55 @@ export default function ChatGrupo() {
         </div>
       )}
 
-      {/* Audio Recording Modal */}
+      {/* Delete Confirm Modal */}
+      {deletingMsgId && (
+        <div className="modal-overlay" onClick={() => setDeletingMsgId(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h3>🗑️ Eliminar Mensagem</h3>
+            <p>Tem a certeza de que pretende eliminar esta mensagem permanentemente?</p>
+            <div className="modal-btns">
+              <button
+                type="button"
+                style={{ background: '#ef4444', color: 'white' }}
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'A eliminar...' : 'Sim, Eliminar'}
+              </button>
+              <button
+                type="button"
+                style={{ background: '#e2e8f0', color: '#475569' }}
+                onClick={() => setDeletingMsgId(null)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Camera Modal */}
+      {showCameraModal && (
+        <div className="capture-modal">
+          <div className="capture-box">
+            <h3>📷 Captura de Imagem</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Tire uma foto utilizando a câmara do seu dispositivo ou selecione um ficheiro de imagem para o grupo.
+            </p>
+            <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleCameraCapture} />
+            <div className="capture-btns">
+              <button type="button" style={{ background: '#10b981' }} onClick={() => cameraInputRef.current?.click()}>
+                Tirar / Selecionar Foto
+              </button>
+              <button type="button" style={{ background: '#64748b' }} onClick={() => setShowCameraModal(false)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audio Modal */}
       {showAudioModal && (
         <div className="capture-modal">
           <div className="capture-box">
@@ -603,27 +1102,12 @@ export default function ChatGrupo() {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
               Grave uma mensagem de voz ou selecione um ficheiro de áudio para partilhar com o grupo.
             </p>
-            <input 
-              type="file" 
-              ref={audioInputRef} 
-              accept="audio/*" 
-              capture 
-              style={{ display: 'none' }} 
-              onChange={handleAudioSelected} 
-            />
+            <input type="file" ref={audioInputRef} accept="audio/*" capture style={{ display: 'none' }} onChange={handleAudioSelected} />
             <div className="capture-btns">
-              <button 
-                type="button" 
-                style={{ background: '#ef4444' }} 
-                onClick={() => audioInputRef.current?.click()}
-              >
+              <button type="button" style={{ background: '#ef4444' }} onClick={() => audioInputRef.current?.click()}>
                 Gravar / Selecionar Áudio
               </button>
-              <button 
-                type="button" 
-                style={{ background: '#64748b' }} 
-                onClick={() => setShowAudioModal(false)}
-              >
+              <button type="button" style={{ background: '#64748b' }} onClick={() => setShowAudioModal(false)}>
                 Cancelar
               </button>
             </div>

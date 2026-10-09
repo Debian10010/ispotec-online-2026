@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { chatService } from '../../services/chatService';
+import { userService } from '../../services/userService';
 import { getFileUrl as resolveFileUrl } from '../../services/api';
 import { isImageUrl, getCleanFileName } from '../../components/AttachmentDisplay';
 
@@ -9,34 +10,78 @@ const QUICK_EMOJIS = ['👍', '👏', '💡', '📚', '📢', '🚀', '🎓', '�
 
 export default function ChatGlobal() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const highlightMsgId = searchParams.get('highlightMsg');
+
   const [messages, setMessages] = useState([]);
   const [texto, setTexto] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [showAudioModal, setShowAudioModal] = useState(false);
-  const [audioTimer, setAudioTimer] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [, setLastUpdated] = useState(new Date());
+
+  // Reply state
+  const [replyingTo, setReplyingTo] = useState(null);
+
+  // Edit message state
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Delete confirm modal
+  const [deletingMsgId, setDeletingMsgId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Mention system state
+  const [allUsers, setAllUsers] = useState([]);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionFilter, setMentionFilter] = useState('');
+  const [selectedMentions, setSelectedMentions] = useState([]);
+
+  // Active message actions menu (for mobile long press / tap)
+  const [activeMenuMsgId, setActiveMenuMsgId] = useState(null);
+  const longPressTimer = useRef(null);
 
   const messagesEndRef = useRef(null);
+  const chatInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const audioInputRef = useRef(null);
   const isFirstLoad = useRef(true);
+  const highlightedRef = useRef(false);
+
+  const isAdmin = user && (user.tipo === 'admin' || user.tipo === 'especialista');
 
   const getFileUrl = (path) => {
     if (!path || path === '#') return '#';
     return resolveFileUrl(path);
   };
 
+  // Check 30 min limit for regular users
+  const isWithin30Mins = (dateStr) => {
+    if (!dateStr) return false;
+    try {
+      const created = new Date(dateStr.replace(' ', 'T')).getTime();
+      return (Date.now() - created) <= 30 * 60 * 1000;
+    } catch {
+      return false;
+    }
+  };
+
+  const loadUsersForMentions = async () => {
+    try {
+      const list = await userService.getAllUsers();
+      setAllUsers(list || []);
+    } catch (_) {}
+  };
+
   const loadMessages = useCallback(async (isManual = false) => {
     try {
       const data = await chatService.getGlobalMessages();
-      setMessages(prev => {
-        // Only update state if data changed to avoid unnecessary re-renders
+      setMessages((prev) => {
         if (JSON.stringify(prev) !== JSON.stringify(data)) {
           return data;
         }
@@ -53,9 +98,10 @@ export default function ChatGlobal() {
     }
   }, []);
 
-  // Initial load + Real-time polling every 3.5 seconds
+  // Initial load
   useEffect(() => {
     loadMessages();
+    loadUsersForMentions();
     const interval = setInterval(() => {
       loadMessages();
     }, 3500);
@@ -63,24 +109,66 @@ export default function ChatGlobal() {
     return () => clearInterval(interval);
   }, [loadMessages]);
 
-  // Auto scroll to bottom when messages change
+  // Handle message highlight from URL parameter
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Audio timer handler
-  useEffect(() => {
-    let interval = null;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setAudioTimer(prev => prev + 1);
-      }, 1000);
-    } else {
-      setAudioTimer(0);
-      clearInterval(interval);
+    if (highlightMsgId && messages.length > 0) {
+      setTimeout(() => {
+        const el = document.getElementById(`msg-${highlightMsgId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight-pulsate');
+          setTimeout(() => el.classList.remove('highlight-pulsate'), 4000);
+        }
+      }, 300);
+    } else if (!highlightedRef.current && messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-    return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [messages, highlightMsgId]);
+
+  // Scroll to target message
+  const scrollToMessage = (msgId) => {
+    const el = document.getElementById(`msg-${msgId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('highlight-pulsate');
+      setTimeout(() => el.classList.remove('highlight-pulsate'), 4000);
+    }
+  };
+
+  // Mention detection while typing
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setTexto(value);
+
+    const cursorPos = e.target.selectionStart;
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/@([a-zA-Z0-9À-ÿ_\s.-]*)$/);
+
+    if (atMatch) {
+      setShowMentionDropdown(true);
+      setMentionFilter(atMatch[1].toLowerCase());
+    } else {
+      setShowMentionDropdown(false);
+    }
+  };
+
+  const selectMentionUser = (targetUser) => {
+    const cursorPos = chatInputRef.current?.selectionStart || texto.length;
+    const textBeforeCursor = texto.slice(0, cursorPos);
+    const textAfterCursor = texto.slice(cursorPos);
+
+    const atIndex = textBeforeCursor.lastIndexOf('@');
+    if (atIndex !== -1) {
+      const newTextBefore = textBeforeCursor.slice(0, atIndex) + `@${targetUser.nome} `;
+      setTexto(newTextBefore + textAfterCursor);
+      setSelectedMentions((prev) => [
+        ...prev.filter((m) => m.user_id !== (targetUser.id || targetUser._id)),
+        { user_id: targetUser.id || targetUser._id, user_nome: targetUser.nome },
+      ]);
+    }
+    setShowMentionDropdown(false);
+    chatInputRef.current?.focus();
+  };
 
   const handleSend = async (e) => {
     e?.preventDefault();
@@ -111,12 +199,17 @@ export default function ChatGlobal() {
         ficheiro_path,
         ficheiro_nome,
         ficheiro_tamanho,
+        reply_to: replyingTo,
+        mencoes: selectedMentions,
         user,
       });
 
       setTexto('');
       setSelectedFile(null);
+      setReplyingTo(null);
+      setSelectedMentions([]);
       await loadMessages(true);
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
     } finally {
@@ -124,8 +217,71 @@ export default function ChatGlobal() {
     }
   };
 
+  // Reply trigger
+  const handleStartReply = (m) => {
+    setReplyingTo({
+      message_id: m.id || m._id,
+      user_nome: m.user_nome,
+      conteudo: m.conteudo || (m.ficheiro_nome ? `[Ficheiro] ${m.ficheiro_nome}` : ''),
+      tipo_mensagem: m.tipo_mensagem,
+    });
+    setActiveMenuMsgId(null);
+    chatInputRef.current?.focus();
+  };
+
+  // Edit trigger
+  const handleStartEdit = (m) => {
+    setEditingMessage(m);
+    setEditText(m.conteudo || '');
+    setActiveMenuMsgId(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMessage || !editText.trim() || savingEdit) return;
+    setSavingEdit(true);
+    try {
+      await chatService.editMessage(editingMessage.id || editingMessage._id, editText.trim());
+      setEditingMessage(null);
+      setEditText('');
+      await loadMessages(true);
+    } catch (err) {
+      alert(err.message || 'Erro ao guardar edição da mensagem.');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // Delete trigger
+  const handleConfirmDelete = async () => {
+    if (!deletingMsgId || deleting) return;
+    setDeleting(true);
+    try {
+      await chatService.deleteMessage(deletingMsgId);
+      setDeletingMsgId(null);
+      await loadMessages(true);
+    } catch (err) {
+      alert(err.message || 'Erro ao eliminar mensagem.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Mobile long press handlers
+  const handleTouchStart = (msgId) => {
+    longPressTimer.current = setTimeout(() => {
+      setActiveMenuMsgId(msgId);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+    }
+  };
+
   const handleInsertEmoji = (emoji) => {
-    setTexto(prev => prev + emoji);
+    setTexto((prev) => prev + emoji);
+    chatInputRef.current?.focus();
   };
 
   const handleCameraCapture = (e) => {
@@ -150,10 +306,13 @@ export default function ChatGlobal() {
       const min = String(d.getMinutes()).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       const month = String(d.getMonth() + 1).padStart(2, '0');
-      
+
       const today = new Date();
-      const isToday = today.getDate() === d.getDate() && today.getMonth() === d.getMonth() && today.getFullYear() === d.getFullYear();
-      
+      const isToday =
+        today.getDate() === d.getDate() &&
+        today.getMonth() === d.getMonth() &&
+        today.getFullYear() === d.getFullYear();
+
       return isToday ? `${horas}:${min}` : `${day}/${month} ${horas}:${min}`;
     } catch {
       return dateString;
@@ -167,7 +326,25 @@ export default function ChatGlobal() {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
-  const filteredMessages = messages.filter(m => {
+  // Render message text with styled mention highlights
+  const renderMessageContent = (content) => {
+    if (!content) return null;
+    const mentionRegex = /(@[a-zA-Z0-9À-ÿ_\s.-]{2,35})/g;
+    const parts = content.split(mentionRegex);
+
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={i} className="chat-mention-tag">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
+  const filteredMessages = messages.filter((m) => {
     if (!searchTerm.trim()) return true;
     const term = searchTerm.toLowerCase();
     return (
@@ -175,6 +352,13 @@ export default function ChatGlobal() {
       (m.user_nome && m.user_nome.toLowerCase().includes(term)) ||
       (m.ficheiro_nome && m.ficheiro_nome.toLowerCase().includes(term))
     );
+  });
+
+  const filteredMentionUsers = allUsers.filter((u) => {
+    if (!mentionFilter) return true;
+    const name = (u.nome || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    return name.includes(mentionFilter) || email.includes(mentionFilter);
   });
 
   return (
@@ -330,6 +514,7 @@ export default function ChatGlobal() {
             min-height: 520px;
             border: 1px solid #e2e8f0;
             border-top: none;
+            position: relative;
             overflow: hidden;
         }
 
@@ -340,14 +525,15 @@ export default function ChatGlobal() {
             background: #f8fafc;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.1rem;
             scroll-behavior: smooth;
         }
 
         .msg-row {
             display: flex;
             gap: 0.75rem;
-            max-width: 80%;
+            max-width: 82%;
+            position: relative;
             animation: slideMsg 0.25s ease-out;
         }
 
@@ -363,6 +549,18 @@ export default function ChatGlobal() {
 
         .msg-row.msg-other {
             align-self: flex-start;
+        }
+
+        .msg-row.highlight-pulsate .msg-bubble {
+            animation: pulseGlow 1.5s ease-in-out infinite;
+            border: 2px solid #f59e0b !important;
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
         .user-avatar-circle {
@@ -383,12 +581,18 @@ export default function ChatGlobal() {
         .avatar-docente { background: linear-gradient(135deg, #10b981, #047857); }
         .avatar-especialista, .avatar-admin { background: linear-gradient(135deg, #f59e0b, #b45309); }
 
+        .msg-bubble-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
         .msg-bubble {
             padding: 0.75rem 1rem;
             border-radius: 14px;
             position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            min-width: 140px;
+            min-width: 150px;
         }
 
         .msg-mine .msg-bubble {
@@ -443,11 +647,62 @@ export default function ChatGlobal() {
         .msg-other .role-tag-docente { background: #d1fae5; color: #065f46; }
         .msg-other .role-tag-especialista, .msg-other .role-tag-admin { background: #fef3c7; color: #92400e; }
 
+        /* Quoted message box inside bubble (WhatsApp style) */
+        .msg-quoted-box {
+            background: rgba(0, 0, 0, 0.08);
+            border-left: 3px solid #60a5fa;
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .msg-mine .msg-quoted-box {
+            background: rgba(255, 255, 255, 0.18);
+            border-left-color: #93c5fd;
+        }
+
+        .msg-quoted-author {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 0.15rem;
+        }
+
+        .msg-mine .msg-quoted-author {
+            color: #fed7aa;
+        }
+
+        .msg-quoted-text {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .msg-body-text {
             font-size: 0.92rem;
             line-height: 1.45;
             word-break: break-word;
             white-space: pre-wrap;
+        }
+
+        .chat-mention-tag {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 600;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0 1px;
+        }
+
+        .msg-mine .chat-mention-tag {
+            background: rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .msg-footer-time {
@@ -457,11 +712,69 @@ export default function ChatGlobal() {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 0.25rem;
+            gap: 0.35rem;
         }
 
         .msg-mine .msg-footer-time { color: rgba(255, 255, 255, 0.75); }
         .msg-other .msg-footer-time { color: #94a3b8; }
+
+        .msg-edited-indicator {
+            font-style: italic;
+            opacity: 0.8;
+            font-size: 0.65rem;
+        }
+
+        /* Action Menu Hover / Long-press (Reply, Edit, Delete) */
+        .msg-actions-trigger {
+            position: absolute;
+            top: 2px;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            display: flex;
+            gap: 0.25rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            padding: 2px 4px;
+            border: 1px solid #e2e8f0;
+            z-index: 10;
+        }
+
+        .msg-mine .msg-actions-trigger {
+            left: -85px;
+        }
+
+        .msg-other .msg-actions-trigger {
+            right: -85px;
+        }
+
+        .msg-row:hover .msg-actions-trigger,
+        .msg-actions-trigger.mobile-active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .msg-action-icon-btn {
+            background: none;
+            border: none;
+            font-size: 0.85rem;
+            padding: 4px 6px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.15s;
+        }
+
+        .msg-action-icon-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            transform: scale(1.15);
+        }
+
+        .msg-action-icon-btn.btn-delete:hover {
+            color: #ef4444;
+            background: #fee2e2;
+        }
 
         .msg-media-attachment {
             margin-top: 0.5rem;
@@ -501,10 +814,108 @@ export default function ChatGlobal() {
             border: 1px solid #cbd5e1;
         }
 
+        /* Reply Banner above Input Area */
+        .chat-reply-banner {
+            background: #f1f5f9;
+            border-left: 4px solid #2563eb;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+            animation: slideUp 0.18s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(8px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .reply-banner-content {
+            flex: 1;
+            font-size: 0.82rem;
+            overflow: hidden;
+        }
+
+        .reply-banner-author {
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 2px;
+        }
+
+        .reply-banner-snippet {
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .reply-close-btn:hover {
+            color: #ef4444;
+        }
+
+        /* Mention Floating Dropdown */
+        .mention-dropdown-popup {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            width: 280px;
+            max-height: 200px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .mention-dropdown-header {
+            padding: 0.4rem 0.75rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .mention-user-row {
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+
+        .mention-user-row:hover {
+            background: #eff6ff;
+        }
+
+        .mention-user-row-name {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .mention-user-row-role {
+            font-size: 0.68rem;
+            color: #64748b;
+        }
+
         /* Emoji Quick Bar */
         .chat-emoji-quickbar {
             padding: 0.4rem 1rem;
-            background: #f1f5f9;
+            background: #f8fafc;
             border-top: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
@@ -728,6 +1139,16 @@ export default function ChatGlobal() {
             .msg-row {
                 max-width: 92%;
             }
+            .msg-mine .msg-actions-trigger {
+                left: auto;
+                right: 0;
+                top: -24px;
+            }
+            .msg-other .msg-actions-trigger {
+                right: auto;
+                left: 0;
+                top: -24px;
+            }
             .chat-main-box {
                 height: calc(100vh - 230px);
             }
@@ -757,7 +1178,7 @@ export default function ChatGlobal() {
                 Em Direto
               </span>
             </h1>
-            <p>Espaço colaborativo de partilha e comunicação de todos os membros registados</p>
+            <p>Espaço colaborativo de partilha e comunicação de toda a comunidade ISPOTEC</p>
           </div>
 
           <div className="chat-header-actions">
@@ -778,7 +1199,7 @@ export default function ChatGlobal() {
         {/* Community Info Banner */}
         <div className="chat-community-banner">
           <div>
-            📢 <strong>Comunidade Aberta:</strong> Todos os estudantes, docentes e especialistas podem interagir neste canal.
+            📢 <strong>Comunidade Aberta:</strong> Todos os estudantes, docentes e especialistas podem interagir neste canal. Use <code>@</code> para mencionar colegas.
           </div>
           <div>
             <input
@@ -808,61 +1229,133 @@ export default function ChatGlobal() {
               </div>
             ) : (
               filteredMessages.map((m) => {
+                const msgId = m.id || m._id;
                 const isMine = m.user_id === user?.id || m.user_id === user?._id;
                 const roleType = m.user_tipo || 'estudante';
 
+                const canEdit = isAdmin || (isMine && isWithin30Mins(m.data_criacao || m.createdAt));
+                const canDelete = isAdmin || (isMine && isWithin30Mins(m.data_criacao || m.createdAt));
+
                 return (
-                  <div className={`msg-row ${isMine ? 'msg-mine' : 'msg-other'}`} key={m.id || m._id}>
+                  <div
+                    className={`msg-row ${isMine ? 'msg-mine' : 'msg-other'}`}
+                    key={msgId}
+                    id={`msg-${msgId}`}
+                    onTouchStart={() => handleTouchStart(msgId)}
+                    onTouchEnd={handleTouchEnd}
+                  >
                     <div className={`user-avatar-circle avatar-${roleType}`}>
                       {getInitials(m.user_nome)}
                     </div>
 
-                    <div className="msg-bubble">
-                      <div className="msg-header-meta">
-                        <span className="msg-author-name">
-                          {isMine ? 'Eu' : (m.user_nome || 'Utilizador')}
-                        </span>
-                        <span className={`role-tag role-tag-${roleType}`}>
-                          {roleType === 'especialista' ? 'Especialista' : roleType === 'docente' ? 'Docente' : 'Estudante'}
-                        </span>
+                    <div className="msg-bubble-container">
+                      {/* Action Menu (Reply, Edit, Delete) */}
+                      <div className={`msg-actions-trigger ${activeMenuMsgId === msgId ? 'mobile-active' : ''}`}>
+                        {/* Reply available for all users */}
+                        <button
+                          type="button"
+                          className="msg-action-icon-btn"
+                          title="Responder à mensagem"
+                          onClick={() => handleStartReply(m)}
+                        >
+                          ↩️
+                        </button>
+
+                        {/* Edit available for Admin anytime, or Author within 30 mins */}
+                        {canEdit && (
+                          <button
+                            type="button"
+                            className="msg-action-icon-btn"
+                            title={isAdmin && !isMine ? 'Editar (Administrador)' : 'Editar mensagem'}
+                            onClick={() => handleStartEdit(m)}
+                          >
+                            ✏️
+                          </button>
+                        )}
+
+                        {/* Delete available for Admin anytime, or Author within 30 mins */}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            className="msg-action-icon-btn btn-delete"
+                            title={isAdmin && !isMine ? 'Eliminar (Administrador)' : 'Eliminar mensagem'}
+                            onClick={() => setDeletingMsgId(msgId)}
+                          >
+                            🗑️
+                          </button>
+                        )}
                       </div>
 
-                      {m.conteudo && <div className="msg-body-text">{m.conteudo}</div>}
-
-                      {m.ficheiro_path && (isImageUrl(m.ficheiro_path, m.ficheiro_nome) || m.tipo_mensagem === 'imagem') && (
-                        <div className="msg-media-attachment" style={{ cursor: 'pointer' }} onClick={() => window.open(getFileUrl(m.ficheiro_path), '_blank')}>
-                          <img
-                            src={getFileUrl(m.ficheiro_path)}
-                            alt={getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
-                            loading="lazy"
-                          />
+                      <div className="msg-bubble">
+                        <div className="msg-header-meta">
+                          <span className="msg-author-name">
+                            {isMine ? 'Eu' : (m.user_nome || 'Utilizador')}
+                          </span>
+                          <span className={`role-tag role-tag-${roleType}`}>
+                            {roleType === 'especialista' ? 'Especialista' : roleType === 'docente' ? 'Docente' : 'Estudante'}
+                          </span>
                         </div>
-                      )}
 
-                      {m.tipo_mensagem === 'audio' && m.ficheiro_path && (
-                        <div className="msg-media-attachment">
-                          <audio controls style={{ width: '100%', minWidth: '220px' }}>
-                            <source src={getFileUrl(m.ficheiro_path)} />
-                            O seu navegador não suporta reprodução de áudio.
-                          </audio>
+                        {/* Quoted Message (WhatsApp Style) */}
+                        {m.reply_to && m.reply_to.message_id && (
+                          <div
+                            className="msg-quoted-box"
+                            onClick={() => scrollToMessage(m.reply_to.message_id)}
+                            title="Clique para ir para a mensagem original"
+                          >
+                            <div className="msg-quoted-author">
+                              ↩ {m.reply_to.user_nome || 'Utilizador'}
+                            </div>
+                            <div className="msg-quoted-text">
+                              {m.reply_to.conteudo || '[Anexo]'}
+                            </div>
+                          </div>
+                        )}
+
+                        {m.conteudo && (
+                          <div className="msg-body-text">{renderMessageContent(m.conteudo)}</div>
+                        )}
+
+                        {m.ficheiro_path && (isImageUrl(m.ficheiro_path, m.ficheiro_nome) || m.tipo_mensagem === 'imagem') && (
+                          <div
+                            className="msg-media-attachment"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => window.open(getFileUrl(m.ficheiro_path), '_blank')}
+                          >
+                            <img
+                              src={getFileUrl(m.ficheiro_path)}
+                              alt={getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+
+                        {m.tipo_mensagem === 'audio' && m.ficheiro_path && (
+                          <div className="msg-media-attachment">
+                            <audio controls style={{ width: '100%', minWidth: '220px' }}>
+                              <source src={getFileUrl(m.ficheiro_path)} />
+                              O seu navegador não suporta reprodução de áudio.
+                            </audio>
+                          </div>
+                        )}
+
+                        {m.ficheiro_path && !isImageUrl(m.ficheiro_path, m.ficheiro_nome) && m.tipo_mensagem !== 'audio' && (
+                          <a
+                            href={getFileUrl(m.ficheiro_path)}
+                            className="msg-file-download"
+                            download
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            📄 {getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
+                            {m.ficheiro_tamanho ? ` (${(m.ficheiro_tamanho / 1024).toFixed(0)} KB)` : ''} ↗
+                          </a>
+                        )}
+
+                        <div className="msg-footer-time">
+                          {m.editado && <span className="msg-edited-indicator">(editada)</span>}
+                          <span>{formatMsgDate(m.data_criacao || m.createdAt)}</span>
                         </div>
-                      )}
-
-                      {m.ficheiro_path && !isImageUrl(m.ficheiro_path, m.ficheiro_nome) && m.tipo_mensagem !== 'audio' && (
-                        <a
-                          href={getFileUrl(m.ficheiro_path)}
-                          className="msg-file-download"
-                          download
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          📄 {getCleanFileName(m.ficheiro_path, m.ficheiro_nome)}
-                          {m.ficheiro_tamanho ? ` (${(m.ficheiro_tamanho / 1024).toFixed(0)} KB)` : ''} ↗
-                        </a>
-                      )}
-
-                      <div className="msg-footer-time">
-                        {formatMsgDate(m.data_criacao || m.createdAt)}
                       </div>
                     </div>
                   </div>
@@ -871,6 +1364,28 @@ export default function ChatGlobal() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Mention Autocomplete Dropdown Popup */}
+          {showMentionDropdown && filteredMentionUsers.length > 0 && (
+            <div className="mention-dropdown-popup">
+              <div className="mention-dropdown-header">Mencionar utilizador (@)</div>
+              {filteredMentionUsers.slice(0, 6).map((u) => (
+                <div
+                  key={u.id || u._id}
+                  className="mention-user-row"
+                  onClick={() => selectMentionUser(u)}
+                >
+                  <div className={`user-avatar-circle avatar-${u.tipo || 'estudante'}`} style={{ width: 26, height: 26, fontSize: '0.7rem' }}>
+                    {getInitials(u.nome)}
+                  </div>
+                  <div>
+                    <div className="mention-user-row-name">{u.nome}</div>
+                    <div className="mention-user-row-role">{u.tipo} {u.curso ? `• ${u.curso}` : ''}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Quick Emoji Bar */}
           <div className="chat-emoji-quickbar">
@@ -887,6 +1402,24 @@ export default function ChatGlobal() {
               </button>
             ))}
           </div>
+
+          {/* Reply Banner */}
+          {replyingTo && (
+            <div className="chat-reply-banner">
+              <div className="reply-banner-content">
+                <div className="reply-banner-author">↩ A responder a {replyingTo.user_nome}</div>
+                <div className="reply-banner-snippet">{replyingTo.conteudo}</div>
+              </div>
+              <button
+                type="button"
+                className="reply-close-btn"
+                onClick={() => setReplyingTo(null)}
+                title="Cancelar resposta"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* Compose / Input Area */}
           <div className="chat-compose-area">
@@ -905,11 +1438,12 @@ export default function ChatGlobal() {
 
             <form className="chat-compose-form" onSubmit={handleSend}>
               <input
+                ref={chatInputRef}
                 type="text"
                 className="chat-text-input"
-                placeholder="Escreva uma mensagem para toda a comunidade ISPOTEC..."
+                placeholder={replyingTo ? `A responder a ${replyingTo.user_nome}...` : "Escreva uma mensagem para a comunidade (@ para mencionar)..."}
                 value={texto}
-                onChange={(e) => setTexto(e.target.value)}
+                onChange={handleInputChange}
                 disabled={sending}
               />
 
@@ -959,6 +1493,82 @@ export default function ChatGlobal() {
           </div>
         </div>
       </div>
+
+      {/* Modal Editar Mensagem */}
+      {editingMessage && (
+        <div className="modal-overlay-chat" onClick={() => setEditingMessage(null)}>
+          <div className="modal-card-chat" onClick={(e) => e.stopPropagation()}>
+            <h3>✏️ Editar Mensagem</h3>
+            <p style={{ marginBottom: '0.75rem' }}>
+              {isAdmin && editingMessage.user_id !== (user?.id || user?._id)
+                ? 'A editar mensagem como Administrador.'
+                : 'Pode editar o texto da sua mensagem (limite de 30 minutos).'}
+            </p>
+            <textarea
+              style={{
+                width: '100%',
+                minHeight: '90px',
+                padding: '0.75rem',
+                border: '2px solid #cbd5e1',
+                borderRadius: '8px',
+                fontFamily: 'inherit',
+                fontSize: '0.92rem',
+                marginBottom: '1rem',
+                outline: 'none',
+              }}
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder="Edite a mensagem..."
+            />
+            <div className="modal-actions-grid">
+              <button
+                type="button"
+                style={{ background: '#2563eb', color: 'white' }}
+                onClick={handleSaveEdit}
+                disabled={savingEdit || !editText.trim()}
+              >
+                {savingEdit ? 'A guardar...' : 'Guardar Alterações'}
+              </button>
+              <button
+                type="button"
+                style={{ background: '#e2e8f0', color: '#475569' }}
+                onClick={() => setEditingMessage(null)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmar Eliminação */}
+      {deletingMsgId && (
+        <div className="modal-overlay-chat" onClick={() => setDeletingMsgId(null)}>
+          <div className="modal-card-chat" onClick={(e) => e.stopPropagation()}>
+            <h3>🗑️ Eliminar Mensagem</h3>
+            <p>
+              Tem a certeza de que pretende eliminar esta mensagem permanentemente? Esta ação não pode ser anulada.
+            </p>
+            <div className="modal-actions-grid">
+              <button
+                type="button"
+                style={{ background: '#ef4444', color: 'white' }}
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'A eliminar...' : 'Sim, Eliminar'}
+              </button>
+              <button
+                type="button"
+                style={{ background: '#e2e8f0', color: '#475569' }}
+                onClick={() => setDeletingMsgId(null)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Captura Imagem */}
       {showCameraModal && (
