@@ -278,7 +278,7 @@ export default function UsersList() {
   };
 
   return (
-    <div className="container" style={{ paddingBottom: '3rem' }}>
+    <div className="container" style={{ paddingBottom: '3rem', maxWidth: '100%' }}>
       <style>{`
         .users-admin-header {
           margin-top: 1.5rem;
@@ -313,6 +313,81 @@ export default function UsersList() {
         /* ===== Desktop Table — always visible on large screens ===== */
         .users-desktop-table {
           display: block !important;
+          width: 100% !important;
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch;
+          background: #ffffff;
+          border-radius: var(--isp-radius-lg);
+          border: 1px solid var(--isp-slate-200);
+          box-shadow: var(--isp-shadow-sm);
+        }
+
+        .users-desktop-table table {
+          width: 100%;
+          min-width: 960px;
+          border-collapse: separate;
+          border-spacing: 0;
+          margin: 0;
+        }
+
+        .users-desktop-table th,
+        .users-desktop-table td {
+          padding: 0.75rem 0.85rem !important;
+          font-size: 0.85rem !important;
+          vertical-align: middle;
+          border-bottom: 1px solid var(--isp-slate-100);
+        }
+
+        .users-desktop-table thead th {
+          background: #f8fafc !important;
+          color: var(--isp-slate-700);
+          font-weight: 700;
+          font-size: 0.75rem !important;
+          letter-spacing: 0.5px;
+          border-bottom: 1px solid var(--isp-slate-200);
+          white-space: nowrap;
+        }
+
+        /* Sticky Ações column pinned to the right on PC */
+        .users-desktop-table th.col-actions,
+        .users-desktop-table td.col-actions {
+          position: sticky !important;
+          right: 0 !important;
+          z-index: 5;
+          box-shadow: -4px 0 8px rgba(15, 23, 42, 0.06);
+          white-space: nowrap;
+        }
+
+        .users-desktop-table th.col-actions {
+          background: #f8fafc !important;
+        }
+
+        .users-desktop-table td.col-actions {
+          background: #ffffff !important;
+        }
+
+        .users-desktop-table tr:hover td {
+          background: #f8fafc;
+        }
+
+        .users-desktop-table tr:hover td.col-actions {
+          background: #f1f5f9 !important;
+        }
+
+        /* Custom horizontal scrollbar */
+        .users-desktop-table::-webkit-scrollbar {
+          height: 8px;
+        }
+        .users-desktop-table::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        .users-desktop-table::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        .users-desktop-table::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
         }
 
         /* ===== Mobile / Tablet Cards — hidden by default ===== */
@@ -333,7 +408,7 @@ export default function UsersList() {
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
-          padding: 0.35rem 0.7rem;
+          padding: 0.35rem 0.65rem;
           font-size: 0.8rem;
           font-weight: 500;
           border-radius: var(--isp-radius-sm);
@@ -697,18 +772,18 @@ export default function UsersList() {
       ) : (
         <>
           {/* 1. Desktop Table View */}
-          <div className="table-responsive users-desktop-table" style={{ background: '#fff', borderRadius: 'var(--isp-radius-lg)', boxShadow: 'var(--isp-shadow-sm)', overflow: 'hidden' }}>
+          <div className="table-responsive users-desktop-table">
             <table className="table" style={{ margin: 0 }}>
               <thead>
                 <tr>
-                  <th style={{ width: '50px' }}>Foto</th>
-                  <th>Nome Completo</th>
-                  <th>Email</th>
-                  <th>Perfil</th>
-                  <th>Curso / Especialidade</th>
-                  <th>Estado</th>
-                  <th>Data Registo</th>
-                  <th style={{ textAlign: 'center', minWidth: '220px' }}>Ações</th>
+                  <th style={{ width: '48px', textAlign: 'center' }}>Foto</th>
+                  <th style={{ minWidth: '150px' }}>Nome Completo</th>
+                  <th style={{ minWidth: '180px' }}>Email</th>
+                  <th style={{ minWidth: '110px' }}>Perfil</th>
+                  <th style={{ minWidth: '140px' }}>Curso / Especialidade</th>
+                  <th style={{ minWidth: '100px' }}>Estado</th>
+                  <th style={{ minWidth: '110px' }}>Data Registo</th>
+                  <th className="col-actions" style={{ textAlign: 'center', minWidth: '220px', paddingRight: '1rem' }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -718,12 +793,12 @@ export default function UsersList() {
 
                   return (
                     <tr key={u.id}>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {avatarSrc ? (
                           <img
                             src={avatarSrc}
                             alt={u.nome}
-                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto' }}
                             onError={(e) => {
                               e.target.style.display = 'none';
                               e.target.nextSibling.style.display = 'flex';
@@ -742,26 +817,27 @@ export default function UsersList() {
                             justifyContent: 'center',
                             fontWeight: 'bold',
                             fontSize: '0.85rem',
+                            margin: '0 auto',
                           }}
                         >
                           {initial}
                         </div>
                       </td>
-                      <td style={{ fontWeight: 600, color: 'var(--isp-slate-900)' }}>{u.nome}</td>
-                      <td style={{ color: 'var(--isp-slate-600)' }}>{u.email}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--isp-slate-900)', whiteSpace: 'nowrap' }}>{u.nome}</td>
+                      <td style={{ color: 'var(--isp-slate-600)', whiteSpace: 'nowrap' }}>{u.email}</td>
                       <td>
                         <span className={`badge badge-info user-badge-${u.tipo}`}>
                           {u.tipo ? u.tipo.charAt(0).toUpperCase() + u.tipo.slice(1) : '-'}
                         </span>
                       </td>
-                      <td>{u.curso || '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{u.curso || '—'}</td>
                       <td>
                         <span className={`badge ${u.status === 'aprovado' ? 'badge-success' : 'badge-warning'}`}>
                           {u.status ? u.status.charAt(0).toUpperCase() + u.status.slice(1) : '-'}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.84rem', color: 'var(--isp-slate-500)' }}>{formatDate(u.data_registo)}</td>
-                      <td style={{ textAlign: 'right', minWidth: '200px', paddingRight: '1rem' }}>
+                      <td style={{ fontSize: '0.84rem', color: 'var(--isp-slate-500)', whiteSpace: 'nowrap' }}>{formatDate(u.data_registo)}</td>
+                      <td className="col-actions" style={{ textAlign: 'right', minWidth: '220px', paddingRight: '1rem' }}>
                         <div className="user-table-actions">
                           <button
                             type="button"
