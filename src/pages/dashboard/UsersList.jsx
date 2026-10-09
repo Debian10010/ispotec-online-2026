@@ -279,8 +279,245 @@ export default function UsersList() {
 
   return (
     <div className="container" style={{ paddingBottom: '3rem' }}>
+      <style>{`
+        .users-admin-header {
+          margin-top: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+
+        .users-filter-bar {
+          margin-bottom: 1.5rem;
+          padding: 1.25rem 1.5rem;
+        }
+
+        .users-filter-form {
+          display: flex;
+          gap: 1rem;
+          align-items: flex-end;
+          flex-wrap: wrap;
+        }
+
+        .filter-field-search {
+          flex: 1;
+          min-width: 220px;
+        }
+
+        .filter-field-select {
+          width: 220px;
+        }
+
+        /* Desktop Table View */
+        .users-desktop-table {
+          display: block;
+        }
+
+        /* Mobile / Tablet Cards View */
+        .users-mobile-cards {
+          display: none;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .user-mobile-card {
+          background: #ffffff;
+          border-radius: var(--isp-radius-lg);
+          border: 1px solid var(--isp-slate-200);
+          box-shadow: var(--isp-shadow-sm);
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+        }
+
+        .user-mobile-card-header {
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+        }
+
+        .user-mobile-card-meta {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .user-mobile-card-name {
+          font-weight: 700;
+          color: var(--isp-slate-900);
+          font-size: 1rem;
+          line-height: 1.3;
+          margin-bottom: 0.2rem;
+          word-break: break-word;
+        }
+
+        .user-mobile-card-email {
+          color: var(--isp-slate-600);
+          font-size: 0.85rem;
+          word-break: break-all;
+        }
+
+        .user-mobile-badges {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.4rem;
+          align-items: center;
+        }
+
+        .user-mobile-details-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.6rem;
+          background: var(--isp-slate-50);
+          border: 1px solid var(--isp-slate-200);
+          border-radius: var(--isp-radius-md);
+          padding: 0.75rem;
+          font-size: 0.82rem;
+        }
+
+        .user-mobile-detail-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .user-mobile-detail-label {
+          color: var(--isp-slate-500);
+          font-size: 0.72rem;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        .user-mobile-detail-value {
+          color: var(--isp-slate-800);
+          font-weight: 500;
+          word-break: break-word;
+        }
+
+        .user-mobile-actions-bar {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 0.5rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid var(--isp-slate-100);
+        }
+
+        .user-mobile-actions-bar .btn {
+          padding: 0.55rem 0.4rem !important;
+          font-size: 0.78rem !important;
+          justify-content: center;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 860px) {
+          .users-desktop-table {
+            display: none !important;
+          }
+
+          .users-mobile-cards {
+            display: flex !important;
+          }
+
+          .users-admin-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .users-admin-header .btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .users-filter-form {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.85rem;
+          }
+
+          .filter-field-search,
+          .filter-field-select {
+            width: 100% !important;
+            min-width: 100% !important;
+          }
+
+          .users-filter-form button {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .user-mobile-details-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .user-mobile-actions-bar {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        /* Responsive Modal Wrapper */
+        .admin-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(15, 23, 42, 0.7);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1100;
+          padding: 0.75rem;
+        }
+
+        .admin-modal-card {
+          background: #ffffff;
+          border-radius: var(--isp-radius-lg);
+          max-width: 540px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: var(--isp-shadow-xl);
+          padding: 1.75rem;
+          border: 1px solid var(--isp-slate-200);
+        }
+
+        .modal-grid-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+          .admin-modal-card {
+            padding: 1.25rem !important;
+            max-height: 94vh;
+          }
+
+          .modal-grid-2col {
+            grid-template-columns: 1fr !important;
+            gap: 0.85rem !important;
+          }
+
+          .modal-footer-btns {
+            flex-direction: column !important;
+          }
+
+          .modal-footer-btns button {
+            width: 100% !important;
+          }
+        }
+      `}</style>
+
       {/* Page Header with Action Button */}
-      <div className="page-header" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="users-admin-header">
         <div>
           <h1 className="page-title">Gestão de Utilizadores</h1>
           <p className="page-description">Painel de administração para gestão de contas, perfis e credenciais</p>
@@ -303,7 +540,7 @@ export default function UsersList() {
         <div
           style={{
             padding: '1rem 1.25rem',
-            marginBottom: '1.5rem',
+            margin: '1.25rem 0',
             borderRadius: 'var(--isp-radius-md)',
             backgroundColor: feedback.type === 'success' ? '#dcfce7' : '#fee2e2',
             color: feedback.type === 'success' ? '#166534' : '#991b1b',
@@ -328,9 +565,9 @@ export default function UsersList() {
       )}
 
       {/* Filters and Search Bar */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem' }}>
-        <form onSubmit={handleFilter} style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1', minWidth: '220px' }}>
+      <div className="card users-filter-bar">
+        <form onSubmit={handleFilter} className="users-filter-form">
+          <div className="filter-field-search">
             <label htmlFor="search-input" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--isp-slate-600)', marginBottom: '0.35rem', display: 'block' }}>
               Pesquisar por Nome ou Email
             </label>
@@ -344,7 +581,7 @@ export default function UsersList() {
             />
           </div>
 
-          <div style={{ width: '200px' }}>
+          <div className="filter-field-select">
             <label htmlFor="tipo-filter" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--isp-slate-600)', marginBottom: '0.35rem', display: 'block' }}>
               Filtrar por Perfil
             </label>
@@ -361,8 +598,8 @@ export default function UsersList() {
             </select>
           </div>
 
-          <div style={{ alignSelf: 'flex-end' }}>
-            <button type="submit" className="btn btn-primary">
+          <div>
+            <button type="submit" className="btn btn-primary" style={{ padding: '0.65rem 1.25rem' }}>
               <span>🔍</span>
               <span>Filtrar</span>
             </button>
@@ -370,134 +607,227 @@ export default function UsersList() {
         </form>
       </div>
 
-      {/* Users Data Table */}
-      <div className="table-responsive" style={{ background: '#fff', borderRadius: 'var(--isp-radius-lg)', boxShadow: 'var(--isp-shadow-sm)', overflow: 'hidden' }}>
-        <table className="table" style={{ margin: 0 }}>
-          <thead>
-            <tr>
-              <th style={{ width: '50px' }}>Foto</th>
-              <th>Nome Completo</th>
-              <th>Email</th>
-              <th>Perfil</th>
-              <th>Curso / Especialidade</th>
-              <th>Estado</th>
-              <th>Data Registo</th>
-              <th style={{ textAlign: 'center', minWidth: '220px' }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="8" style={{ padding: '3rem', textAlign: 'center', color: 'var(--isp-slate-500)' }}>
-                  A carregar utilizadores...
-                </td>
-              </tr>
-            ) : utilizadores.length === 0 ? (
-              <tr>
-                <td colSpan="8">
-                  <div className="empty-state" style={{ border: 'none', padding: '2.5rem 1rem' }}>
-                    <span className="empty-state-icon">👥</span>
-                    <h3 className="empty-state-title">Nenhum utilizador encontrado</h3>
-                    <p className="empty-state-desc">Não foram encontrados registos correspondentes aos filtros seleccionados.</p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              utilizadores.map((u) => {
-                const avatarSrc = u.foto_perfil ? getFileUrl(u.foto_perfil) : null;
-                const initial = (u.nome ? u.nome.charAt(0) : 'U').toUpperCase();
+      {/* Loading & Empty states */}
+      {loading ? (
+        <div className="card" style={{ padding: '3.5rem 1rem', textAlign: 'center', color: 'var(--isp-slate-500)' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⏳</div>
+          A carregar utilizadores...
+        </div>
+      ) : utilizadores.length === 0 ? (
+        <div className="card empty-state" style={{ padding: '3.5rem 1rem' }}>
+          <span className="empty-state-icon">👥</span>
+          <h3 className="empty-state-title">Nenhum utilizador encontrado</h3>
+          <p className="empty-state-desc">Não foram encontrados registos correspondentes aos filtros seleccionados.</p>
+        </div>
+      ) : (
+        <>
+          {/* 1. Desktop Table View */}
+          <div className="table-responsive users-desktop-table" style={{ background: '#fff', borderRadius: 'var(--isp-radius-lg)', boxShadow: 'var(--isp-shadow-sm)', overflow: 'hidden' }}>
+            <table className="table" style={{ margin: 0 }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '50px' }}>Foto</th>
+                  <th>Nome Completo</th>
+                  <th>Email</th>
+                  <th>Perfil</th>
+                  <th>Curso / Especialidade</th>
+                  <th>Estado</th>
+                  <th>Data Registo</th>
+                  <th style={{ textAlign: 'center', minWidth: '220px' }}>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {utilizadores.map((u) => {
+                  const avatarSrc = u.foto_perfil ? getFileUrl(u.foto_perfil) : null;
+                  const initial = (u.nome ? u.nome.charAt(0) : 'U').toUpperCase();
 
-                return (
-                  <tr key={u.id}>
-                    <td>
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt={u.nome}
-                          style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
+                  return (
+                    <tr key={u.id}>
+                      <td>
+                        {avatarSrc ? (
+                          <img
+                            src={avatarSrc}
+                            alt={u.nome}
+                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, var(--isp-blue-600), var(--isp-purple-600))',
+                            color: '#fff',
+                            display: avatarSrc ? 'none' : 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            fontSize: '0.85rem',
                           }}
-                        />
-                      ) : null}
-                      <div
-                        style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '50%',
-                          background: 'linear-gradient(135deg, var(--isp-blue-600), var(--isp-purple-600))',
-                          color: '#fff',
-                          display: avatarSrc ? 'none' : 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 'bold',
-                          fontSize: '0.85rem',
+                        >
+                          {initial}
+                        </div>
+                      </td>
+                      <td style={{ fontWeight: 600, color: 'var(--isp-slate-900)' }}>{u.nome}</td>
+                      <td style={{ color: 'var(--isp-slate-600)' }}>{u.email}</td>
+                      <td>
+                        <span className={`badge badge-info user-badge-${u.tipo}`}>
+                          {u.tipo ? u.tipo.charAt(0).toUpperCase() + u.tipo.slice(1) : '-'}
+                        </span>
+                      </td>
+                      <td>{u.curso || '—'}</td>
+                      <td>
+                        <span className={`badge ${u.status === 'aprovado' ? 'badge-success' : 'badge-warning'}`}>
+                          {u.status ? u.status.charAt(0).toUpperCase() + u.status.slice(1) : '-'}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.84rem', color: 'var(--isp-slate-500)' }}>{formatDate(u.data_registo)}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'center' }}>
+                          <button
+                            type="button"
+                            className="btn btn-outline"
+                            onClick={() => handleOpenEdit(u)}
+                            title="Editar Perfil (Email e Foto)"
+                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                          >
+                            <span>✏️</span>
+                            <span>Editar</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn btn-outline"
+                            onClick={() => handleOpenResetPassword(u)}
+                            title="Alterar Palavra-passe"
+                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                          >
+                            <span>🔑</span>
+                            <span>Password</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn btn-outline"
+                            onClick={() => handleOpenDelete(u)}
+                            title="Eliminar Utilizador"
+                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', color: '#dc2626', borderColor: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                          >
+                            <span>🗑️</span>
+                            <span>Eliminar</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. Mobile & Tablet Card Layout */}
+          <div className="users-mobile-cards">
+            {utilizadores.map((u) => {
+              const avatarSrc = u.foto_perfil ? getFileUrl(u.foto_perfil) : null;
+              const initial = (u.nome ? u.nome.charAt(0) : 'U').toUpperCase();
+
+              return (
+                <div className="user-mobile-card" key={`mobile-${u.id}`}>
+                  <div className="user-mobile-card-header">
+                    {avatarSrc ? (
+                      <img
+                        src={avatarSrc}
+                        alt={u.nome}
+                        style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
                         }}
-                      >
-                        {initial}
-                      </div>
-                    </td>
-                    <td style={{ fontWeight: 600, color: 'var(--isp-slate-900)' }}>{u.nome}</td>
-                    <td style={{ color: 'var(--isp-slate-600)' }}>{u.email}</td>
-                    <td>
-                      <span className={`badge badge-info user-badge-${u.tipo}`}>
-                        {u.tipo ? u.tipo.charAt(0).toUpperCase() + u.tipo.slice(1) : '-'}
-                      </span>
-                    </td>
-                    <td>{u.curso || '—'}</td>
-                    <td>
-                      <span className={`badge ${u.status === 'aprovado' ? 'badge-success' : 'badge-warning'}`}>
-                        {u.status ? u.status.charAt(0).toUpperCase() + u.status.slice(1) : '-'}
-                      </span>
-                    </td>
-                    <td style={{ fontSize: '0.84rem', color: 'var(--isp-slate-500)' }}>{formatDate(u.data_registo)}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'center' }}>
-                        {/* Edit Profile (Photo & Email only) */}
-                        <button
-                          type="button"
-                          className="btn btn-outline"
-                          onClick={() => handleOpenEdit(u)}
-                          title="Editar Perfil (Email e Foto)"
-                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                        >
-                          <span>✏️</span>
-                          <span>Editar</span>
-                        </button>
+                      />
+                    ) : null}
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--isp-blue-600), var(--isp-purple-600))',
+                        color: '#fff',
+                        display: avatarSrc ? 'none' : 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {initial}
+                    </div>
 
-                        {/* Reset Password */}
-                        <button
-                          type="button"
-                          className="btn btn-outline"
-                          onClick={() => handleOpenResetPassword(u)}
-                          title="Alterar Palavra-passe"
-                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                        >
-                          <span>🔑</span>
-                          <span>Password</span>
-                        </button>
+                    <div className="user-mobile-card-meta">
+                      <div className="user-mobile-card-name">{u.nome}</div>
+                      <div className="user-mobile-card-email">{u.email}</div>
+                    </div>
+                  </div>
 
-                        {/* Delete User */}
-                        <button
-                          type="button"
-                          className="btn btn-outline"
-                          onClick={() => handleOpenDelete(u)}
-                          title="Eliminar Utilizador"
-                          style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', color: '#dc2626', borderColor: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                        >
-                          <span>🗑️</span>
-                          <span>Eliminar</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                  <div className="user-mobile-badges">
+                    <span className={`badge badge-info user-badge-${u.tipo}`}>
+                      {u.tipo ? u.tipo.charAt(0).toUpperCase() + u.tipo.slice(1) : '-'}
+                    </span>
+                    <span className={`badge ${u.status === 'aprovado' ? 'badge-success' : 'badge-warning'}`}>
+                      {u.status ? u.status.charAt(0).toUpperCase() + u.status.slice(1) : '-'}
+                    </span>
+                  </div>
+
+                  <div className="user-mobile-details-grid">
+                    <div className="user-mobile-detail-item">
+                      <span className="user-mobile-detail-label">Curso / Especialidade</span>
+                      <span className="user-mobile-detail-value">{u.curso || '—'}</span>
+                    </div>
+                    <div className="user-mobile-detail-item">
+                      <span className="user-mobile-detail-label">Data de Registo</span>
+                      <span className="user-mobile-detail-value">{formatDate(u.data_registo)}</span>
+                    </div>
+                  </div>
+
+                  <div className="user-mobile-actions-bar">
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => handleOpenEdit(u)}
+                    >
+                      <span>✏️</span>
+                      <span>Editar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => handleOpenResetPassword(u)}
+                    >
+                      <span>🔑</span>
+                      <span>Password</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={() => handleOpenDelete(u)}
+                      style={{ color: '#dc2626', borderColor: '#fca5a5' }}
+                    >
+                      <span>🗑️</span>
+                      <span>Eliminar</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <div style={{ marginTop: '1.5rem' }}>
         <Link to="/dashboard" className="btn btn-secondary">
@@ -507,38 +837,13 @@ export default function UsersList() {
       </div>
 
       {/* ========================================================
-          MODAL 1: ADD NEW USER
+          MODAL 1: ADD NEW USER (Responsive)
           ======================================================== */}
       {showAddModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 'var(--isp-radius-lg)',
-              maxWidth: '550px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: 'var(--isp-shadow-xl)',
-              padding: '2rem',
-            }}
-          >
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--isp-slate-200)', paddingBottom: '0.75rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1.35rem', color: 'var(--isp-slate-900)' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--isp-slate-900)' }}>
                 ➕ Adicionar Novo Utilizador
               </h2>
               <button
@@ -595,7 +900,7 @@ export default function UsersList() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="modal-grid-2col">
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--isp-slate-700)', display: 'block', marginBottom: '0.35rem' }}>
                       Perfil / Tipo
@@ -627,7 +932,7 @@ export default function UsersList() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="modal-grid-2col">
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--isp-slate-700)', display: 'block', marginBottom: '0.35rem' }}>
                       Curso / Departamento
@@ -680,7 +985,7 @@ export default function UsersList() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--isp-slate-200)', paddingTop: '1rem' }}>
+              <div className="modal-footer-btns" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--isp-slate-200)', paddingTop: '1rem' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -703,40 +1008,17 @@ export default function UsersList() {
       )}
 
       {/* ========================================================
-          MODAL 2: EDIT USER PROFILE (Email & Photo only)
+          MODAL 2: EDIT USER PROFILE (Responsive)
           ======================================================== */}
       {editingUser && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 'var(--isp-radius-lg)',
-              maxWidth: '500px',
-              width: '100%',
-              boxShadow: 'var(--isp-shadow-xl)',
-              padding: '2rem',
-            }}
-          >
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--isp-slate-200)', paddingBottom: '0.75rem' }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: '1.35rem', color: 'var(--isp-slate-900)' }}>
+                <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--isp-slate-900)' }}>
                   ✏️ Editar Perfil do Utilizador
                 </h2>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--isp-slate-500)' }}>
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: 'var(--isp-slate-500)' }}>
                   {editingUser.nome} ({editingUser.tipo})
                 </p>
               </div>
@@ -751,7 +1033,6 @@ export default function UsersList() {
 
             <form onSubmit={handleEditSubmit}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                {/* Email address field */}
                 <div>
                   <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--isp-slate-700)', display: 'block', marginBottom: '0.35rem' }}>
                     Endereço de Email *
@@ -769,12 +1050,11 @@ export default function UsersList() {
                   </small>
                 </div>
 
-                {/* Profile photo field */}
                 <div>
                   <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--isp-slate-700)', display: 'block', marginBottom: '0.35rem' }}>
                     Foto de Perfil
                   </label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                     {editForm.foto_perfil ? (
                       <img
                         src={getFileUrl(editForm.foto_perfil)}
@@ -798,7 +1078,7 @@ export default function UsersList() {
                         👤
                       </div>
                     )}
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: '180px' }}>
                       <input
                         type="file"
                         accept="image/*"
@@ -823,7 +1103,7 @@ export default function UsersList() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--isp-slate-200)', paddingTop: '1rem' }}>
+              <div className="modal-footer-btns" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--isp-slate-200)', paddingTop: '1rem' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -846,41 +1126,18 @@ export default function UsersList() {
       )}
 
       {/* ========================================================
-          MODAL 3: CHANGE / RESET PASSWORD (Direct setting by Admin)
+          MODAL 3: CHANGE / RESET PASSWORD (Responsive)
           ======================================================== */}
       {resetPasswordUser && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 'var(--isp-radius-lg)',
-              maxWidth: '460px',
-              width: '100%',
-              boxShadow: 'var(--isp-shadow-xl)',
-              padding: '2rem',
-            }}
-          >
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--isp-slate-200)', paddingBottom: '0.75rem' }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: '1.35rem', color: 'var(--isp-slate-900)' }}>
+                <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--isp-slate-900)' }}>
                   🔑 Definir Nova Palavra-passe
                 </h2>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--isp-slate-500)' }}>
-                  Para o utilizador: <strong>{resetPasswordUser.nome}</strong> ({resetPasswordUser.email})
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: 'var(--isp-slate-500)' }}>
+                  Para: <strong>{resetPasswordUser.nome}</strong> ({resetPasswordUser.email})
                 </p>
               </div>
               <button
@@ -925,7 +1182,7 @@ export default function UsersList() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--isp-slate-200)', paddingTop: '1rem' }}>
+              <div className="modal-footer-btns" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem', borderTop: '1px solid var(--isp-slate-200)', paddingTop: '1rem' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -948,47 +1205,23 @@ export default function UsersList() {
       )}
 
       {/* ========================================================
-          MODAL 4: DELETE CONFIRMATION
+          MODAL 4: DELETE CONFIRMATION (Responsive)
           ======================================================== */}
       {deletingUser && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '1rem',
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 'var(--isp-radius-lg)',
-              maxWidth: '440px',
-              width: '100%',
-              boxShadow: 'var(--isp-shadow-xl)',
-              padding: '2rem',
-              textAlign: 'center',
-            }}
-          >
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-card" style={{ maxWidth: '440px', textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>⚠️</div>
-            <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.35rem', color: '#991b1b' }}>
+            <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', color: '#991b1b' }}>
               Confirmar Eliminação
             </h2>
-            <p style={{ fontSize: '0.95rem', color: 'var(--isp-slate-600)', margin: '0 0 1.5rem 0', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '0.92rem', color: 'var(--isp-slate-600)', margin: '0 0 1.5rem 0', lineHeight: 1.5 }}>
               Tem a certeza de que deseja eliminar permanentemente a conta de{' '}
               <strong>{deletingUser.nome}</strong> ({deletingUser.email})?
               <br />
               <span style={{ fontSize: '0.82rem', color: '#dc2626' }}>Esta ação não poderá ser revertida.</span>
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
+            <div className="modal-footer-btns" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -1004,7 +1237,7 @@ export default function UsersList() {
                 disabled={submittingDelete}
                 style={{ backgroundColor: '#dc2626', color: '#fff', fontWeight: 600 }}
               >
-                {submittingDelete ? 'A eliminar...' : 'Sim, Eliminar Utilizador'}
+                {submittingDelete ? 'A eliminar...' : 'Sim, Eliminar'}
               </button>
             </div>
           </div>

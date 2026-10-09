@@ -126,6 +126,19 @@ export default function Profile() {
             }
         }
 
+        .profile-form-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .profile-form-grid-2col {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+            }
+        }
+
         .profile-header {
             text-align: center;
             position: relative;
@@ -314,7 +327,7 @@ export default function Profile() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="profile-form-grid-2col">
                   <div className="form-group">
                     <label htmlFor="curso">Curso / Área</label>
                     <input 

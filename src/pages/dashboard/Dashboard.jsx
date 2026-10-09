@@ -68,23 +68,69 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
+      <style>{`
+        .dashboard-hero-banner {
+          background: linear-gradient(135deg, var(--isp-navy-950) 0%, var(--isp-navy-800) 100%);
+          color: var(--isp-white);
+          border-radius: var(--isp-radius-lg);
+          padding: 2rem 2.25rem;
+          margin-bottom: 2rem;
+          box-shadow: var(--isp-shadow-md);
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1.5rem;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dashboard-hero-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+        }
+
+        .dashboard-twocol-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-hero-banner {
+            padding: 1.25rem 1rem !important;
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 1rem !important;
+          }
+
+          .dashboard-hero-banner h1 {
+            font-size: 1.45rem !important;
+          }
+
+          .dashboard-hero-right {
+            width: 100%;
+            align-items: flex-start !important;
+          }
+
+          .dashboard-hero-right .btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .dashboard-twocol-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+        }
+      `}</style>
+
       {/* ========================================================
           1. PAGE TITLE & INSTITUTIONAL HEADER BANNER
           ======================================================== */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--isp-navy-950) 0%, var(--isp-navy-800) 100%)',
-        color: 'var(--isp-white)',
-        borderRadius: 'var(--isp-radius-lg)',
-        padding: '2rem 2.25rem',
-        marginBottom: '2rem',
-        boxShadow: 'var(--isp-shadow-md)',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1.5rem',
-        border: '1px solid rgba(255, 255, 255, 0.08)'
-      }}>
+      <div className="dashboard-hero-banner">
         <div>
           <div style={{
             display: 'flex',
@@ -129,12 +175,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: '0.5rem'
-        }}>
+        <div className="dashboard-hero-right">
           <div style={{
             fontSize: '0.8rem',
             color: 'var(--isp-slate-400)',
@@ -379,12 +420,7 @@ export default function Dashboard() {
       {/* ========================================================
           4. RECENT ACTIVITIES / REAL CONTENT & QUICK SHORTCUTS
           ======================================================== */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
+      <div className="dashboard-twocol-grid">
         {/* Atividades Recentes */}
         <div style={{
           background: 'var(--isp-white)',
