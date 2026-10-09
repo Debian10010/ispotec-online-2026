@@ -310,18 +310,70 @@ export default function UsersList() {
           width: 220px;
         }
 
-        /* Desktop Table View */
+        /* ===== Desktop Table — always visible on large screens ===== */
         .users-desktop-table {
-          display: block;
+          display: block !important;
         }
 
-        /* Mobile / Tablet Cards View */
+        /* ===== Mobile / Tablet Cards — hidden by default ===== */
         .users-mobile-cards {
-          display: none;
-          flex-direction: column;
-          gap: 1rem;
+          display: none !important;
         }
 
+        /* ===== Table action buttons ===== */
+        .user-table-actions {
+          display: flex;
+          gap: 0.4rem;
+          justify-content: flex-end;
+          flex-wrap: nowrap;
+          align-items: center;
+        }
+
+        .user-table-actions .btn-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          padding: 0.35rem 0.7rem;
+          font-size: 0.8rem;
+          font-weight: 500;
+          border-radius: var(--isp-radius-sm);
+          border: 1px solid var(--isp-slate-200);
+          background: var(--isp-white);
+          color: var(--isp-slate-700);
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.15s ease;
+          text-decoration: none;
+        }
+
+        .user-table-actions .btn-action:hover {
+          background: var(--isp-slate-50);
+          border-color: var(--isp-slate-300);
+        }
+
+        .user-table-actions .btn-action.btn-edit:hover {
+          background: var(--isp-blue-50);
+          border-color: var(--isp-blue-500);
+          color: var(--isp-blue-700);
+        }
+
+        .user-table-actions .btn-action.btn-password:hover {
+          background: #fef3c7;
+          border-color: #f59e0b;
+          color: #92400e;
+        }
+
+        .user-table-actions .btn-action.btn-delete {
+          color: #dc2626;
+          border-color: #fca5a5;
+        }
+
+        .user-table-actions .btn-action.btn-delete:hover {
+          background: #fee2e2;
+          border-color: #dc2626;
+        }
+
+        /* Mobile card styles */
         .user-mobile-card {
           background: #ffffff;
           border-radius: var(--isp-radius-lg);
@@ -403,17 +455,24 @@ export default function UsersList() {
           border-top: 1px solid var(--isp-slate-100);
         }
 
-        .user-mobile-actions-bar .btn {
-          padding: 0.55rem 0.4rem !important;
-          font-size: 0.78rem !important;
-          justify-content: center;
-          text-align: center;
+        .user-mobile-actions-bar button,
+        .user-mobile-actions-bar a {
+          padding: 0.6rem 0.4rem;
+          font-size: 0.8rem;
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 0.25rem;
+          border-radius: var(--isp-radius-md);
+          border: 1px solid var(--isp-slate-200);
+          background: var(--isp-white);
+          color: var(--isp-slate-700);
+          cursor: pointer;
+          font-weight: 500;
+          text-decoration: none;
         }
 
-        /* Responsive Breakpoints */
+        /* ===== TABLET: switch to cards at 860px ===== */
         @media (max-width: 860px) {
           .users-desktop-table {
             display: none !important;
@@ -421,6 +480,8 @@ export default function UsersList() {
 
           .users-mobile-cards {
             display: flex !important;
+            flex-direction: column;
+            gap: 1rem;
           }
 
           .users-admin-header {
@@ -428,7 +489,11 @@ export default function UsersList() {
             align-items: stretch;
           }
 
-          .users-admin-header .btn {
+          .users-admin-header > div:last-child {
+            width: 100%;
+          }
+
+          .users-admin-header > div:last-child .btn {
             width: 100%;
             justify-content: center;
           }
@@ -451,7 +516,8 @@ export default function UsersList() {
           }
         }
 
-        @media (max-width: 480px) {
+        /* ===== SMALL MOBILE: stack action buttons ===== */
+        @media (max-width: 400px) {
           .user-mobile-details-grid {
             grid-template-columns: 1fr;
           }
@@ -461,14 +527,14 @@ export default function UsersList() {
           }
         }
 
-        /* Responsive Modal Wrapper */
+        /* ===== MODAL styles ===== */
         .admin-modal-overlay {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(15, 23, 42, 0.7);
+          background-color: rgba(15, 23, 42, 0.72);
           backdrop-filter: blur(4px);
           display: flex;
           align-items: center;
@@ -480,7 +546,7 @@ export default function UsersList() {
         .admin-modal-card {
           background: #ffffff;
           border-radius: var(--isp-radius-lg);
-          max-width: 540px;
+          max-width: 560px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
@@ -495,23 +561,32 @@ export default function UsersList() {
           gap: 1rem;
         }
 
+        .modal-footer-btns {
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.75rem;
+          margin-top: 1.5rem;
+          border-top: 1px solid var(--isp-slate-200);
+          padding-top: 1rem;
+        }
+
         @media (max-width: 600px) {
           .admin-modal-card {
-            padding: 1.25rem !important;
+            padding: 1.25rem;
             max-height: 94vh;
           }
 
           .modal-grid-2col {
-            grid-template-columns: 1fr !important;
-            gap: 0.85rem !important;
+            grid-template-columns: 1fr;
+            gap: 0.85rem;
           }
 
           .modal-footer-btns {
-            flex-direction: column !important;
+            flex-direction: column;
           }
 
           .modal-footer-btns button {
-            width: 100% !important;
+            width: 100%;
           }
         }
       `}</style>
@@ -686,14 +761,13 @@ export default function UsersList() {
                         </span>
                       </td>
                       <td style={{ fontSize: '0.84rem', color: 'var(--isp-slate-500)' }}>{formatDate(u.data_registo)}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'center' }}>
+                      <td style={{ textAlign: 'right', minWidth: '200px', paddingRight: '1rem' }}>
+                        <div className="user-table-actions">
                           <button
                             type="button"
-                            className="btn btn-outline"
+                            className="btn-action btn-edit"
                             onClick={() => handleOpenEdit(u)}
-                            title="Editar Perfil (Email e Foto)"
-                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                            title="Editar Email e Foto de Perfil"
                           >
                             <span>✏️</span>
                             <span>Editar</span>
@@ -701,10 +775,9 @@ export default function UsersList() {
 
                           <button
                             type="button"
-                            className="btn btn-outline"
+                            className="btn-action btn-password"
                             onClick={() => handleOpenResetPassword(u)}
                             title="Alterar Palavra-passe"
-                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                           >
                             <span>🔑</span>
                             <span>Password</span>
@@ -712,10 +785,9 @@ export default function UsersList() {
 
                           <button
                             type="button"
-                            className="btn btn-outline"
+                            className="btn-action btn-delete"
                             onClick={() => handleOpenDelete(u)}
                             title="Eliminar Utilizador"
-                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem', color: '#dc2626', borderColor: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                           >
                             <span>🗑️</span>
                             <span>Eliminar</span>
