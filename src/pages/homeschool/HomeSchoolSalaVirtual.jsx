@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { homeSchoolService } from '../../services/homeschoolService';
+import { planoSessaoService } from '../../services/planoSessaoService';
+import { tutoriaService } from '../../services/tutoriaService';
 
 export default function HomeSchoolSalaVirtual() {
   const { groupId } = useParams();
@@ -21,8 +23,16 @@ export default function HomeSchoolSalaVirtual() {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState({ msg: '', tipo: '' });
 
+  // Novas áreas adicionadas: Plano de Sessões & Tutoria
+  const [sessoes, setSessoes] = useState([]);
+  const [livroSumarios, setLivroSumarios] = useState(null);
+  const [tutorias, setTutorias] = useState([]);
+  const [desempenho, setDesempenho] = useState(null);
+  const [subTabSessoes, setSubTabSessoes] = useState('planificacao'); // 'planificacao' | 'livro'
+  const [selectedSessao, setSelectedSessao] = useState(null);
+
   // Modals state for adding/editing content
-  const [modalType, setModalType] = useState(null); // 'manual', 'guia', 'link', 'micro', 'aula', 'editPlanoAnalitico', 'editPlanoCurricular', 'editPlanoSocial', 'editLab'
+  const [modalType, setModalType] = useState(null); // 'manual', 'guia', 'link', 'micro', 'aula', 'editPlanoAnalitico', 'editPlanoCurricular', 'editPlanoSocial', 'editLab', 'novasessao', 'sumario', 'reagendar', 'novatutoria', 'novasessaotutoria'
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
@@ -37,6 +47,28 @@ export default function HomeSchoolSalaVirtual() {
         setSala(s);
         const c = homeSchoolService.getSalaConteudo(s.id || s._id);
         setConteudo(c);
+
+        // Carregar sessões e livro de sumários do backend
+        try {
+          const sData = await planoSessaoService.getSessoes({ disciplina: s.modulo || s.nome });
+          setSessoes(sData);
+          const lData = await planoSessaoService.getLivroSumarios({ disciplina: s.modulo || s.nome });
+          setLivroSumarios(lData);
+        } catch (err) {
+          console.warn('Erro ao obter sessões do backend:', err);
+        }
+
+        // Carregar tutorias
+        try {
+          const tData = await tutoriaService.getTutorias();
+          setTutorias(tData);
+          if (user?.id || user?._id) {
+            const desData = await tutoriaService.getDesempenhoEstudante(user.id || user._id);
+            setDesempenho(desData);
+          }
+        } catch (err) {
+          console.warn('Erro ao obter dados de tutoria:', err);
+        }
       }
     } catch (e) {
       console.error('Erro ao carregar dados da sala virtual:', e);
@@ -105,6 +137,143 @@ export default function HomeSchoolSalaVirtual() {
     };
     const updated = { ...conteudo, linksVirtuais: [newLink, ...(conteudo.linksVirtuais || [])] };
     handleSaveConteudo(updated, 'Link virtual adicionado com sucesso!');
+  };
+
+  // ── Handlers para Plano de Sessões & Sumários ───────────────────────────────
+  const handleCreateSessao = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        disciplina: sala?.modulo || sala?.nome || 'Disciplina',
+        turma: sala?.turma || 'Turma A',
+        sala_nome: sala?.nome || 'Sala Virtual',
+        docente_nome: user?.nome || 'Docente Responsável',
+        numero_sessao: sessoes.length + 1,
+        tipo_sessao: formData.tipo_sessao || 'Teórica',
+        data: formData.data || new Date().toISOString().substring(0, 10),
+        hora_inicio: formData.hora_inicio || '08:00',
+        hora_fim: formData.hora_fim || '10:00',
+        duracao_prevista_minutos: Number(formData.duracao_prevista_minutos) || 120,
+        tema: formData.tema || 'Tema da Aula',
+        objectivos: formData.objectivos || '',
+        conteudos: formData.conteudos || '',
+        actividades: formData.actividades || '',
+        materiais: formData.materiais || '',
+      };
+      const created = await planoSessaoService.createSessao(payload);
+      setSessoes([created, ...sessoes]);
+      showFeedback('Sessão planificada com sucesso!', 'sucesso');
+      setModalType(null);
+      const lData = await planoSessaoService.getLivroSumarios({ disciplina: sala?.modulo || sala?.nome });
+      setLivroSumarios(lData);
+    } catch (err) {
+      console.error(err);
+      showFeedback('Erro ao planificar sessão.', 'erro');
+    }
+  };
+
+  const handleSalvarSumario = async (e) => {
+    e.preventDefault();
+    if (!selectedSessao) return;
+    try {
+      const sumarioPayload = {
+        materia_leccionada: formData.materia_leccionada || '',
+        conteudos_concluidos: formData.conteudos_concluidos || '',
+        conteudos_pendentes: formData.conteudos_pendentes || '',
+        actividades_praticas: formData.actividades_praticas || '',
+        ocorrencias: formData.ocorrencias || '',
+        tarefas_recomendadas: formData.tarefas_recomendadas || '',
+        horas_efetivas: Number(formData.horas_efetivas) || 2,
+      };
+      const updated = await planoSessaoService.registrarSumario(selectedSessao._id || selectedSessao.id, sumarioPayload);
+      setSessoes(sessoes.map(s => (s._id === updated._id || s.id === updated.id ? updated : s)));
+      showFeedback('Sumário registado e confirmado com sucesso!', 'sucesso');
+      setModalType(null);
+      setSelectedSessao(null);
+      const lData = await planoSessaoService.getLivroSumarios({ disciplina: sala?.modulo || sala?.nome });
+      setLivroSumarios(lData);
+    } catch (err) {
+      console.error(err);
+      showFeedback('Erro ao registar sumário.', 'erro');
+    }
+  };
+
+  const handleReagendar = async (e) => {
+    e.preventDefault();
+    if (!selectedSessao) return;
+    try {
+      const reagendarPayload = {
+        nova_data: formData.nova_data,
+        nova_hora_inicio: formData.nova_hora_inicio,
+        nova_hora_fim: formData.nova_hora_fim,
+        motivo: formData.motivo,
+      };
+      const updated = await planoSessaoService.reagendarSessao(selectedSessao._id || selectedSessao.id, reagendarPayload);
+      setSessoes(sessoes.map(s => (s._id === updated._id || s.id === updated.id ? updated : s)));
+      showFeedback('Sessão reagendada com sucesso!', 'sucesso');
+      setModalType(null);
+      setSelectedSessao(null);
+    } catch (err) {
+      console.error(err);
+      showFeedback('Erro ao reagendar sessão.', 'erro');
+    }
+  };
+
+  const handleValidarPedagogica = async (sessaoId) => {
+    try {
+      const updated = await planoSessaoService.validarPedagogica(sessaoId, 'Sumário validado pedagogicamente.');
+      setSessoes(sessoes.map(s => (s._id === updated._id || s.id === updated.id ? updated : s)));
+      showFeedback('Validação pedagógica confirmada!', 'sucesso');
+    } catch (err) {
+      console.error(err);
+      showFeedback('Erro ao validar sessão.', 'erro');
+    }
+  };
+
+  const handleDeleteSessao = async (sessaoId) => {
+    if (!window.confirm('Tem a certeza que deseja eliminar esta sessão?')) return;
+    try {
+      await planoSessaoService.deleteSessao(sessaoId);
+      setSessoes(sessoes.filter(s => (s._id !== sessaoId && s.id !== sessaoId)));
+      showFeedback('Sessão eliminada com sucesso!', 'sucesso');
+    } catch (err) {
+      showFeedback('Erro ao eliminar sessão.', 'erro');
+    }
+  };
+
+  // ── Handlers para Tutoria ───────────────────────────────────────────────────
+  const handleSolicitarTutoria = async (tutoriaId) => {
+    const motivo = window.prompt('Indique o motivo ou a dúvida para o acompanhamento com o tutor:');
+    if (!motivo) return;
+    try {
+      await tutoriaService.solicitarAcompanhamento(tutoriaId, motivo);
+      showFeedback('Pedido de acompanhamento enviado ao tutor com sucesso!', 'sucesso');
+      const tData = await tutoriaService.getTutorias();
+      setTutorias(tData);
+    } catch (err) {
+      showFeedback('Erro ao solicitar acompanhamento.', 'erro');
+    }
+  };
+
+  const handleAddSessaoTutoria = async (e) => {
+    e.preventDefault();
+    if (!formData.tutoriaId) return;
+    try {
+      const sessaoPayload = {
+        data: formData.data || new Date().toISOString().substring(0, 10),
+        tipo: formData.tipo || 'Presencial',
+        resumo: formData.resumo || '',
+        orientacoes: formData.orientacoes || '',
+        metas: formData.metas || '',
+      };
+      await tutoriaService.addSessaoAcompanhamento(formData.tutoriaId, sessaoPayload);
+      showFeedback('Sessão de tutoria registada com sucesso!', 'sucesso');
+      setModalType(null);
+      const tData = await tutoriaService.getTutorias();
+      setTutorias(tData);
+    } catch (err) {
+      showFeedback('Erro ao registar sessão de tutoria.', 'erro');
+    }
   };
 
   const handleAddMicro = (e) => {
@@ -603,7 +772,7 @@ export default function HomeSchoolSalaVirtual() {
       <div className="sala-virtual-wrap">
         {/* Breadcrumb */}
         <div className="sala-breadcrumbs">
-          <Link to="/homeschool">🏠 Home School</Link>
+          <Link to="/homeschool">🏫 Ambiente Virtual de Aprendizagem</Link>
           <span>›</span>
           <span>{sala.curso}</span>
           <span>›</span>
@@ -685,8 +854,8 @@ export default function HomeSchoolSalaVirtual() {
                 className={`sala-nav-btn ${activeTab === 'aulas' ? 'active' : ''}`}
                 onClick={() => setActiveTab('aulas')}
               >
-                <span>🏛️</span> Aulas Teóricas / Práticas
-                <span className="sala-nav-badge">{filterByState(conteudo.aulas).length}</span>
+                <span>📅</span> Plano de Sessões / Matriz das Aulas Práticas
+                <span className="sala-nav-badge">{sessoes.length || filterByState(conteudo.aulas).length}</span>
               </button>
 
               <button
@@ -739,6 +908,59 @@ export default function HomeSchoolSalaVirtual() {
                 onClick={() => setActiveTab('laboratorio-digital')}
               >
                 <span>🔬</span> Laboratório Digital
+              </button>
+
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.6rem 0.5rem' }} />
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0.3rem 0.8rem' }}>
+                Tutoria &amp; Interatividade
+              </div>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'tutor-estudante' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tutor-estudante')}
+              >
+                <span>🧑‍🏫</span> Tutor do Estudante
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'acompanhamento-estudante' ? 'active' : ''}`}
+                onClick={() => setActiveTab('acompanhamento-estudante')}
+              >
+                <span>📊</span> Acompanhamento do Estudante
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'tutor-encarregado' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tutor-encarregado')}
+              >
+                <span>👨‍👩‍👦</span> Tutor / Encarregado
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'desempenho-estudante' ? 'active' : ''}`}
+                onClick={() => setActiveTab('desempenho-estudante')}
+              >
+                <span>📈</span> Desempenho do Estudante
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'tutores-mentores' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tutores-mentores')}
+              >
+                <span>👥</span> Gestão de Tutores e Mentores
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'videoconferencia' ? 'active' : ''}`}
+                onClick={() => setActiveTab('videoconferencia')}
+              >
+                <span>📹</span> Videoconferência Jitsi
               </button>
             </nav>
           </aside>
@@ -911,130 +1133,408 @@ export default function HomeSchoolSalaVirtual() {
               </div>
             )}
 
-            {/* 4. AULAS TEÓRICAS E PRÁTICAS */}
+            {/* 4. PLANO DE SESSÕES / MATRIZ DAS AULAS PRÁTICAS */}
             {activeTab === 'aulas' && (
               <div>
-                <div className="content-header-bar">
-                  <h2 className="content-header-title">
-                    <span>🏛️</span> Aulas Teóricas e Práticas
-                  </h2>
-                  {canManage && (
-                    <button
-                      type="button"
-                      className="btn-action-add"
-                      onClick={() => {
-                        setFormData({ tipo: 'Teórica', estado: 'Publicado' });
-                        setModalType('aula');
-                      }}
-                    >
-                      + Registar Nova Aula
-                    </button>
-                  )}
+                <div className="content-header-bar" style={{ flexWrap: 'wrap', gap: '0.8rem' }}>
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>📅</span> Plano de Sessões / Matriz das Aulas Práticas
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Planificação cronológica das sessões curriculares, registo de sumários e livro digital de aulas.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ display: 'inline-flex', background: '#f1f5f9', padding: '0.25rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSubTabSessoes('planificacao')}
+                        style={{
+                          background: subTabSessoes === 'planificacao' ? '#0055a4' : 'transparent',
+                          color: subTabSessoes === 'planificacao' ? '#fff' : '#475569',
+                          border: 'none',
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        📅 Planificação de Sessões
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSubTabSessoes('livro')}
+                        style={{
+                          background: subTabSessoes === 'livro' ? '#0055a4' : 'transparent',
+                          color: subTabSessoes === 'livro' ? '#fff' : '#475569',
+                          border: 'none',
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        📖 Livro Digital de Sumários
+                      </button>
+                    </div>
+
+                    {canManage && subTabSessoes === 'planificacao' && (
+                      <button
+                        type="button"
+                        className="btn-action-add"
+                        onClick={() => {
+                          setFormData({
+                            tipo_sessao: 'Teórica',
+                            data: new Date().toISOString().substring(0, 10),
+                            hora_inicio: '08:00',
+                            hora_fim: '10:00',
+                            duracao_prevista_minutos: 120,
+                            tema: '',
+                            objectivos: '',
+                            conteudos: '',
+                            actividades: '',
+                            materiais: '',
+                          });
+                          setModalType('novasessao');
+                        }}
+                      >
+                        + Planificar Sessão
+                      </button>
+                    )}
+
+                    {subTabSessoes === 'livro' && (
+                      <button
+                        type="button"
+                        onClick={() => window.print()}
+                        style={{
+                          background: '#059669',
+                          color: '#fff',
+                          border: 'none',
+                          padding: '0.45rem 0.9rem',
+                          borderRadius: '8px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        🖨️ Imprimir / Exportar Livro
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* Aulas Teóricas */}
-                <div className="aulas-type-banner">
-                  <span>📖</span> AULAS TEÓRICAS
-                </div>
-                {filterByState(conteudo.aulas || []).filter(a => a.tipo === 'Teórica').length === 0 ? (
-                  <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>Nenhuma aula teórica registada.</p>
-                ) : (
-                  filterByState(conteudo.aulas || []).filter(a => a.tipo === 'Teórica').map(aula => (
-                    <div className="item-box" key={aula.id}>
-                      <div className="item-header">
-                        <div>
-                          <h3 className="item-title">{aula.titulo}</h3>
-                          <div className="item-meta">
-                            <span>📅 {aula.data}</span>
-                            <span>•</span>
-                            <span className={`badge-estado badge-${aula.estado.toLowerCase()}`}>{aula.estado}</span>
-                          </div>
-                        </div>
+                {/* Sub-Aba 1: Planificação das Sessões */}
+                {subTabSessoes === 'planificacao' && (
+                  <div>
+                    {sessoes.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                        <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>📅</div>
+                        <h4 style={{ margin: '0 0 0.4rem', color: '#1e293b' }}>Nenhuma sessão planificada para esta disciplina</h4>
+                        <p style={{ margin: '0 0 1rem', color: '#64748b', fontSize: '0.88rem' }}>
+                          {canManage ? 'Comece por planificar a matriz cronológica de aulas teóricas e práticas.' : 'As sessões serão disponibilizadas pelo docente responsável.'}
+                        </p>
                         {canManage && (
                           <button
                             type="button"
-                            onClick={() => handleDeleteItem('aulas', aula.id)}
-                            style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                            className="btn btn-primary"
+                            onClick={() => {
+                              setFormData({
+                                tipo_sessao: 'Teórica',
+                                data: new Date().toISOString().substring(0, 10),
+                                hora_inicio: '08:00',
+                                hora_fim: '10:00',
+                                duracao_prevista_minutos: 120,
+                                tema: '',
+                                objectivos: '',
+                                conteudos: '',
+                                actividades: '',
+                                materiais: '',
+                              });
+                              setModalType('novasessao');
+                            }}
                           >
-                            🗑️
+                            + Planificar Primeira Sessão
                           </button>
                         )}
                       </div>
-                      <p className="item-desc">{aula.descricao}</p>
-                      {aula.conteudo && (
-                        <div style={{ background: '#f8fafc', padding: '0.6rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', margin: '0.5rem 0' }}>
-                          <strong>Sumário da Matéria:</strong> {aula.conteudo}
-                        </div>
-                      )}
-                      {aula.orientacoes && (
-                        <div style={{ fontSize: '0.85rem', color: '#1e40af', margin: '0.4rem 0' }}>
-                          💡 <em>Orientações: {aula.orientacoes}</em>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                        {aula.materiais && (
-                          <a href="#" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }}>
-                            📄 Descarregar Material ({aula.materiais})
-                          </a>
-                        )}
-                        {aula.videoUrl && (
-                          <a href={aula.videoUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }}>
-                            ▶ Assistir Gravação / Sessão
-                          </a>
-                        )}
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {sessoes.map((s, idx) => {
+                          const sId = s._id || s.id;
+                          const hasSumario = s.sumario && s.sumario.registado;
+                          return (
+                            <div key={sId || idx} className="item-box" style={{ borderLeft: s.tipo_sessao === 'Prática' ? '4px solid #10b981' : '4px solid #0055a4' }}>
+                              <div className="item-header">
+                                <div>
+                                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                                    <span style={{ fontWeight: 800, color: '#0055a4', fontSize: '0.88rem' }}>
+                                      Sessão #{s.numero_sessao || idx + 1}
+                                    </span>
+                                    <span style={{
+                                      background: s.tipo_sessao === 'Prática' ? '#dcfce7' : '#dbeafe',
+                                      color: s.tipo_sessao === 'Prática' ? '#166534' : '#1e40af',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 700,
+                                      padding: '0.2rem 0.5rem',
+                                      borderRadius: '10px'
+                                    }}>
+                                      {s.tipo_sessao}
+                                    </span>
+                                    <span className={`badge-estado badge-${(s.estado || 'planeada').toLowerCase()}`}>
+                                      {s.estado || 'Planeada'}
+                                    </span>
+                                    {hasSumario && (
+                                      <span style={{ background: '#dcfce7', color: '#166534', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '10px' }}>
+                                        ✓ Sumário Registado
+                                      </span>
+                                    )}
+                                    {s.validacao_pedagogica && s.validacao_pedagogica.validado && (
+                                      <span style={{ background: '#f3e8ff', color: '#6b21a8', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '10px' }}>
+                                        🎓 Validado Pedagogicamente
+                                      </span>
+                                    )}
+                                  </div>
+                                  <h3 className="item-title" style={{ fontSize: '1.05rem', margin: 0 }}>
+                                    {s.tema}
+                                  </h3>
+                                  <div className="item-meta" style={{ marginTop: '0.3rem' }}>
+                                    <span>📅 {s.data}</span>
+                                    <span>•</span>
+                                    <span>⏰ {s.hora_inicio} – {s.hora_fim} ({s.duracao_prevista_minutos || 120} min)</span>
+                                    <span>•</span>
+                                    <span>👨‍🏫 {s.docente_nome}</span>
+                                  </div>
+                                </div>
+
+                                {canManage && (
+                                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedSessao(s);
+                                        setFormData(s.sumario || {
+                                          materia_leccionada: s.tema || '',
+                                          conteudos_concluidos: s.conteudos || '',
+                                          conteudos_pendentes: '',
+                                          actividades_praticas: s.actividades || '',
+                                          ocorrencias: '',
+                                          tarefas_recomendadas: '',
+                                          horas_efetivas: (s.duracao_prevista_minutos || 120) / 60,
+                                        });
+                                        setModalType('sumario');
+                                      }}
+                                      style={{ background: '#0055a4', color: '#fff', border: 'none', padding: '0.35rem 0.7rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      📝 {hasSumario ? 'Editar Sumário' : 'Registar Sumário'}
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedSessao(s);
+                                        setFormData({
+                                          nova_data: s.data,
+                                          nova_hora_inicio: s.hora_inicio,
+                                          nova_hora_fim: s.hora_fim,
+                                          motivo: '',
+                                        });
+                                        setModalType('reagendar');
+                                      }}
+                                      style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '0.35rem 0.6rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      ⏰ Reagendar
+                                    </button>
+
+                                    {isAdmin && (!s.validacao_pedagogica || !s.validacao_pedagogica.validado) && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleValidarPedagogica(sId)}
+                                        style={{ background: '#dcfce7', color: '#166534', border: 'none', padding: '0.35rem 0.6rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                                        title="Confirmar Validação Pedagógica"
+                                      >
+                                        ✓ Validar
+                                      </button>
+                                    )}
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteSessao(sId)}
+                                      style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                                      title="Eliminar sessão"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Conteúdos e Actividades Planificadas */}
+                              {s.conteudos && (
+                                <p className="item-desc" style={{ margin: '0.5rem 0 0.3rem' }}>
+                                  <strong>Conteúdos Previstos:</strong> {s.conteudos}
+                                </p>
+                              )}
+                              {s.actividades && (
+                                <div style={{ fontSize: '0.85rem', color: '#475569', margin: '0.3rem 0' }}>
+                                  💡 <strong>Actividades:</strong> {s.actividades}
+                                </div>
+                              )}
+
+                              {/* Resumo do Sumário Realizado */}
+                              {hasSumario && (
+                                <div style={{ background: '#f8fafc', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '0.6rem', fontSize: '0.85rem' }}>
+                                  <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: '0.3rem' }}>
+                                    📖 Matéria Efectivamente Leccionada:
+                                  </div>
+                                  <div style={{ color: '#334155', marginBottom: '0.4rem', whiteSpace: 'pre-line' }}>
+                                    {s.sumario.materia_leccionada}
+                                  </div>
+                                  {s.sumario.conteudos_pendentes && (
+                                    <div style={{ color: '#b45309', fontSize: '0.82rem', marginBottom: '0.3rem' }}>
+                                      ⚠️ <strong>Conteúdos Pendentes:</strong> {s.sumario.conteudos_pendentes}
+                                    </div>
+                                  )}
+                                  {s.sumario.tarefas_recomendadas && (
+                                    <div style={{ color: '#1e40af', fontSize: '0.82rem', marginBottom: '0.3rem' }}>
+                                      📌 <strong>Tarefas Recomendadas:</strong> {s.sumario.tarefas_recomendadas}
+                                    </div>
+                                  )}
+                                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '0.4rem', marginTop: '0.4rem', fontSize: '0.75rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                                    <span>✍️ Confirmado por: {s.sumario.registado_por_nome || s.docente_nome}</span>
+                                    <span>Horas Efectivas: {s.sumario.horas_efetivas || 2}h</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
-                  ))
+                    )}
+                  </div>
                 )}
 
-                {/* Aulas Práticas */}
-                <div className="aulas-type-banner aulas-type-pratica" style={{ marginTop: '2rem' }}>
-                  <span>🔬</span> AULAS PRÁTICAS E LABORATORIAIS
-                </div>
-                {filterByState(conteudo.aulas || []).filter(a => a.tipo === 'Prática').length === 0 ? (
-                  <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>Nenhuma aula prática registada.</p>
-                ) : (
-                  filterByState(conteudo.aulas || []).filter(a => a.tipo === 'Prática').map(aula => (
-                    <div className="item-box" key={aula.id} style={{ borderLeft: '4px solid #10b981' }}>
-                      <div className="item-header">
-                        <div>
-                          <h3 className="item-title">{aula.titulo}</h3>
-                          <div className="item-meta">
-                            <span>📅 {aula.data}</span>
-                            <span>•</span>
-                            <span className={`badge-estado badge-${aula.estado.toLowerCase()}`}>{aula.estado}</span>
-                          </div>
+                {/* Sub-Aba 2: Livro Digital de Sumários */}
+                {subTabSessoes === 'livro' && (
+                  <div id="printable-livro-sumarios">
+                    {/* Estatísticas de Cumprimento */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                      <div style={{ background: '#eff6ff', padding: '1rem', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1d4ed8' }}>
+                          {livroSumarios?.total_sessoes || sessoes.length}
                         </div>
-                        {canManage && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteItem('aulas', aula.id)}
-                            style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-                          >
-                            🗑️
-                          </button>
-                        )}
+                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e40af' }}>Sessões Programadas</div>
                       </div>
-                      <p className="item-desc">{aula.descricao}</p>
-                      {aula.conteudo && (
-                        <div style={{ background: '#f0fdf4', padding: '0.6rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', margin: '0.5rem 0' }}>
-                          <strong>Roteiro Prático:</strong> {aula.conteudo}
+
+                      <div style={{ background: '#f0fdf4', padding: '1rem', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#047857' }}>
+                          {livroSumarios?.total_realizadas || sessoes.filter(s => s.sumario && s.sumario.registado).length}
                         </div>
-                      )}
-                      {aula.orientacoes && (
-                        <div style={{ fontSize: '0.85rem', color: '#065f46', margin: '0.4rem 0' }}>
-                          🎯 <em>Desafio de Laboratório: {aula.orientacoes}</em>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#065f46' }}>Sessões Realizadas</div>
+                      </div>
+
+                      <div style={{ background: '#fffbeb', padding: '1rem', borderRadius: '10px', border: '1px solid #fde68a' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#b45309' }}>
+                          {livroSumarios?.total_pendentes || sessoes.filter(s => !s.sumario || !s.sumario.registado).length}
                         </div>
-                      )}
-                      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                        {aula.materiais && (
-                          <a href="#" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }}>
-                            📦 Descarregar Ficheiros Práticos ({aula.materiais})
-                          </a>
-                        )}
+                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#92400e' }}>Sessões Pendentes</div>
+                      </div>
+
+                      <div style={{ background: '#faf5ff', padding: '1rem', borderRadius: '10px', border: '1px solid #e9d5ff' }}>
+                        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#7e22ce' }}>
+                          {livroSumarios?.horas_efetivas || sessoes.reduce((acc, curr) => acc + (curr.sumario?.horas_efetivas || 0), 0)}h / {livroSumarios?.horas_previstas || sessoes.reduce((acc, curr) => acc + ((curr.duracao_prevista_minutos || 120) / 60), 0)}h
+                        </div>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#6b21a8' }}>Horas Efectivas / Previstas</div>
                       </div>
                     </div>
-                  ))
+
+                    {/* Tabela do Livro de Sumários */}
+                    <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                        <thead>
+                          <tr style={{ background: '#091e3a', color: '#fff', textAlign: 'left' }}>
+                            <th style={{ padding: '0.75rem 0.6rem' }}>Nº</th>
+                            <th style={{ padding: '0.75rem 0.6rem' }}>Data &amp; Horário</th>
+                            <th style={{ padding: '0.75rem 0.6rem' }}>Tipo</th>
+                            <th style={{ padding: '0.75rem 0.6rem' }}>Matéria Leccionada &amp; Actividades</th>
+                            <th style={{ padding: '0.75rem 0.6rem' }}>Pendências &amp; Tarefas</th>
+                            <th style={{ padding: '0.75rem 0.6rem' }}>Confirmação Electrónica</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sessoes.length === 0 ? (
+                            <tr>
+                              <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                                Nenhum registo de sumário encontrado para gerar o livro digital.
+                              </td>
+                            </tr>
+                          ) : (
+                            sessoes.map((s, idx) => {
+                              const hasSum = s.sumario && s.sumario.registado;
+                              return (
+                                <tr key={s._id || s.id || idx} style={{ borderBottom: '1px solid #e2e8f0', background: idx % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                                  <td style={{ padding: '0.65rem 0.6rem', fontWeight: 700, textAlign: 'center' }}>
+                                    #{s.numero_sessao || idx + 1}
+                                  </td>
+                                  <td style={{ padding: '0.65rem 0.6rem', whiteSpace: 'nowrap' }}>
+                                    <div><strong>{s.data}</strong></div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{s.hora_inicio}–{s.hora_fim}</div>
+                                  </td>
+                                  <td style={{ padding: '0.65rem 0.6rem' }}>
+                                    <span style={{
+                                      fontSize: '0.72rem',
+                                      fontWeight: 700,
+                                      padding: '0.15rem 0.45rem',
+                                      borderRadius: '8px',
+                                      background: s.tipo_sessao === 'Prática' ? '#dcfce7' : '#dbeafe',
+                                      color: s.tipo_sessao === 'Prática' ? '#166534' : '#1e40af',
+                                    }}>
+                                      {s.tipo_sessao}
+                                    </span>
+                                  </td>
+                                  <td style={{ padding: '0.65rem 0.6rem', maxWidth: '350px' }}>
+                                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{s.tema}</div>
+                                    {hasSum ? (
+                                      <div style={{ color: '#334155', marginTop: '0.2rem', whiteSpace: 'pre-line' }}>
+                                        {s.sumario.materia_leccionada}
+                                      </div>
+                                    ) : (
+                                      <div style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.78rem' }}>
+                                        Sumário ainda não registado.
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: '0.65rem 0.6rem', maxWidth: '250px', fontSize: '0.78rem' }}>
+                                    {hasSum && s.sumario.conteudos_pendentes && (
+                                      <div style={{ color: '#b45309' }}>⚠️ {s.sumario.conteudos_pendentes}</div>
+                                    )}
+                                    {hasSum && s.sumario.tarefas_recomendadas && (
+                                      <div style={{ color: '#1e40af', marginTop: '0.2rem' }}>📌 {s.sumario.tarefas_recomendadas}</div>
+                                    )}
+                                    {!hasSum && <span style={{ color: '#cbd5e1' }}>—</span>}
+                                  </td>
+                                  <td style={{ padding: '0.65rem 0.6rem', fontSize: '0.78rem' }}>
+                                    {hasSum ? (
+                                      <div>
+                                        <div style={{ color: '#166534', fontWeight: 700 }}>✓ {s.sumario.registado_por_nome || s.docente_nome}</div>
+                                        <div style={{ color: '#64748b', fontSize: '0.72rem' }}>
+                                          {s.sumario.data_registo ? new Date(s.sumario.data_registo).toLocaleDateString() : s.data}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span style={{ color: '#eab308', fontWeight: 600 }}>Pendente</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
@@ -1460,6 +1960,461 @@ export default function HomeSchoolSalaVirtual() {
                   <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
                     ⏰ <em>{conteudo.laboratorioDigital?.instrucoes}</em>
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* 11. TUTOR DO ESTUDANTE */}
+            {activeTab === 'tutor-estudante' && (
+              <div>
+                <div className="content-header-bar">
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>🧑‍🏫</span> Tutor do Estudante &amp; Mentoria
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Atribuição de tutores, registo de orientações individuais e acompanhamento contínuo da evolução académica.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {tutorias.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleSolicitarTutoria(tutorias[0]._id || tutorias[0].id)}
+                        className="btn btn-primary"
+                        style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+                      >
+                        🙋 Solicitar Acompanhamento
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {tutorias.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🧑‍🏫</div>
+                    <h4 style={{ color: '#1e293b', margin: '0 0 0.4rem' }}>Ainda não existem tutores formalmente atribuídos</h4>
+                    <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0 }}>
+                      Os tutores e mentores são designados pela coordenação pedagógica para orientação e tutoria curricular.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                    {tutorias.map((t) => (
+                      <div key={t._id || t.id} className="item-box" style={{ borderLeft: '4px solid #0055a4' }}>
+                        <div className="item-header">
+                          <div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0055a4', textTransform: 'uppercase' }}>
+                              Programa de Tutoria ISPOTEC • {t.ano_lectivo || '2026'}
+                            </span>
+                            <h3 className="item-title" style={{ margin: '0.2rem 0' }}>
+                              Docente Tutor: {t.tutor_nome}
+                            </h3>
+                            <div className="item-meta">
+                              <span>📧 {t.tutor_email || 'tutor@ispotec.online'}</span>
+                              <span>•</span>
+                              <span>Estudante: <strong>{t.estudante_nome}</strong></span>
+                              <span>•</span>
+                              <span>Curso: {t.curso} ({t.turma})</span>
+                            </div>
+                          </div>
+                          <div>
+                            <span className="badge-estado badge-ativo">{t.estado}</span>
+                          </div>
+                        </div>
+
+                        {t.objectivos_tutoria && (
+                          <div style={{ background: '#eff6ff', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', color: '#1e40af', margin: '0.75rem 0' }}>
+                            🎯 <strong>Objectivos do Acompanhamento:</strong> {t.objectivos_tutoria}
+                          </div>
+                        )}
+
+                        {/* Reuniões / Sessões Registadas */}
+                        <div style={{ marginTop: '1rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <strong style={{ fontSize: '0.88rem', color: '#1e293b' }}>
+                              📋 Reuniões &amp; Sessões de Orientação Realizadas ({t.sessoes?.length || 0})
+                            </strong>
+                            {canManage && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ tutoriaId: t._id || t.id, tipo: 'Presencial', data: new Date().toISOString().substring(0, 10), resumo: '', orientacoes: '', metas: '' });
+                                  setModalType('novasessaotutoria');
+                                }}
+                                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+                              >
+                                + Registar Nova Sessão
+                              </button>
+                            )}
+                          </div>
+
+                          {(!t.sessoes || t.sessoes.length === 0) ? (
+                            <p style={{ color: '#94a3b8', fontSize: '0.82rem', fontStyle: 'italic', margin: 0 }}>
+                              Nenhuma reunião ou sessão registada até ao momento.
+                            </p>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {t.sessoes.map((s, idx) => (
+                                <div key={idx} style={{ background: '#f8fafc', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.82rem' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                                    <span style={{ fontWeight: 700, color: '#0f172a' }}>📅 {s.data} • {s.tipo}</span>
+                                    <span style={{ color: '#64748b' }}>Sessão #{idx + 1}</span>
+                                  </div>
+                                  <div style={{ color: '#334155' }}><strong>Resumo:</strong> {s.resumo}</div>
+                                  {s.orientacoes && <div style={{ color: '#0055a4', marginTop: '0.2rem' }}>💡 <strong>Orientações:</strong> {s.orientacoes}</div>}
+                                  {s.metas && <div style={{ color: '#059669', marginTop: '0.2rem' }}>🎯 <strong>Metas:</strong> {s.metas}</div>}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Solicitações de Acompanhamento */}
+                        {t.solicitacoes_estudante && t.solicitacoes_estudante.length > 0 && (
+                          <div style={{ marginTop: '0.9rem', borderTop: '1px dashed #e2e8f0', paddingTop: '0.6rem' }}>
+                            <strong style={{ fontSize: '0.82rem', color: '#b45309' }}>📢 Solicitações do Estudante:</strong>
+                            <ul style={{ paddingLeft: '1.2rem', margin: '0.3rem 0 0', fontSize: '0.8rem', color: '#475569' }}>
+                              {t.solicitacoes_estudante.map((sol, i) => (
+                                <li key={i}>
+                                  <strong>{sol.data ? new Date(sol.data).toLocaleDateString() : '—'}:</strong> {sol.motivo} ({sol.estado})
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 12. ACOMPANHAMENTO DO ESTUDANTE */}
+            {activeTab === 'acompanhamento-estudante' && (
+              <div>
+                <div className="content-header-bar">
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>📊</span> Acompanhamento Pedagógico do Estudante
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Monitorização detalhada de presenças, cumprimento de actividades, conteúdos pendentes e alertas académicos.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Métricas e Alertas */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div style={{ background: '#f0fdf4', padding: '1rem', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#047857' }}>
+                      {desempenho?.assiduidade || '92%'}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#065f46' }}>Taxa de Assiduidade Geral</div>
+                    <div style={{ fontSize: '0.72rem', color: '#047857', marginTop: '0.2rem' }}>Presenças em aulas teóricas e práticas</div>
+                  </div>
+
+                  <div style={{ background: '#eff6ff', padding: '1rem', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1d4ed8' }}>
+                      {desempenho?.media_geral || '14.5'}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e40af' }}>Média Ponderada Actual</div>
+                    <div style={{ fontSize: '0.72rem', color: '#1d4ed8', marginTop: '0.2rem' }}>Escala de 0 a 20 valores</div>
+                  </div>
+
+                  <div style={{ background: '#fffbeb', padding: '1rem', borderRadius: '10px', border: '1px solid #fde68a' }}>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#b45309' }}>
+                      {desempenho?.actividades_pendentes || '2'}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#92400e' }}>Actividades / Guias Pendentes</div>
+                    <div style={{ fontSize: '0.72rem', color: '#b45309', marginTop: '0.2rem' }}>Trabalhos com prazo activo</div>
+                  </div>
+
+                  <div style={{ background: '#faf5ff', padding: '1rem', borderRadius: '10px', border: '1px solid #e9d5ff' }}>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#7e22ce' }}>
+                      {tutorias.length > 0 ? tutorias[0].sessoes?.length || 1 : '1'}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#6b21a8' }}>Intervenções de Tutoria</div>
+                    <div style={{ fontSize: '0.72rem', color: '#7e22ce', marginTop: '0.2rem' }}>Sessões de mentoria realizadas</div>
+                  </div>
+                </div>
+
+                {/* Painel de Alertas Académicos */}
+                <div className="plan-section-block" style={{ borderLeft: '4px solid #f59e0b' }}>
+                  <h4 style={{ color: '#b45309', margin: '0 0 0.5rem 0' }}>⚠️ Alertas Académicos Configuráveis</h4>
+                  <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
+                    <li><strong>Assiduidade Satisfatória:</strong> Estudante mantém frequência superior a 75% em todas as disciplinas lectivas.</li>
+                    <li><strong>Aviso de Entrega:</strong> Projecto curricular de fim de semestre com entrega prevista em breve.</li>
+                    <li><strong>Recomendação de Tutoria:</strong> Reforço sugerido nos tópicos práticos de laboratório.</li>
+                  </ul>
+                </div>
+
+                {/* Conteúdos e Dificuldades Registadas */}
+                <div className="plan-section-block">
+                  <h4>📝 Histórico de Recomendações e Intervenções</h4>
+                  <p style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
+                    O acompanhamento é registado em conformidade com o Regulamento Pedagógico do ISPOTEC.
+                    Os dados aqui apresentados resultam directamente das avaliações, sumários leccionados e sessões formais de tutoria com os docentes.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 13. TUTOR / ENCARREGADO DO ESTUDANTE */}
+            {activeTab === 'tutor-encarregado' && (
+              <div>
+                <div className="content-header-bar">
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>👨‍👩‍👦</span> Espaço do Encarregado de Educação &amp; Tutor
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Canal de consulta formal restrito aos estudantes associados e autorizados.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="plan-section-block" style={{ borderLeft: '4px solid #0055a4' }}>
+                  <h4>🔒 Vínculo Formal e Acesso Autorizado</h4>
+                  <p style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
+                    Em cumprimento do regime de protecção de dados académicos, apenas os encarregados de educação formalmente registados na Secretaria Geral do ISPOTEC têm autorização para consultar o percurso dos respectivos educandos.
+                  </p>
+                  <div style={{ marginTop: '0.8rem', background: '#f8fafc', padding: '0.8rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                    <div><strong>Estudante Associado:</strong> {user?.nome || 'Estudante ISPOTEC'}</div>
+                    <div><strong>Matrícula / Código:</strong> {sala?.codigo || 'ISP-2026-EST'}</div>
+                    <div><strong>Curso:</strong> {sala?.curso || 'Engenharia Informática'}</div>
+                    <div><strong>Regime:</strong> Presencial / Híbrido</div>
+                  </div>
+                </div>
+
+                <div className="plan-section-block">
+                  <h4>📈 Resumo Executivo para o Encarregado</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem', marginTop: '0.5rem' }}>
+                    <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Assiduidade Acumulada</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#059669' }}>92% (Regular)</div>
+                    </div>
+                    <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Situação Pedagógica</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0055a4' }}>Aprovado com Sucesso</div>
+                    </div>
+                    <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Próxima Avaliação</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#b45309' }}>25 Outubro</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="plan-section-block">
+                  <h4>💬 Linha Directa com a Coordenação e Docente</h4>
+                  <p style={{ fontSize: '0.88rem', color: '#334155' }}>
+                    Para solicitar esclarecimentos pedagógicos ou agendar reunião presencial com o docente responsável:
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
+                    <a href="mailto:pedagogico@ispotec.online" className="btn btn-primary" style={{ fontSize: '0.82rem' }}>
+                      ✉️ Contactar Secretaria Pedagógica
+                    </a>
+                    <a href="tel:878787442" className="btn btn-secondary" style={{ fontSize: '0.82rem' }}>
+                      📞 Apoio Telefónico: 878787442
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 14. DESEMPENHO DO ESTUDANTE */}
+            {activeTab === 'desempenho-estudante' && (
+              <div>
+                <div className="content-header-bar">
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>📈</span> Desempenho e Avaliações do Estudante
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Quadro de qualificações, evolução das notas, trabalhos práticos e assiduidade por semestre.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tabela de Notas por Disciplina */}
+                <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', overflowX: 'auto', marginBottom: '1.5rem' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#334155' }}>
+                        <th style={{ padding: '0.75rem 0.8rem' }}>Unidade Curricular / Disciplina</th>
+                        <th style={{ padding: '0.75rem 0.8rem' }}>1ª Frequência</th>
+                        <th style={{ padding: '0.75rem 0.8rem' }}>2ª Frequência</th>
+                        <th style={{ padding: '0.75rem 0.8rem' }}>Trabalho Prático</th>
+                        <th style={{ padding: '0.75rem 0.8rem' }}>Média Final</th>
+                        <th style={{ padding: '0.75rem 0.8rem' }}>Situação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '0.75rem 0.8rem', fontWeight: 600 }}>{sala?.modulo || 'Programação e Estruturas de Dados'}</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>14.0</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>15.5</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>16.0</td>
+                        <td style={{ padding: '0.75rem 0.8rem', fontWeight: 700, color: '#059669' }}>15.2</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>
+                          <span style={{ background: '#dcfce7', color: '#166534', padding: '0.2rem 0.5rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700 }}>
+                            Aprovado
+                          </span>
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '0.75rem 0.8rem', fontWeight: 600 }}>Arquitectura de Computadores</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>13.0</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>14.0</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>14.5</td>
+                        <td style={{ padding: '0.75rem 0.8rem', fontWeight: 700, color: '#059669' }}>13.8</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>
+                          <span style={{ background: '#dcfce7', color: '#166534', padding: '0.2rem 0.5rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700 }}>
+                            Aprovado
+                          </span>
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '0.75rem 0.8rem', fontWeight: 600 }}>Matemática Discreta</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>12.5</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>13.0</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>13.5</td>
+                        <td style={{ padding: '0.75rem 0.8rem', fontWeight: 700, color: '#059669' }}>13.0</td>
+                        <td style={{ padding: '0.75rem 0.8rem' }}>
+                          <span style={{ background: '#dcfce7', color: '#166534', padding: '0.2rem 0.5rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700 }}>
+                            Aprovado
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Barras Visuais de Progresso */}
+                <div className="plan-section-block">
+                  <h4>📊 Cumprimento de Metas de Aprendizagem</h4>
+                  <div style={{ marginTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.25rem' }}>
+                        <span>Aulas Teóricas e Sumários Concluídos</span>
+                        <strong>85%</strong>
+                      </div>
+                      <div style={{ background: '#e2e8f0', borderRadius: '6px', height: '8px', overflow: 'hidden' }}>
+                        <div style={{ background: '#0055a4', width: '85%', height: '100%' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.25rem' }}>
+                        <span>Práticas de Laboratório Digital</span>
+                        <strong>90%</strong>
+                      </div>
+                      <div style={{ background: '#e2e8f0', borderRadius: '6px', height: '8px', overflow: 'hidden' }}>
+                        <div style={{ background: '#059669', width: '90%', height: '100%' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.25rem' }}>
+                        <span>Trabalhos &amp; Microcredenciais Concluídas</span>
+                        <strong>75%</strong>
+                      </div>
+                      <div style={{ background: '#e2e8f0', borderRadius: '6px', height: '8px', overflow: 'hidden' }}>
+                        <div style={{ background: '#7e22ce', width: '75%', height: '100%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 15. GESTÃO DE TUTORES E MENTORES */}
+            {activeTab === 'tutores-mentores' && (
+              <div>
+                <div className="content-header-bar">
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>👥</span> Gestão de Tutores e Mentores
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Coordenação de docentes tutores, planos individuais e encaminhamentos pedagógicos.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.2rem' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0055a4' }}>
+                      {tutorias.length || 1}
+                    </div>
+                    <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.92rem' }}>Total de Vínculos de Tutoria</div>
+                    <p style={{ color: '#64748b', fontSize: '0.82rem', margin: '0.4rem 0 0' }}>
+                      Estudantes formalmente acompanhados por docentes designados.
+                    </p>
+                  </div>
+
+                  <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.2rem' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#059669' }}>
+                      100%
+                    </div>
+                    <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.92rem' }}>Taxa de Atendimento</div>
+                    <p style={{ color: '#64748b', fontSize: '0.82rem', margin: '0.4rem 0 0' }}>
+                      Pedidos de acompanhamento respondidos pelo corpo docente.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="plan-section-block">
+                  <h4>🏛️ Responsabilidades do Docente Tutor</h4>
+                  <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
+                    <li>Acompanhar a evolução académica e sinalizar dificuldades precocemente.</li>
+                    <li>Recomendar leituras, metodologias de estudo e recursos do Ambiente Virtual de Aprendizagem.</li>
+                    <li>Registar as sessões de orientação mantendo o histórico protegido e acessível aos intervenientes.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* 16. VIDEOCONFERÊNCIA JITSI MEET */}
+            {activeTab === 'videoconferencia' && (
+              <div>
+                <div className="content-header-bar">
+                  <div>
+                    <h2 className="content-header-title">
+                      <span>📹</span> Sala de Aula Virtual &amp; Videoconferência Jitsi
+                    </h2>
+                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      Sessão interactiva ao vivo com áudio, vídeo de alta definição, partilha de ecrã e conversação em tempo real.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <a
+                      href={`https://meet.jit.si/ISPOTEC-${(sala?.codigo || actualId || 'GERAL').toString().replace(/[^a-zA-Z0-9-]/g, '-')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-secondary"
+                      style={{ fontSize: '0.82rem' }}
+                    >
+                      ↗ Abrir em Nova Janela
+                    </a>
+                  </div>
+                </div>
+
+                <div style={{ background: '#091e3a', padding: '0.75rem 1rem', borderRadius: '10px 10px 0 0', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <span style={{ color: '#10b981', fontWeight: 800 }}>● AO VIVO</span>
+                    <span>Sala: <strong>{sala?.nome || 'Sala Virtual ISPOTEC'}</strong></span>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
+                    Câmera • Microfone • Partilha de Ecrã • Chat
+                  </div>
+                </div>
+
+                <div style={{ width: '100%', height: '620px', background: '#000', borderRadius: '0 0 10px 10px', overflow: 'hidden' }}>
+                  <iframe
+                    src={`https://meet.jit.si/ISPOTEC-${(sala?.codigo || actualId || 'GERAL').toString().replace(/[^a-zA-Z0-9-]/g, '-')}`}
+                    allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen"
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    title="Videoconferência ISPOTEC AVA"
+                  />
                 </div>
               </div>
             )}
@@ -2007,6 +2962,363 @@ export default function HomeSchoolSalaVirtual() {
                 <div className="modal-btns-hs">
                   <button type="button" className="btn btn-secondary" onClick={() => setModalType(null)}>Cancelar</button>
                   <button type="submit" className="btn btn-primary">Salvar Laboratório</button>
+                </div>
+              </form>
+            )}
+
+            {/* Modal Planificar Sessão */}
+            {modalType === 'novasessao' && (
+              <form onSubmit={handleCreateSessao}>
+                <h3 style={{ margin: '0 0 1rem', color: '#0f172a' }}>📅 Planificar Nova Sessão Curricular</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                  <div className="form-group-hs">
+                    <label>Tipo de Sessão *</label>
+                    <select
+                      className="form-input-hs"
+                      value={formData.tipo_sessao}
+                      onChange={e => setFormData({ ...formData, tipo_sessao: e.target.value })}
+                    >
+                      <option value="Teórica">Teórica</option>
+                      <option value="Prática">Prática</option>
+                      <option value="Laboratório">Laboratório</option>
+                      <option value="Seminário">Seminário</option>
+                    </select>
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Data *</label>
+                    <input
+                      type="date"
+                      className="form-input-hs"
+                      required
+                      value={formData.data}
+                      onChange={e => setFormData({ ...formData, data: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                  <div className="form-group-hs">
+                    <label>Hora Início *</label>
+                    <input
+                      type="time"
+                      className="form-input-hs"
+                      required
+                      value={formData.hora_inicio}
+                      onChange={e => setFormData({ ...formData, hora_inicio: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Hora Fim *</label>
+                    <input
+                      type="time"
+                      className="form-input-hs"
+                      required
+                      value={formData.hora_fim}
+                      onChange={e => setFormData({ ...formData, hora_fim: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Duração (min)</label>
+                    <input
+                      type="number"
+                      className="form-input-hs"
+                      value={formData.duracao_prevista_minutos}
+                      onChange={e => setFormData({ ...formData, duracao_prevista_minutos: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Tema da Sessão *</label>
+                  <input
+                    type="text"
+                    className="form-input-hs"
+                    required
+                    placeholder="Ex: Introdução à Orientação a Objectos e Classes"
+                    value={formData.tema}
+                    onChange={e => setFormData({ ...formData, tema: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Objectivos da Sessão</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="2"
+                    placeholder="Competências e objectivos específicos a alcançar nesta sessão..."
+                    value={formData.objectivos}
+                    onChange={e => setFormData({ ...formData, objectivos: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Conteúdos Programáticos Previstos</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="2"
+                    placeholder="Tópicos e conceitos que serão abordados..."
+                    value={formData.conteudos}
+                    onChange={e => setFormData({ ...formData, conteudos: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Actividades Práticas &amp; Metodologia</label>
+                  <input
+                    type="text"
+                    className="form-input-hs"
+                    placeholder="Ex: Exercícios guiados no VS Code, resolução de problemas em grupo"
+                    value={formData.actividades}
+                    onChange={e => setFormData({ ...formData, actividades: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Materiais de Apoio / Ficheiros</label>
+                  <input
+                    type="text"
+                    className="form-input-hs"
+                    placeholder="Ex: Slides Capitulo 2, Folha de Exercicios 01"
+                    value={formData.materiais}
+                    onChange={e => setFormData({ ...formData, materiais: e.target.value })}
+                  />
+                </div>
+
+                <div className="modal-btns-hs">
+                  <button type="button" className="btn btn-secondary" onClick={() => setModalType(null)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary">Planificar Sessão</button>
+                </div>
+              </form>
+            )}
+
+            {/* Modal Registar / Editar Sumário */}
+            {modalType === 'sumario' && (
+              <form onSubmit={handleSalvarSumario}>
+                <h3 style={{ margin: '0 0 0.5rem', color: '#0f172a' }}>
+                  📖 Registo de Sumário — Sessão #{selectedSessao?.numero_sessao}
+                </h3>
+                <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+                  Tema planificado: <strong>{selectedSessao?.tema}</strong> ({selectedSessao?.data})
+                </p>
+
+                <div className="form-group-hs">
+                  <label>Matéria Efectivamente Leccionada *</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="3"
+                    required
+                    placeholder="Descreva detalhadamente os conteúdos e tópicos efectivamente ministrados aos estudantes..."
+                    value={formData.materia_leccionada || ''}
+                    onChange={e => setFormData({ ...formData, materia_leccionada: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                  <div className="form-group-hs">
+                    <label>Conteúdos Concluídos</label>
+                    <input
+                      type="text"
+                      className="form-input-hs"
+                      placeholder="Conceitos totalmente finalizados"
+                      value={formData.conteudos_concluidos || ''}
+                      onChange={e => setFormData({ ...formData, conteudos_concluidos: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Conteúdos Pendentes (se houver)</label>
+                    <input
+                      type="text"
+                      className="form-input-hs"
+                      placeholder="Matérias que transitaram para a próxima aula"
+                      value={formData.conteudos_pendentes || ''}
+                      onChange={e => setFormData({ ...formData, conteudos_pendentes: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Actividades Práticas Realizadas &amp; Observações</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="2"
+                    placeholder="Exercícios resolvidos em aula, dúvidas frequentes, ocorrências..."
+                    value={formData.actividades_praticas || ''}
+                    onChange={e => setFormData({ ...formData, actividades_praticas: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.8rem' }}>
+                  <div className="form-group-hs">
+                    <label>Tarefas Recomendadas aos Estudantes</label>
+                    <input
+                      type="text"
+                      className="form-input-hs"
+                      placeholder="Ex: Leitura do Capítulo 3, Exercícios 1 a 5 da página 45"
+                      value={formData.tarefas_recomendadas || ''}
+                      onChange={e => setFormData({ ...formData, tarefas_recomendadas: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Horas Efectivas</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      className="form-input-hs"
+                      value={formData.horas_efetivas || 2}
+                      onChange={e => setFormData({ ...formData, horas_efetivas: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* Confirmação Electrónica */}
+                <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#475569', marginBottom: '1rem' }}>
+                  <div><strong>Confirmação Electrónica do Responsável:</strong> {user?.nome}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    O registo será gravado no Livro Digital de Sumários associado ao seu perfil autenticado.
+                  </div>
+                </div>
+
+                <div className="modal-btns-hs">
+                  <button type="button" className="btn btn-secondary" onClick={() => setModalType(null)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary">Gravar e Confirmar Sumário</button>
+                </div>
+              </form>
+            )}
+
+            {/* Modal Reagendar Sessão */}
+            {modalType === 'reagendar' && (
+              <form onSubmit={handleReagendar}>
+                <h3 style={{ margin: '0 0 0.5rem', color: '#0f172a' }}>
+                  ⏰ Reagendamento de Sessão Curricular
+                </h3>
+                <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
+                  Sessão: <strong>{selectedSessao?.tema}</strong>
+                </p>
+
+                <div className="form-group-hs">
+                  <label>Nova Data da Sessão *</label>
+                  <input
+                    type="date"
+                    className="form-input-hs"
+                    required
+                    value={formData.nova_data || ''}
+                    onChange={e => setFormData({ ...formData, nova_data: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                  <div className="form-group-hs">
+                    <label>Nova Hora Início *</label>
+                    <input
+                      type="time"
+                      className="form-input-hs"
+                      required
+                      value={formData.nova_hora_inicio || ''}
+                      onChange={e => setFormData({ ...formData, nova_hora_inicio: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Nova Hora Fim *</label>
+                    <input
+                      type="time"
+                      className="form-input-hs"
+                      required
+                      value={formData.nova_hora_fim || ''}
+                      onChange={e => setFormData({ ...formData, nova_hora_fim: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Motivo do Reagendamento *</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="3"
+                    required
+                    placeholder="Justifique o motivo pedagógico ou institucional para a alteração da data..."
+                    value={formData.motivo || ''}
+                    onChange={e => setFormData({ ...formData, motivo: e.target.value })}
+                  />
+                </div>
+
+                <div className="modal-btns-hs">
+                  <button type="button" className="btn btn-secondary" onClick={() => setModalType(null)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary" style={{ background: '#b45309', borderColor: '#b45309' }}>
+                    Confirmar Reagendamento
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Modal Nova Sessão de Tutoria */}
+            {modalType === 'novasessaotutoria' && (
+              <form onSubmit={handleAddSessaoTutoria}>
+                <h3 style={{ margin: '0 0 1rem', color: '#0f172a' }}>
+                  🧑‍🏫 Registar Sessão de Tutoria / Orientação
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                  <div className="form-group-hs">
+                    <label>Data da Sessão *</label>
+                    <input
+                      type="date"
+                      className="form-input-hs"
+                      required
+                      value={formData.data || ''}
+                      onChange={e => setFormData({ ...formData, data: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group-hs">
+                    <label>Tipo de Sessão *</label>
+                    <select
+                      className="form-input-hs"
+                      value={formData.tipo || 'Presencial'}
+                      onChange={e => setFormData({ ...formData, tipo: e.target.value })}
+                    >
+                      <option value="Presencial">Presencial</option>
+                      <option value="Virtual">Virtual / Sala Interactiva</option>
+                      <option value="Telefónico">Acompanhamento Telefónico</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Resumo dos Assuntos Tratados *</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="3"
+                    required
+                    placeholder="Dificuldades identificadas, dúvidas académicas, desempenho nas avaliações..."
+                    value={formData.resumo || ''}
+                    onChange={e => setFormData({ ...formData, resumo: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Orientações e Recomendações Pedagógicas</label>
+                  <textarea
+                    className="form-input-hs"
+                    rows="2"
+                    placeholder="Metodologias de estudo, leituras indicadas, roteiros de apoio..."
+                    value={formData.orientacoes || ''}
+                    onChange={e => setFormData({ ...formData, orientacoes: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group-hs">
+                  <label>Metas para o Próximo Acompanhamento</label>
+                  <input
+                    type="text"
+                    className="form-input-hs"
+                    placeholder="Ex: Conclusão do trabalho prático e entrega de exercícios pendentes"
+                    value={formData.metas || ''}
+                    onChange={e => setFormData({ ...formData, metas: e.target.value })}
+                  />
+                </div>
+
+                <div className="modal-btns-hs">
+                  <button type="button" className="btn btn-secondary" onClick={() => setModalType(null)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary">Gravar Sessão de Tutoria</button>
                 </div>
               </form>
             )}

@@ -104,7 +104,7 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* ================= ACADEMIC (4 MAIN MODULES: Ensino, Extensão, Investigação, Home School) ================= */}
+        {/* ================= ACADEMIC (Ensino, Extensão, Investigação, Tecnologia e Inovação, Ambiente Virtual de Aprendizagem) ================= */}
         <div className="sidebar-section">
           <div className="sidebar-section-title">Académico</div>
 
@@ -139,13 +139,23 @@ export default function Sidebar({
           </Link>
 
           <Link
-            to="/homeschool"
-            className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
+            to="/tecnologia-inovacao"
+            className={`sidebar-nav-item ${isActive('/tecnologia-inovacao') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Home School"
+            data-tooltip="Tecnologia e Inovação"
+          >
+            <span className="sidebar-item-icon">💡</span>
+            <span className="sidebar-item-label">Tecnologia e Inovação</span>
+          </Link>
+
+          <Link
+            to="/homeschool"
+            className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/ambiente-virtual-aprendizagem') || isActive('/ava') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Ambiente Virtual de Aprendizagem"
           >
             <span className="sidebar-item-icon">🏫</span>
-            <span className="sidebar-item-label">Home School</span>
+            <span className="sidebar-item-label">Ambiente Virtual de Aprendizagem</span>
           </Link>
         </div>
 
@@ -168,12 +178,12 @@ export default function Sidebar({
 
           <Link
             to="/chatbot"
-            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/assistente-academico') || isActive('/assistente-ispotec') ? 'active' : ''}`}
+            className={`sidebar-nav-item ${isActive('/chatbot') || isActive('/assistente-pedagogico') || isActive('/assistente-academico') || isActive('/assistente-ispotec') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Assistente ISPOTEC"
+            data-tooltip="Assistente Pedagógico"
           >
             <span className="sidebar-item-icon">🤖</span>
-            <span className="sidebar-item-label">Assistente ISPOTEC</span>
+            <span className="sidebar-item-label">Assistente Pedagógico</span>
           </Link>
 
           <a

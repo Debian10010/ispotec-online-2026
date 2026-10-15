@@ -30,6 +30,7 @@ import Investigacao from './pages/investigacao/Investigacao';
 import LaboratorioVirtual from './pages/laboratorio/LaboratorioVirtual';
 import HomeSchool from './pages/homeschool/HomeSchool';
 import HomeSchoolSalaVirtual from './pages/homeschool/HomeSchoolSalaVirtual';
+import TecnologiaInovacao from './pages/tecnologia/TecnologiaInovacao';
 
 export default function App() {
   return (
@@ -527,6 +528,84 @@ export default function App() {
           element={
             <ProtectedRoute>
               <LaboratorioVirtual />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Tecnologia e Inovacao Routes */}
+        <Route
+          path="/tecnologia-inovacao"
+          element={
+            <ProtectedRoute>
+              <TecnologiaInovacao />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tecnologia-inovacao/index.php"
+          element={
+            <ProtectedRoute>
+              <TecnologiaInovacao />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Ambiente Virtual de Aprendizagem (AVA) Aliases */}
+        <Route
+          path="/ambiente-virtual-aprendizagem"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ambiente-virtual-aprendizagem/index.php"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ambiente-virtual-aprendizagem/sala/:groupId"
+          element={
+            <ProtectedRoute>
+              <HomeSchoolSalaVirtual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ava"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ava/sala/:groupId"
+          element={
+            <ProtectedRoute>
+              <HomeSchoolSalaVirtual />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Assistente Pedagogico Aliases */}
+        <Route
+          path="/assistente-pedagogico"
+          element={
+            <ProtectedRoute>
+              <Chatbot />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assistente-pedagogico/index.php"
+          element={
+            <ProtectedRoute>
+              <Chatbot />
             </ProtectedRoute>
           }
         />

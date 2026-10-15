@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ensinoService } from '../../services/ensinoService';
+import { planoAnaliticoService } from '../../services/planoAnaliticoService';
 import { getFileUrl } from '../../services/api';
 import AttachmentDisplay from '../../components/AttachmentDisplay';
 
@@ -240,7 +241,8 @@ const css = `
 
 const SECCOES = [
   { key:'projetos-educativos',   label:'Projetos Educativos',   icon:'🎯' },
-  { key:'projetos-curriculares', label:'Projetos Curriculares',  icon:'📋' },
+  { key:'plano-analitico',       label:'Plano Analítico',       icon:'📋' },
+  { key:'projetos-curriculares', label:'Projetos Curriculares',  icon:'📜' },
   { key:'bibliotecas',           label:'Bibliotecas',            icon:'📚' },
   { key:'laboratorios',          label:'Laboratórios',           icon:'🔬' },
   { key:'estatistica-academica', label:'Estatística Académica',  icon:'📊' },
@@ -512,6 +514,928 @@ function ProjetosEducativos({ canAdd, canEdit, canDelete }) {
               </div>
             );
           })}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Section 1.5: Plano Analítico (REAL BACKEND) ─────────────────────────────
+function PlanoAnaliticoSection({ canAdd, canEdit, canDelete }) {
+  const { user } = useAuth();
+  const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
+  const isDocente = user && (user.tipo === 'docente');
+
+  const [planos, setPlanos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filtroCurso, setFiltroCurso] = useState('Todos');
+  const [filtroEstado, setFiltroEstado] = useState('Todos');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [viewingPlano, setViewingPlano] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [file, setFile] = useState(null);
+  const [feedback, setFeedback] = useState({ msg: '', tipo: '' });
+
+  const [formData, setFormData] = useState({
+    disciplina: '',
+    codigo_disciplina: '',
+    curso: 'Informática',
+    turma: 'Turma A',
+    ano_lectivo: '2026',
+    semestre: '1º Semestre',
+    docente_nome: user?.nome || '',
+    carga_horaria_total: 60,
+    objectivos_gerais: '',
+    objectivos_especificos: '',
+    competencias: '',
+    conteudos_programaticos: '',
+    metodologias_ensino: '',
+    actividades_aprendizagem: '',
+    estrategias_avaliacao: '',
+    bibliografia_obrigatoria: '',
+    bibliografia_complementar: '',
+    unidades_tematicas: [
+      { semana: 1, sessao: 1, tema: 'Introdução e Enquadramento', conteudos: '', metodologia: 'Expositiva / Interativa', actividades: 'Discussão inicial', horas_previstas: 2, tipo_sessao: 'Teórica' },
+    ],
+  });
+
+  const loadPlanos = async () => {
+    setLoading(true);
+    try {
+      const data = await planoAnaliticoService.getPlanos();
+      setPlanos(data);
+    } catch (err) {
+      console.error('Erro ao carregar planos analíticos:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPlanos();
+  }, []);
+
+  const showMsg = (msg, tipo = 'sucesso') => {
+    setFeedback({ msg, tipo });
+    setTimeout(() => setFeedback({ msg: '', tipo: '' }), 4000);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      disciplina: '',
+      codigo_disciplina: '',
+      curso: 'Informática',
+      turma: 'Turma A',
+      ano_lectivo: '2026',
+      semestre: '1º Semestre',
+      docente_nome: user?.nome || '',
+      carga_horaria_total: 60,
+      objectivos_gerais: '',
+      objectivos_especificos: '',
+      competencias: '',
+      conteudos_programaticos: '',
+      metodologias_ensino: '',
+      actividades_aprendizagem: '',
+      estrategias_avaliacao: '',
+      bibliografia_obrigatoria: '',
+      bibliografia_complementar: '',
+      unidades_tematicas: [
+        { semana: 1, sessao: 1, tema: 'Introdução e Enquadramento', conteudos: '', metodologia: 'Expositiva / Interativa', actividades: 'Discussão inicial', horas_previstas: 2, tipo_sessao: 'Teórica' },
+      ],
+    });
+    setFile(null);
+    setEditingId(null);
+    setShowAddForm(false);
+  };
+
+  const handleAddUnidadeRow = () => {
+    const nextSem = formData.unidades_tematicas.length + 1;
+    setFormData({
+      ...formData,
+      unidades_tematicas: [
+        ...formData.unidades_tematicas,
+        { semana: nextSem, sessao: nextSem, tema: '', conteudos: '', metodologia: 'Teórico-Prática', actividades: '', horas_previstas: 2, tipo_sessao: 'Teórica' },
+      ],
+    });
+  };
+
+  const handleRemoveUnidadeRow = (index) => {
+    const updated = formData.unidades_tematicas.filter((_, idx) => idx !== index);
+    setFormData({ ...formData, unidades_tematicas: updated });
+  };
+
+  const handleUnidadeChange = (index, field, value) => {
+    const updated = [...formData.unidades_tematicas];
+    updated[index][field] = value;
+    setFormData({ ...formData, unidades_tematicas: updated });
+  };
+
+  const handleEditClick = (p) => {
+    setEditingId(p._id || p.id);
+    setFormData({
+      disciplina: p.disciplina || '',
+      codigo_disciplina: p.codigo_disciplina || '',
+      curso: p.curso || 'Informática',
+      turma: p.turma || 'Turma A',
+      ano_lectivo: p.ano_lectivo || '2026',
+      semestre: p.semestre || '1º Semestre',
+      docente_nome: p.docente_nome || user?.nome || '',
+      carga_horaria_total: p.carga_horaria_total || 60,
+      objectivos_gerais: p.objectivos_gerais || '',
+      objectivos_especificos: p.objectivos_especificos || '',
+      competencias: p.competencias || '',
+      conteudos_programaticos: p.conteudos_programaticos || '',
+      metodologias_ensino: p.metodologias_ensino || '',
+      actividades_aprendizagem: p.actividades_aprendizagem || '',
+      estrategias_avaliacao: p.estrategias_avaliacao || '',
+      bibliografia_obrigatoria: p.bibliografia_obrigatoria || '',
+      bibliografia_complementar: p.bibliografia_complementar || '',
+      unidades_tematicas: p.unidades_tematicas && p.unidades_tematicas.length > 0 ? p.unidades_tematicas : [
+        { semana: 1, sessao: 1, tema: 'Introdução e Enquadramento', conteudos: '', metodologia: 'Expositiva / Interativa', actividades: 'Discussão inicial', horas_previstas: 2, tipo_sessao: 'Teórica' },
+      ],
+    });
+    setShowAddForm(true);
+    setViewingPlano(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      let anexos = [];
+      if (file) {
+        const uploadRes = await planoAnaliticoService.uploadAnexo(file);
+        if (uploadRes && uploadRes.url) {
+          anexos.push({
+            nome: uploadRes.nome || file.name,
+            url: uploadRes.url,
+            tamanho: uploadRes.tamanho || file.size,
+          });
+        }
+      }
+
+      const payload = {
+        ...formData,
+        ...(anexos.length > 0 ? { anexos } : {}),
+      };
+
+      if (editingId) {
+        await planoAnaliticoService.updatePlano(editingId, payload);
+        showMsg('Plano Analítico actualizado com sucesso!');
+      } else {
+        await planoAnaliticoService.createPlano(payload);
+        showMsg('Plano Analítico criado com sucesso!');
+      }
+
+      resetForm();
+      loadPlanos();
+    } catch (err) {
+      console.error(err);
+      showMsg('Erro ao guardar o Plano Analítico.', 'erro');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEstadoChange = async (id, novoEstado, obs = '') => {
+    try {
+      await planoAnaliticoService.updateEstado(id, novoEstado, obs);
+      showMsg(`Estado do Plano Analítico alterado para "${novoEstado}".`);
+      loadPlanos();
+      if (viewingPlano && (viewingPlano._id === id || viewingPlano.id === id)) {
+        setViewingPlano(null);
+      }
+    } catch (err) {
+      showMsg('Erro ao atualizar o estado do plano.', 'erro');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Tem a certeza que deseja eliminar este Plano Analítico?')) return;
+    try {
+      await planoAnaliticoService.deletePlano(id);
+      showMsg('Plano Analítico eliminado com sucesso.');
+      loadPlanos();
+      if (viewingPlano && (viewingPlano._id === id || viewingPlano.id === id)) {
+        setViewingPlano(null);
+      }
+    } catch (err) {
+      showMsg('Erro ao eliminar o plano.', 'erro');
+    }
+  };
+
+  const renderBadgeEstado = (estado) => {
+    switch (estado) {
+      case 'aprovado':
+        return <span style={{ background: '#dcfce7', color: '#166534', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>Aprovado</span>;
+      case 'validado':
+        return <span style={{ background: '#fef3c7', color: '#92400e', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>Validado</span>;
+      case 'submetido':
+        return <span style={{ background: '#dbeafe', color: '#1e40af', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>Submetido</span>;
+      case 'arquivado':
+        return <span style={{ background: '#f1f5f9', color: '#475569', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>Arquivado</span>;
+      default:
+        return <span style={{ background: '#e2e8f0', color: '#334155', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>Rascunho</span>;
+    }
+  };
+
+  const planosFiltrados = planos.filter((p) => {
+    const matchCurso = filtroCurso === 'Todos' || p.curso === filtroCurso;
+    const matchEstado = filtroEstado === 'Todos' || p.estado === filtroEstado;
+    return matchCurso && matchEstado;
+  });
+
+  return (
+    <>
+      <div className="ensino-header">
+        <h1>📋 Plano Analítico</h1>
+        <p>
+          Registo oficial da programação temática, objectivos de aprendizagem, matriz de sessões teóricas e práticas,
+          estratégias de avaliação e referências bibliográficas do ISPOTEC.
+        </p>
+      </div>
+
+      {feedback.msg && (
+        <div style={{
+          background: feedback.tipo === 'erro' ? '#fee2e2' : '#dcfce7',
+          color: feedback.tipo === 'erro' ? '#991b1b' : '#166534',
+          border: `1px solid ${feedback.tipo === 'erro' ? '#fecaca' : '#bbf7d0'}`,
+          padding: '0.85rem 1.25rem',
+          borderRadius: '10px',
+          marginBottom: '1.2rem',
+          fontWeight: 600,
+        }}>
+          {feedback.tipo === 'erro' ? '⚠️ ' : '✓ '}{feedback.msg}
+        </div>
+      )}
+
+      {/* Control Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <select
+            value={filtroCurso}
+            onChange={(e) => setFiltroCurso(e.target.value)}
+            className="ensino-select"
+            style={{ minWidth: '140px' }}
+          >
+            <option value="Todos">Todos os Cursos</option>
+            <option value="Informática">Informática</option>
+            <option value="Medicina">Medicina</option>
+            <option value="Gestão">Gestão</option>
+            <option value="Direito">Direito</option>
+            <option value="Enfermagem">Enfermagem</option>
+          </select>
+
+          <select
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value)}
+            className="ensino-select"
+            style={{ minWidth: '130px' }}
+          >
+            <option value="Todos">Todos os Estados</option>
+            <option value="rascunho">Rascunho</option>
+            <option value="submetido">Submetido</option>
+            <option value="validado">Validado</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="arquivado">Arquivado</option>
+          </select>
+        </div>
+
+        {(canAdd || isDocente || isAdmin) && (
+          <button
+            type="button"
+            className="btn-add-action"
+            onClick={() => {
+              if (showAddForm) resetForm();
+              else {
+                resetForm();
+                setShowAddForm(true);
+              }
+            }}
+          >
+            {showAddForm ? '✕ Fechar Formulário' : '+ Novo Plano Analítico'}
+          </button>
+        )}
+      </div>
+
+      {/* Form de Criação / Edição */}
+      {showAddForm && (
+        <form onSubmit={handleSubmit} className="ensino-form" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ margin: '0 0 1rem', fontSize: '1.2rem', fontWeight: 700, color: '#0f172a' }}>
+            {editingId ? '✏️ Editar Plano Analítico' : '📋 Criar Novo Plano Analítico'}
+          </h3>
+
+          <div className="form-row-2">
+            <div>
+              <label className="form-label">Nome da Disciplina / Unidade Curricular *</label>
+              <input
+                type="text"
+                required
+                className="ensino-input"
+                placeholder="Ex: Engenharia de Software"
+                value={formData.disciplina}
+                onChange={(e) => setFormData({ ...formData, disciplina: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="form-label">Código da Disciplina</label>
+              <input
+                type="text"
+                className="ensino-input"
+                placeholder="Ex: INF-302"
+                value={formData.codigo_disciplina}
+                onChange={(e) => setFormData({ ...formData, codigo_disciplina: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label className="form-label">Curso *</label>
+              <input
+                type="text"
+                required
+                className="ensino-input"
+                value={formData.curso}
+                onChange={(e) => setFormData({ ...formData, curso: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="form-label">Turma *</label>
+              <input
+                type="text"
+                required
+                className="ensino-input"
+                value={formData.turma}
+                onChange={(e) => setFormData({ ...formData, turma: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="form-label">Ano Lectivo *</label>
+              <input
+                type="text"
+                required
+                className="ensino-input"
+                value={formData.ano_lectivo}
+                onChange={(e) => setFormData({ ...formData, ano_lectivo: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="form-label">Semestre *</label>
+              <input
+                type="text"
+                required
+                className="ensino-input"
+                value={formData.semestre}
+                onChange={(e) => setFormData({ ...formData, semestre: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="form-row-2">
+            <div>
+              <label className="form-label">Docente Responsável *</label>
+              <input
+                type="text"
+                required
+                className="ensino-input"
+                value={formData.docente_nome}
+                onChange={(e) => setFormData({ ...formData, docente_nome: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="form-label">Carga Horária Total (Horas) *</label>
+              <input
+                type="number"
+                required
+                className="ensino-input"
+                value={formData.carga_horaria_total}
+                onChange={(e) => setFormData({ ...formData, carga_horaria_total: Number(e.target.value) })}
+              />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label className="form-label">Objectivos Gerais da Disciplina</label>
+            <textarea
+              className="ensino-textarea"
+              rows="2"
+              value={formData.objectivos_gerais}
+              onChange={(e) => setFormData({ ...formData, objectivos_gerais: e.target.value })}
+              placeholder="Descreva as metas globais de formação e competências esperadas..."
+            />
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label className="form-label">Objectivos Específicos &amp; Competências</label>
+            <textarea
+              className="ensino-textarea"
+              rows="2"
+              value={formData.objectivos_especificos}
+              onChange={(e) => setFormData({ ...formData, objectivos_especificos: e.target.value })}
+              placeholder="Competências cognitivas, práticas e atitudinais a serem adquiridas..."
+            />
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label className="form-label">Conteúdos Programáticos (Síntese Geral)</label>
+            <textarea
+              className="ensino-textarea"
+              rows="3"
+              value={formData.conteudos_programaticos}
+              onChange={(e) => setFormData({ ...formData, conteudos_programaticos: e.target.value })}
+              placeholder="Unidades curriculares, temas principais e módulos lecionados..."
+            />
+          </div>
+
+          <div className="form-row-2">
+            <div>
+              <label className="form-label">Metodologias de Ensino</label>
+              <textarea
+                className="ensino-textarea"
+                rows="2"
+                value={formData.metodologias_ensino}
+                onChange={(e) => setFormData({ ...formData, metodologias_ensino: e.target.value })}
+                placeholder="Expositiva, metodologias ativas, estudo de casos, aulas laboratoriais..."
+              />
+            </div>
+            <div>
+              <label className="form-label">Estratégias de Avaliação</label>
+              <textarea
+                className="ensino-textarea"
+                rows="2"
+                value={formData.estrategias_avaliacao}
+                onChange={(e) => setFormData({ ...formData, estrategias_avaliacao: e.target.value })}
+                placeholder="Frequências (50%), Trabalhos práticos (30%), Seminários (20%)..."
+              />
+            </div>
+          </div>
+
+          {/* Unidades Temáticas / Sessões */}
+          <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1e293b' }}>
+                📅 Estrutura das Unidades Temáticas / Sessões
+              </h4>
+              <button
+                type="button"
+                onClick={handleAddUnidadeRow}
+                style={{ background: '#0055a4', color: '#fff', border: 'none', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+              >
+                + Adicionar Sessão
+              </button>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                <thead>
+                  <tr style={{ background: '#e2e8f0', color: '#334155', textAlign: 'left' }}>
+                    <th style={{ padding: '0.5rem' }}>Semana</th>
+                    <th style={{ padding: '0.5rem' }}>Tipo</th>
+                    <th style={{ padding: '0.5rem' }}>Tema da Aula</th>
+                    <th style={{ padding: '0.5rem' }}>Metodologia</th>
+                    <th style={{ padding: '0.5rem' }}>Horas</th>
+                    <th style={{ padding: '0.5rem' }}>Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.unidades_tematicas.map((u, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '0.4rem' }}>
+                        <input
+                          type="number"
+                          style={{ width: '50px', padding: '0.3rem' }}
+                          value={u.semana}
+                          onChange={(e) => handleUnidadeChange(idx, 'semana', Number(e.target.value))}
+                        />
+                      </td>
+                      <td style={{ padding: '0.4rem' }}>
+                        <select
+                          style={{ padding: '0.3rem' }}
+                          value={u.tipo_sessao}
+                          onChange={(e) => handleUnidadeChange(idx, 'tipo_sessao', e.target.value)}
+                        >
+                          <option value="Teórica">Teórica</option>
+                          <option value="Prática">Prática</option>
+                          <option value="Laboratório">Laboratório</option>
+                          <option value="Seminário">Seminário</option>
+                        </select>
+                      </td>
+                      <td style={{ padding: '0.4rem' }}>
+                        <input
+                          type="text"
+                          style={{ width: '100%', padding: '0.3rem' }}
+                          value={u.tema}
+                          onChange={(e) => handleUnidadeChange(idx, 'tema', e.target.value)}
+                          placeholder="Tema da sessão"
+                          required
+                        />
+                      </td>
+                      <td style={{ padding: '0.4rem' }}>
+                        <input
+                          type="text"
+                          style={{ width: '100%', padding: '0.3rem' }}
+                          value={u.metodologia}
+                          onChange={(e) => handleUnidadeChange(idx, 'metodologia', e.target.value)}
+                          placeholder="Expositiva / Prática"
+                        />
+                      </td>
+                      <td style={{ padding: '0.4rem' }}>
+                        <input
+                          type="number"
+                          style={{ width: '50px', padding: '0.3rem' }}
+                          value={u.horas_previstas}
+                          onChange={(e) => handleUnidadeChange(idx, 'horas_previstas', Number(e.target.value))}
+                        />
+                      </td>
+                      <td style={{ padding: '0.4rem' }}>
+                        {formData.unidades_tematicas.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveUnidadeRow(idx)}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold' }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="form-row-2">
+            <div>
+              <label className="form-label">Bibliografia Obrigatória</label>
+              <textarea
+                className="ensino-textarea"
+                rows="2"
+                value={formData.bibliografia_obrigatoria}
+                onChange={(e) => setFormData({ ...formData, bibliografia_obrigatoria: e.target.value })}
+                placeholder="Livros e manuais fundamentais..."
+              />
+            </div>
+            <div>
+              <label className="form-label">Bibliografia Complementar</label>
+              <textarea
+                className="ensino-textarea"
+                rows="2"
+                value={formData.bibliografia_complementar}
+                onChange={(e) => setFormData({ ...formData, bibliografia_complementar: e.target.value })}
+                placeholder="Artigos, sites, referências adicionais..."
+              />
+            </div>
+          </div>
+
+          {/* Anexo */}
+          <div style={{ marginBottom: '1.2rem' }}>
+            <label className="form-label">Anexar Documento do Plano Analítico (PDF / Word)</label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              onChange={(e) => setFile(e.target.files[0])}
+              style={{ fontSize: '0.85rem' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.8rem' }}>
+            <button type="submit" className="btn-add-action" disabled={submitting}>
+              {submitting ? 'A guardar...' : editingId ? 'Actualizar Plano' : 'Gravar Plano Analítico'}
+            </button>
+            <button type="button" className="btn-secondary" onClick={resetForm}>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Lista de Planos Analíticos */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>A carregar planos analíticos...</div>
+      ) : planosFiltrados.length === 0 ? (
+        <EmptyState
+          mensagem="Nenhum Plano Analítico encontrado com os filtros actuais."
+          canAdd={canAdd || isDocente || isAdmin}
+          onAdd={() => setShowAddForm(true)}
+        />
+      ) : (
+        <div className="ensino-grid">
+          {planosFiltrados.map((p) => {
+            const pId = p._id || p.id;
+            return (
+              <div key={pId} className="ensino-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                    <div className="card-icon blue">📋</div>
+                    {renderBadgeEstado(p.estado)}
+                  </div>
+
+                  <h3 style={{ fontSize: '1.08rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                    {p.disciplina}
+                  </h3>
+
+                  <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.8rem', lineHeight: 1.5 }}>
+                    <div><strong>Curso:</strong> {p.curso} • <strong>Turma:</strong> {p.turma}</div>
+                    <div><strong>Docente:</strong> {p.docente_nome}</div>
+                    <div><strong>Ano/Semestre:</strong> {p.ano_lectivo} • {p.semestre}</div>
+                    <div><strong>Carga:</strong> {p.carga_horaria_total} horas</div>
+                  </div>
+
+                  {p.objectivos_gerais && (
+                    <p style={{ fontSize: '0.85rem', color: '#334155', margin: '0 0 0.8rem 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {p.objectivos_gerais}
+                    </p>
+                  )}
+
+                  {p.anexos && p.anexos.length > 0 && (
+                    <div style={{ marginBottom: '0.8rem' }}>
+                      <AttachmentBadge url={p.anexos[0].url} nome={p.anexos[0].nome || 'Plano Analítico Oficial'} />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '0.8rem', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setViewingPlano(p)}
+                      style={{ background: '#0055a4', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      👁️ Consultar / Imprimir
+                    </button>
+
+                    <div style={{ display: 'flex', gap: '0.3rem' }}>
+                      {(canEdit || isDocente || isAdmin) && (
+                        <button
+                          type="button"
+                          onClick={() => handleEditClick(p)}
+                          style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem', cursor: 'pointer' }}
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
+                      )}
+
+                      {/* Workflow buttons */}
+                      {p.estado === 'rascunho' && (isDocente || isAdmin) && (
+                        <button
+                          type="button"
+                          onClick={() => handleEstadoChange(pId, 'submetido')}
+                          style={{ background: '#dbeafe', color: '#1e40af', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+                          title="Submeter para validação pedagógica"
+                        >
+                          Submeter ↗
+                        </button>
+                      )}
+
+                      {p.estado === 'submetido' && isAdmin && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleEstadoChange(pId, 'aprovado')}
+                            style={{ background: '#dcfce7', color: '#166534', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+                            title="Aprovar Plano"
+                          >
+                            ✓ Aprovar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleEstadoChange(pId, 'rascunho', 'Necessita de correções')}
+                            style={{ background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+                            title="Devolver para revisão"
+                          >
+                            ✕ Rejeitar
+                          </button>
+                        </>
+                      )}
+
+                      {(canDelete || isAdmin) && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(pId)}
+                          style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem', cursor: 'pointer' }}
+                          title="Eliminar"
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Modal de Consulta e Impressão do Plano Analítico */}
+      {viewingPlano && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '1rem',
+          }}
+        >
+          <div
+            id="printable-plano"
+            style={{
+              background: '#fff',
+              borderRadius: '16px',
+              maxWidth: '850px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '2.5rem',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+              position: 'relative',
+            }}
+          >
+            {/* Action Bar (Top) */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0055a4', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0055a4', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  INSTITUTO SUPERIOR POLITÉCNICO DE TECNOLOGIAS E CIÊNCIAS
+                </span>
+                <h2 style={{ margin: '0.2rem 0 0 0', color: '#0f172a', fontSize: '1.4rem', fontWeight: 800 }}>
+                  Plano Analítico Oficial
+                </h2>
+              </div>
+              <div style={{ display: 'flex', gap: '0.6rem' }}>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{ background: '#0055a4', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  🖨️ Imprimir / PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingPlano(null)}
+                  style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.8rem', fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Cabeçalho de Dados da Disciplina */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.8rem', fontSize: '0.88rem' }}>
+              <div><strong>Disciplina:</strong> {viewingPlano.disciplina}</div>
+              <div><strong>Código:</strong> {viewingPlano.codigo_disciplina || '—'}</div>
+              <div><strong>Curso:</strong> {viewingPlano.curso}</div>
+              <div><strong>Turma:</strong> {viewingPlano.turma}</div>
+              <div><strong>Ano Lectivo:</strong> {viewingPlano.ano_lectivo}</div>
+              <div><strong>Semestre:</strong> {viewingPlano.semestre}</div>
+              <div><strong>Docente Responsável:</strong> {viewingPlano.docente_nome}</div>
+              <div><strong>Carga Horária:</strong> {viewingPlano.carga_horaria_total} Horas</div>
+              <div><strong>Estado:</strong> {renderBadgeEstado(viewingPlano.estado)}</div>
+            </div>
+
+            {/* Objectivos Gerais */}
+            {viewingPlano.objectivos_gerais && (
+              <div style={{ marginBottom: '1.2rem' }}>
+                <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.4rem 0' }}>
+                  1. Objectivos Gerais
+                </h4>
+                <p style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6, margin: 0 }}>
+                  {viewingPlano.objectivos_gerais}
+                </p>
+              </div>
+            )}
+
+            {/* Objectivos Específicos e Competências */}
+            {viewingPlano.objectivos_especificos && (
+              <div style={{ marginBottom: '1.2rem' }}>
+                <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.4rem 0' }}>
+                  2. Objectivos Específicos &amp; Competências
+                </h4>
+                <p style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-line' }}>
+                  {viewingPlano.objectivos_especificos}
+                </p>
+              </div>
+            )}
+
+            {/* Conteúdos Programáticos */}
+            {viewingPlano.conteudos_programaticos && (
+              <div style={{ marginBottom: '1.2rem' }}>
+                <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.4rem 0' }}>
+                  3. Conteúdos Programáticos
+                </h4>
+                <p style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-line' }}>
+                  {viewingPlano.conteudos_programaticos}
+                </p>
+              </div>
+            )}
+
+            {/* Matriz das Unidades Temáticas / Sessões */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>
+                4. Matriz Cronológica de Unidades Temáticas e Sessões
+              </h4>
+              {viewingPlano.unidades_tematicas && viewingPlano.unidades_tematicas.length > 0 ? (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                    <thead>
+                      <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
+                        <th style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>Sem.</th>
+                        <th style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>Tipo</th>
+                        <th style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>Tema da Sessão</th>
+                        <th style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>Metodologia</th>
+                        <th style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>Actividades</th>
+                        <th style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>Horas</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {viewingPlano.unidades_tematicas.map((u, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '0.5rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>{u.semana}</td>
+                          <td style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>{u.tipo_sessao}</td>
+                          <td style={{ padding: '0.5rem', border: '1px solid #e2e8f0', fontWeight: 600 }}>{u.tema}</td>
+                          <td style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>{u.metodologia}</td>
+                          <td style={{ padding: '0.5rem', border: '1px solid #e2e8f0' }}>{u.actividades || '—'}</td>
+                          <td style={{ padding: '0.5rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>{u.horas_previstas}h</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p style={{ fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic' }}>
+                  Sem sessões discriminadas na matriz.
+                </p>
+              )}
+            </div>
+
+            {/* Metodologias & Avaliação */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem', marginBottom: '1.2rem' }}>
+              {viewingPlano.metodologias_ensino && (
+                <div>
+                  <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.4rem 0' }}>
+                    5. Metodologias de Ensino
+                  </h4>
+                  <p style={{ fontSize: '0.85rem', color: '#334155', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-line' }}>
+                    {viewingPlano.metodologias_ensino}
+                  </p>
+                </div>
+              )}
+              {viewingPlano.estrategias_avaliacao && (
+                <div>
+                  <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.4rem 0' }}>
+                    6. Estratégias de Avaliação
+                  </h4>
+                  <p style={{ fontSize: '0.85rem', color: '#334155', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-line' }}>
+                    {viewingPlano.estrategias_avaliacao}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Bibliografia */}
+            {(viewingPlano.bibliografia_obrigatoria || viewingPlano.bibliografia_complementar) && (
+              <div style={{ marginBottom: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '10px' }}>
+                <h4 style={{ color: '#0055a4', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>
+                  7. Referências Bibliográficas
+                </h4>
+                {viewingPlano.bibliografia_obrigatoria && (
+                  <div style={{ marginBottom: '0.6rem' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>Obrigatória:</div>
+                    <div style={{ fontSize: '0.85rem', color: '#475569', whiteSpace: 'pre-line' }}>
+                      {viewingPlano.bibliografia_obrigatoria}
+                    </div>
+                  </div>
+                )}
+                {viewingPlano.bibliografia_complementar && (
+                  <div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>Complementar:</div>
+                    <div style={{ fontSize: '0.85rem', color: '#475569', whiteSpace: 'pre-line' }}>
+                      {viewingPlano.bibliografia_complementar}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Histórico de Validação / Assinaturas */}
+            <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem', marginTop: '1.5rem', fontSize: '0.82rem', color: '#64748b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong>Confirmação Pedagógica:</strong> {viewingPlano.docente_nome} ({viewingPlano.estado.toUpperCase()})
+                </div>
+                <div>
+                  ISPOTEC.ONLINE — Sistema Integrado de Gestão Académica
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </>
@@ -1380,6 +2304,7 @@ export default function Ensino() {
     const props = { canAdd, canEdit, canDelete };
     switch(seccao) {
       case 'projetos-educativos':    return <ProjetosEducativos {...props} />;
+      case 'plano-analitico':        return <PlanoAnaliticoSection {...props} />;
       case 'projetos-curriculares':  return <ProjetosCurriculares {...props} />;
       case 'bibliotecas':            return <Bibliotecas {...props} />;
       case 'laboratorios':           return <Laboratorios {...props} />;

@@ -496,9 +496,9 @@ export default function Chatbot() {
               <div className="avatar">🤖</div>
               <div>
                 <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Assistente ISPOTEC
+                  Assistente Pedagógico
                 </h2>
-                <p>Orientação académica, metodológica e de estudo em tempo real</p>
+                <p>Orientação académica, pedagógica e de estudo em tempo real</p>
               </div>
             </div>
 
@@ -506,10 +506,10 @@ export default function Chatbot() {
               {(!activeConv?.messages || activeConv.messages.length === 0) ? (
                 <div className="empty-chat">
                   <div className="icon">🤖</div>
-                  <h3>Olá! Sou o Assistente ISPOTEC</h3>
+                  <h3>Olá! Sou o Assistente Pedagógico</h3>
                   <p>
                     Posso ajudar-te a compreender matérias, organizar os teus estudos,
-                    aprender técnicas de estudo, orientar na elaboração de trabalhos e apoiar em diferentes áreas académicas.
+                    aprender técnicas pedagógicas, orientar na elaboração de trabalhos e apoiar em diferentes áreas académicas.
                   </p>
 
                   <div className="suggestions">
