@@ -329,7 +329,7 @@ export default function HomeSchoolSalaVirtual() {
     return (
       <div className="container" style={{ padding: '3rem 1rem', textAlign: 'center' }}>
         <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⏳</div>
-        <p style={{ color: '#64748b' }}>A carregar a Sala de Aula Virtual do ISPOTEC Home School...</p>
+        <p style={{ color: '#64748b' }}>A carregar a Sala de Aula do Ambiente Virtual e Aprendizagem...</p>
       </div>
     );
   }
@@ -341,7 +341,7 @@ export default function HomeSchoolSalaVirtual() {
         <h3>Sala Virtual Não Encontrada</h3>
         <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>O grupo ou sala de aula virtual solicitado não está disponível.</p>
         <Link to="/homeschool" className="btn btn-primary">
-          ← Voltar ao Home School
+          ← Voltar ao Ambiente Virtual e Aprendizagem
         </Link>
       </div>
     );

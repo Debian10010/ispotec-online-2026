@@ -518,9 +518,9 @@ export default function HomeSchool() {
         {/* Hero Banner */}
         <div className="hs-hero-banner">
           <div className="hs-badge-hero">
-            <span>🏫</span> ISPOTEC HOME SCHOOL
+            <span>🏫</span> ISPOTEC AMBIENTE VIRTUAL E APRENDIZAGEM
           </div>
-          <h1>Ambiente de Aprendizagem Híbrida</h1>
+          <h1>Ambiente Virtual e Aprendizagem</h1>
           <p>
             Sala de aula virtual institucional do ISPOTEC. Acompanhe as aulas teóricas e práticas, consulte o plano analítico e curricular, aceda aos manuais, roteiros de estudo, links virtuais, microcredenciais e execute as atividades do laboratório digital.
           </p>
@@ -642,7 +642,7 @@ export default function HomeSchool() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#64748b' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⏳</div>
-            <p>A carregar as salas virtuais do ISPOTEC Home School...</p>
+            <p>A carregar as salas virtuais do Ambiente Virtual e Aprendizagem...</p>
           </div>
         ) : (
           <div className="hs-salas-grid">
@@ -754,7 +754,7 @@ export default function HomeSchool() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 style={{ margin: '0 0 1.25rem', color: '#0f172a', fontSize: '1.25rem' }}>
-              {editingSala ? '✏️ Editar Sala / Grupo Virtual' : '🏫 Criar Nova Sala / Grupo no Home School'}
+              {editingSala ? '✏️ Editar Sala / Grupo Virtual' : '🏫 Criar Nova Sala no Ambiente Virtual e Aprendizagem'}
             </h3>
 
             <form onSubmit={handleSaveSala}>

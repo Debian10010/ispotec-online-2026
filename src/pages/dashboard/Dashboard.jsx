@@ -395,7 +395,27 @@ export default function Dashboard() {
             </div>
           </Link>
 
-          {/* Home School */}
+          {/* Tecnologia e Inovação */}
+          <Link to="/tecnologia-inovacao" className="enterprise-module-card">
+            <div className="module-card-top">
+              <div className="module-card-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>
+                💡
+              </div>
+              <span className="module-card-badge" style={{ background: '#f0f9ff', color: '#0284c7' }}>
+                5 Áreas
+              </span>
+            </div>
+            <h3 className="module-card-title">Tecnologia &amp; Inovação</h3>
+            <p className="module-card-desc">
+              Projectos Tecnológicos, Laboratório de Inovação, Desenvolvimento de Competências, Exposição de Protótipos e Parcerias Empresariais.
+            </p>
+            <div className="module-card-footer">
+              <span>Aceder ao Módulo</span>
+              <span>→</span>
+            </div>
+          </Link>
+
+          {/* Ambiente Virtual e Aprendizagem */}
           <Link to="/homeschool" className="enterprise-module-card">
             <div className="module-card-top">
               <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
@@ -405,9 +425,9 @@ export default function Dashboard() {
                 Híbrido
               </span>
             </div>
-            <h3 className="module-card-title">Home School</h3>
+            <h3 className="module-card-title">Ambiente Virtual e Aprendizagem</h3>
             <p className="module-card-desc">
-              Ambiente oficial de aprendizagem híbrida e salas de aula virtuais. Acompanhe aulas teóricas e práticas, manuais, guias e laboratórios digitais.
+              Ambiente oficial de aprendizagem híbrida e salas de aula virtuais. Acompanhe aulas teóricas e práticas, sumários, manuais, guias e tutoria.
             </p>
             <div className="module-card-footer">
               <span>Aceder ao Módulo</span>
@@ -575,6 +595,33 @@ export default function Dashboard() {
             </Link>
 
             <Link
+              to="/tecnologia-inovacao"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.85rem',
+                padding: '0.85rem',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                borderRadius: 'var(--isp-radius-md)',
+                textDecoration: 'none',
+                color: 'var(--isp-slate-900)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>💡</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '700', fontSize: '0.92rem', color: '#0369a1' }}>
+                  Tecnologia &amp; Inovação
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
+                  Projectos tecnológicos, laboratório de inovação e protótipos
+                </div>
+              </div>
+              <span style={{ color: '#0284c7', fontWeight: 'bold' }}>→</span>
+            </Link>
+
+            <Link
               to="/chatbot"
               style={{
                 display: 'flex',
@@ -592,10 +639,10 @@ export default function Dashboard() {
               <span style={{ fontSize: '1.5rem' }}>🤖</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-purple-600)' }}>
-                  Assistente ISPOTEC
+                  Assistente Pedagógico
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
-                  Consulte dúvidas de investigação, normas APA e planos de estudo
+                  Orientação académica, pedagógica e de estudo em tempo real
                 </div>
               </div>
               <span style={{ color: 'var(--isp-purple-600)', fontWeight: 'bold' }}>→</span>

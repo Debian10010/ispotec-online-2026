@@ -100,7 +100,7 @@ export default function Header({
     if (path.startsWith('/investigacao')) return 'Investigação';
     if (path.startsWith('/tecnologia-inovacao')) return 'Tecnologia e Inovação';
     if (path.startsWith('/homeschool/sala')) return 'Ambiente Virtual › Sala de Aula Virtual';
-    if (path.startsWith('/homeschool') || path.startsWith('/ambiente-virtual-aprendizagem') || path.startsWith('/ava') || path.startsWith('/grupo-de-estudos')) return 'Ambiente Virtual de Aprendizagem';
+    if (path.startsWith('/homeschool') || path.startsWith('/ambiente-virtual-aprendizagem') || path.startsWith('/ava') || path.startsWith('/grupo-de-estudos')) return 'Ambiente Virtual e Aprendizagem';
     if (
       path.startsWith('/chatbot') ||
       path.startsWith('/assistente-pedagogico') ||

@@ -152,10 +152,10 @@ export default function Sidebar({
             to="/homeschool"
             className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/ambiente-virtual-aprendizagem') || isActive('/ava') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Ambiente Virtual de Aprendizagem"
+            data-tooltip="Ambiente Virtual e Aprendizagem"
           >
             <span className="sidebar-item-icon">🏫</span>
-            <span className="sidebar-item-label">Ambiente Virtual de Aprendizagem</span>
+            <span className="sidebar-item-label">Ambiente Virtual e Aprendizagem</span>
           </Link>
         </div>
 
