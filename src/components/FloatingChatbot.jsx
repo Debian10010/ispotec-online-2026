@@ -12,7 +12,7 @@ export default function FloatingChatbot() {
     {
       id: 'welcome',
       tipo: 'resposta',
-      conteudo: 'Olá! Sou o Assistente ISPOTEC.\n\nComo posso apoiar os seus estudos, pesquisas ou dúvidas académicas hoje?',
+      conteudo: 'Olá! Sou o Assistente Pedagógico.\n\nComo posso apoiar os seus estudos, pesquisas ou dúvidas académicas hoje?',
       data_criacao: new Date().toISOString()
     }
   ]);
@@ -523,11 +523,11 @@ export default function FloatingChatbot() {
         <div
           className="chatbot-callout"
           onClick={() => setIsOpen(true)}
-          title="Clique para abrir o Assistente ISPOTEC"
+          title="Clique para abrir o Assistente Pedagógico"
         >
           <div className="chatbot-callout-text">
             <span>🤖</span>
-            <span>Assistente ISPOTEC</span>
+            <span>Assistente Pedagógico</span>
             <span className="chatbot-callout-badge">Abrir assistente →</span>
           </div>
           <button
@@ -549,22 +549,22 @@ export default function FloatingChatbot() {
         type="button"
         className="floating-chatbot-btn"
         onClick={() => setIsOpen(prev => !prev)}
-        title="Assistente ISPOTEC — Abrir o assistente"
-        aria-label="Abrir Assistente ISPOTEC"
+        title="Assistente Pedagógico — Abrir o assistente"
+        aria-label="Abrir Assistente Pedagógico"
       >
         <span>🤖</span>
       </button>
 
       {/* Janela Flutuante do Chatbot */}
       {isOpen && (
-        <div className="floating-chatbot-window" role="dialog" aria-label="Assistente ISPOTEC">
+        <div className="floating-chatbot-window" role="dialog" aria-label="Assistente Pedagógico">
           {/* Header */}
           <div className="floating-chat-header">
             <div className="floating-chat-title-group">
               <div className="floating-chat-avatar">🤖</div>
               <div>
                 <h3 className="floating-chat-name">
-                  Assistente ISPOTEC
+                  Assistente Pedagógico
                 </h3>
                 <p className="floating-chat-status">Apoio e orientação em tempo real</p>
               </div>
