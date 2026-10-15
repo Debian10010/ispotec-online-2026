@@ -331,7 +331,7 @@ export default function Home() {
       </section>
 
       <div className="container">
-        {/* 4 Core Academic Modules Section (Ensino, Extensão, Investigação, Home School) */}
+        {/* Core Academic Modules Section (Ensino, Extensão, Investigação, Tecnologia & Inovação, Ambiente Virtual e Aprendizagem) */}
         <section style={{ margin: '3rem 0 1rem 0' }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <span style={{
@@ -349,10 +349,10 @@ export default function Home() {
               Estrutura Institucional
             </span>
             <h2 className="features-title" style={{ margin: '0 0 0.5rem 0' }}>
-              4 Módulos Centrais ISPOTEC
+              Módulos Centrais ISPOTEC
             </h2>
             <p className="features-subtitle" style={{ margin: 0 }}>
-              Ensino de excelência, extensão comunitária, investigação científica e aprendizagem híbrida
+              Ensino de excelência, extensão comunitária, investigação científica, inovação tecnológica e aprendizagem virtual
             </p>
           </div>
 
@@ -396,15 +396,28 @@ export default function Home() {
               </div>
             </Link>
 
+            <Link to="/tecnologia-inovacao" className="enterprise-module-card">
+              <div className="module-card-top">
+                <div className="module-card-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>💡</div>
+                <span className="module-card-badge" style={{ background: '#f0f9ff', color: '#0284c7' }}>5 Áreas</span>
+              </div>
+              <h3 className="module-card-title">Tecnologia &amp; Inovação</h3>
+              <p className="module-card-desc">Projectos Tecnológicos, Laboratório de Inovação, Desenvolvimento de Competências, Exposição de Protótipos e Parcerias Empresariais.</p>
+              <div className="module-card-footer">
+                <span>Conhecer Tecnologia &amp; Inovação</span>
+                <span>→</span>
+              </div>
+            </Link>
+
             <Link to="/homeschool" className="enterprise-module-card">
               <div className="module-card-top">
                 <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>🏫</div>
                 <span className="module-card-badge" style={{ background: '#fffbeb', color: '#d97706' }}>Híbrido</span>
               </div>
-              <h3 className="module-card-title">Home School</h3>
+              <h3 className="module-card-title">Ambiente Virtual e Aprendizagem</h3>
               <p className="module-card-desc">Ambiente oficial de aprendizagem híbrida e salas de aula virtuais. Acompanhe aulas teóricas e práticas, planos e laboratórios digitais.</p>
               <div className="module-card-footer">
-                <span>Aceder ao Home School</span>
+                <span>Aceder ao Ambiente Virtual</span>
                 <span>→</span>
               </div>
             </Link>
@@ -431,7 +444,7 @@ export default function Home() {
             
             <div className="feature-card">
               <div className="feature-icon purple">🤖</div>
-              <h3 className="feature-title">Assistente ISPOTEC</h3>
+              <h3 className="feature-title">Assistente Pedagógico</h3>
               <p className="feature-desc">Tire dúvidas de estudo, metodologia e pesquisas com apoio oficial 24/7.</p>
             </div>
             
