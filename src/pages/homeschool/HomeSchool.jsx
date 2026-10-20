@@ -7,7 +7,7 @@ import { tutoriaService } from '../../services/tutoriaService';
 
 /* ─── Shared styles ─────────────────────────────────────────────────────────── */
 const CSS = `
-  .ava-wrap { max-width: 1200px; margin: 1.5rem auto 4rem; padding: 0 1rem; }
+  .ava-wrap { max-width: 1200px; margin: 1.5rem auto 4rem; padding: 0 1rem; width: 100%; box-sizing: border-box; }
 
   /* Hero */
   .ava-hero {
@@ -37,7 +37,7 @@ const CSS = `
   }
   .ava-tab {
     display:flex; align-items:center; gap:.4rem;
-    padding:.5rem 1rem; border-radius:8px; border:none;
+    padding:.55rem 1rem; border-radius:8px; border:none;
     background:transparent; color:#64748b; font-size:.85rem;
     font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap;
   }
@@ -58,7 +58,7 @@ const CSS = `
   .ava-stat-lbl  { font-size:.82rem; color:#64748b; margin-top:.15rem; }
 
   /* Cards grid */
-  .ava-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:1.25rem; }
+  .ava-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.25rem; }
   .ava-card {
     background:#fff; border:1px solid #e2e8f0; border-radius:14px;
     padding:1.4rem; box-shadow:0 4px 6px -1px rgba(0,0,0,.04);
@@ -70,7 +70,7 @@ const CSS = `
   .ava-card-sub   { font-size:.87rem; color:#2563eb; font-weight:600; margin-bottom:.5rem; }
   .ava-card-meta  { background:#f8fafc; border-radius:8px; padding:.7rem; font-size:.82rem; color:#475569; margin-bottom:1rem; }
   .ava-card-meta div { margin-bottom:.2rem; }
-  .ava-card-actions { display:flex; gap:.4rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.85rem; }
+  .ava-card-actions { display:flex; gap:.4rem; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:.85rem; flex-wrap:wrap; }
 
   /* Buttons */
   .btn-ava-primary { background:linear-gradient(135deg,#4338ca,#3730a3); color:#fff; border:none;
@@ -108,7 +108,7 @@ const CSS = `
 
   /* Table */
   .ava-table-wrap { background:#fff; border:1px solid #e2e8f0; border-radius:12px;
-    overflow:hidden; box-shadow:0 4px 6px -1px rgba(0,0,0,.04); margin-bottom:1.75rem; overflow-x:auto; }
+    overflow:hidden; box-shadow:0 4px 6px -1px rgba(0,0,0,.04); margin-bottom:1.75rem; overflow-x:auto; -webkit-overflow-scrolling: touch; }
   .ava-table { width:100%; border-collapse:collapse; font-size:.875rem; }
   .ava-table th { background:#f8fafc; padding:.75rem 1rem; text-align:left;
     font-weight:600; color:#374151; border-bottom:1px solid #e2e8f0; white-space:nowrap; }
@@ -154,12 +154,169 @@ const CSS = `
     border:1px dashed #cbd5e1; border-radius:16px; color:#64748b; }
   .ava-empty-icon { font-size:3rem; margin-bottom:.75rem; }
 
-  @media(max-width:768px){
-    .ava-hero { padding:1.5rem 1.25rem; }
-    .ava-hero h1 { font-size:1.55rem; }
-    .ava-grid { grid-template-columns:1fr; }
-    .ava-tabs { gap:.3rem; }
-    .ava-tab { font-size:.8rem; padding:.4rem .75rem; }
+  /* ================= RESPONSIVIDADE (Mobile, Tablet e PC) ================= */
+
+  /* TABLET (641px - 1024px) */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .ava-wrap { padding: 0 1.25rem; }
+    .ava-hero { padding: 1.75rem 2rem; }
+    .ava-hero h1 { font-size: 1.75rem; }
+    .ava-stats { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    .ava-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .ava-filter-bar { gap: 0.75rem; padding: 0.9rem 1rem; }
+    .ava-search { min-width: 180px; }
+  }
+
+  /* MOBILE (< 640px) */
+  @media (max-width: 640px) {
+    .ava-wrap { padding: 0 0.75rem; margin: 1rem auto 3rem; }
+    .ava-hero { padding: 1.35rem 1rem; border-radius: 12px; margin-bottom: 1.25rem; }
+    .ava-hero::after { display: none; }
+    .ava-hero-badge { font-size: 0.72rem; padding: 0.25rem 0.65rem; }
+    .ava-hero h1 { font-size: 1.4rem; line-height: 1.25; margin-bottom: 0.4rem; }
+    .ava-hero p { font-size: 0.88rem; line-height: 1.5; }
+
+    /* Scrollable horizontal tabs */
+    .ava-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      gap: 0.35rem;
+      padding: 0.45rem;
+      margin-bottom: 1.25rem;
+      border-radius: 10px;
+      scrollbar-width: none;
+    }
+    .ava-tabs::-webkit-scrollbar { display: none; }
+    .ava-tab {
+      flex-shrink: 0;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    /* 2-column or 1-column stats on small mobile */
+    .ava-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 1.25rem;
+    }
+    .ava-stat {
+      padding: 0.85rem 0.8rem;
+      gap: 0.65rem;
+      border-radius: 10px;
+    }
+    .ava-stat-icon {
+      width: 38px;
+      height: 38px;
+      font-size: 1.2rem;
+    }
+    .ava-stat-val {
+      font-size: 1.25rem;
+    }
+    .ava-stat-lbl {
+      font-size: 0.72rem;
+      line-height: 1.2;
+    }
+
+    /* Filter bar stacked */
+    .ava-filter-bar {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0.85rem;
+      gap: 0.65rem;
+    }
+    .ava-filter-bar > div {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 0.5rem !important;
+    }
+    .ava-search {
+      width: 100%;
+      min-width: 100%;
+    }
+    .ava-select {
+      width: 100%;
+    }
+    .btn-ava-primary {
+      width: 100%;
+      justify-content: center;
+      padding: 0.65rem 1rem;
+    }
+
+    /* Section bar stacked */
+    .ava-section-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.65rem;
+    }
+    .ava-section-bar > div {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 0.5rem !important;
+    }
+    .ava-section-bar .ava-select {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+
+    /* Cards 1 column */
+    .ava-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .ava-card {
+      padding: 1.15rem;
+      border-radius: 12px;
+    }
+    .ava-card-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+    .btn-ava-enter {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Tables */
+    .ava-table th, .ava-table td {
+      padding: 0.55rem 0.65rem;
+      font-size: 0.78rem;
+    }
+
+    /* Modals */
+    .ava-modal-bg {
+      padding: 0.5rem;
+      align-items: flex-end;
+    }
+    .ava-modal {
+      max-width: 100%;
+      width: 100%;
+      max-height: 92vh;
+      padding: 1.25rem 1rem;
+      border-radius: 16px 16px 0 0;
+    }
+    .ava-form-grid {
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+    }
+    .ava-modal-footer {
+      flex-direction: column-reverse;
+      gap: 0.5rem;
+    }
+    .ava-modal-footer button {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      padding: 0.65rem 1rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .ava-stats {
+      grid-template-columns: 1fr;
+    }
   }
 `;
 

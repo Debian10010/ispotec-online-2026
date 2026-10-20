@@ -746,25 +746,182 @@ export default function HomeSchoolSalaVirtual() {
           margin-top: 1.5rem;
         }
 
-        /* Responsive */
-        @media (max-width: 860px) {
+        /* ================= RESPONSIVIDADE (Mobile, Tablet e PC) ================= */
+
+        /* TABLET (641px - 1024px) */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .sala-virtual-wrap {
+            padding: 0 1.25rem;
+          }
+          .sala-hero {
+            padding: 1.75rem 2rem;
+          }
+          .sala-hero h1 {
+            font-size: 1.65rem;
+          }
           .sala-layout-grid {
             grid-template-columns: 1fr;
+            gap: 1.25rem;
           }
           .sala-sidebar {
             position: relative;
             top: 0;
+            padding: 0.65rem;
           }
           .sala-sidebar nav {
             display: flex;
             overflow-x: auto;
-            gap: 0.35rem;
-            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            gap: 0.4rem;
+            padding-bottom: 0.4rem;
           }
           .sala-nav-btn {
             white-space: nowrap;
             width: auto;
             flex-shrink: 0;
+            padding: 0.6rem 0.85rem;
+            font-size: 0.85rem;
+          }
+          .sala-content-card {
+            padding: 1.5rem;
+          }
+        }
+
+        /* MOBILE (< 640px) */
+        @media (max-width: 640px) {
+          .sala-virtual-wrap {
+            padding: 0 0.75rem;
+            margin: 1rem auto 2.5rem;
+          }
+          .sala-breadcrumbs {
+            font-size: 0.78rem;
+            gap: 0.35rem;
+            margin-bottom: 0.75rem;
+          }
+          .sala-hero {
+            padding: 1.25rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.25rem;
+          }
+          .sala-hero::after {
+            display: none;
+          }
+          .sala-hero h1 {
+            font-size: 1.35rem;
+            line-height: 1.25;
+            margin-bottom: 0.35rem;
+          }
+          .sala-subtitle {
+            font-size: 0.88rem;
+            margin-bottom: 0.5rem;
+          }
+          .sala-desc {
+            font-size: 0.84rem;
+            line-height: 1.45;
+          }
+          .sala-docente-box {
+            font-size: 0.78rem;
+            padding: 0.35rem 0.65rem;
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: flex-start;
+          }
+          .sala-layout-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .sala-sidebar {
+            position: relative;
+            top: 0;
+            padding: 0.5rem;
+            border-radius: 10px;
+          }
+          .sala-sidebar-title {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.7rem;
+          }
+          .sala-sidebar nav {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 0.35rem;
+            padding-bottom: 0.35rem;
+            scrollbar-width: none;
+          }
+          .sala-sidebar nav::-webkit-scrollbar {
+            display: none;
+          }
+          .sala-nav-btn {
+            white-space: nowrap;
+            width: auto;
+            flex-shrink: 0;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+          }
+          .sala-content-card {
+            padding: 1rem;
+            border-radius: 12px;
+            min-height: auto;
+          }
+          .content-header-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.65rem;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+          }
+          .content-header-title {
+            font-size: 1.15rem;
+          }
+          .btn-action-add {
+            width: 100%;
+            justify-content: center;
+            padding: 0.65rem 1rem;
+          }
+          .item-box {
+            padding: 0.9rem;
+          }
+          .item-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.35rem;
+          }
+          .item-title {
+            font-size: 0.95rem;
+          }
+          .item-meta {
+            font-size: 0.75rem;
+            gap: 0.45rem;
+          }
+          .item-desc {
+            font-size: 0.84rem;
+          }
+          .modal-backdrop-hs {
+            padding: 0.5rem;
+            align-items: flex-end;
+          }
+          .modal-card-hs {
+            max-width: 100%;
+            width: 100%;
+            max-height: 92vh;
+            padding: 1.25rem 1rem;
+            border-radius: 16px 16px 0 0;
+          }
+          .modal-card-hs div[style*="display: grid"],
+          .modal-card-hs div[style*="display:grid"] {
+            grid-template-columns: 1fr !important;
+            gap: 0.65rem !important;
+          }
+          .modal-btns-hs {
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+            margin-top: 1.25rem;
+          }
+          .modal-btns-hs button {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+            padding: 0.65rem 1rem;
           }
         }
       `}</style>
@@ -772,7 +929,7 @@ export default function HomeSchoolSalaVirtual() {
       <div className="sala-virtual-wrap">
         {/* Breadcrumb */}
         <div className="sala-breadcrumbs">
-          <Link to="/homeschool">🏫 Ambiente Virtual de Aprendizagem</Link>
+          <Link to="/homeschool">🏫 Ambiente Virtual e Aprendizagem</Link>
           <span>›</span>
           <span>{sala.curso}</span>
           <span>›</span>
@@ -2366,7 +2523,7 @@ export default function HomeSchoolSalaVirtual() {
                   <h4>🏛️ Responsabilidades do Docente Tutor</h4>
                   <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
                     <li>Acompanhar a evolução académica e sinalizar dificuldades precocemente.</li>
-                    <li>Recomendar leituras, metodologias de estudo e recursos do Ambiente Virtual de Aprendizagem.</li>
+                    <li>Recomendar leituras, metodologias de estudo e recursos do Ambiente Virtual e Aprendizagem.</li>
                     <li>Registar as sessões de orientação mantendo o histórico protegido e acessível aos intervenientes.</li>
                   </ul>
                 </div>

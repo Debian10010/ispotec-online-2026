@@ -104,7 +104,7 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* ================= ACADEMIC (Ensino, Extensão, Investigação, Tecnologia e Inovação, Ambiente Virtual de Aprendizagem) ================= */}
+        {/* ================= ACADEMIC (Ensino, Extensão, Investigação, Tecnologia e Inovação, Ambiente Virtual e Aprendizagem) ================= */}
         <div className="sidebar-section">
           <div className="sidebar-section-title">Académico</div>
 
@@ -122,10 +122,10 @@ export default function Sidebar({
             to="/homeschool"
             className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/ambiente-virtual-aprendizagem') || isActive('/ava') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Ambiente Virtual de Aprendizagem"
+            data-tooltip="Ambiente Virtual e Aprendizagem"
           >
             <span className="sidebar-item-icon">🏫</span>
-            <span className="sidebar-item-label">Ambiente Virtual de Aprendizagem</span>
+            <span className="sidebar-item-label">Ambiente Virtual e Aprendizagem</span>
           </Link>
 
           <Link

@@ -550,7 +550,7 @@ export default function App() {
           }
         />
 
-        {/* Ambiente Virtual de Aprendizagem (AVA) Aliases */}
+        {/* Ambiente Virtual e Aprendizagem (AVA) Aliases */}
         <Route
           path="/ambiente-virtual-aprendizagem"
           element={
