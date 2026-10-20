@@ -31,6 +31,20 @@ export default function HomeSchoolSalaVirtual() {
   const [subTabSessoes, setSubTabSessoes] = useState('planificacao'); // 'planificacao' | 'livro'
   const [selectedSessao, setSelectedSessao] = useState(null);
 
+  // Videoconferência fullscreen & link copy state
+  const [isVideoFullscreen, setIsVideoFullscreen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyVideoLink = (url) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 3000);
+    } else {
+      window.prompt('Copie o link da sessão:', url);
+    }
+  };
+
   // Modals state for adding/editing content
   const [modalType, setModalType] = useState(null); // 'manual', 'guia', 'link', 'micro', 'aula', 'editPlanoAnalitico', 'editPlanoCurricular', 'editPlanoSocial', 'editLab', 'novasessao', 'sumario', 'reagendar', 'novatutoria', 'novasessaotutoria'
   const [formData, setFormData] = useState({});
@@ -746,6 +760,143 @@ export default function HomeSchoolSalaVirtual() {
           margin-top: 1.5rem;
         }
 
+        /* ================= VIDEOCONFERÊNCIA BASE (PC Default) ================= */
+        .video-conference-wrapper {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          margin-top: 0.5rem;
+          transition: all 0.2s ease;
+        }
+
+        .video-status-bar {
+          background: #091e3a;
+          padding: 0.75rem 1rem;
+          border-radius: 10px 10px 0 0;
+          color: #fff;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .video-status-left {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          font-size: 0.85rem;
+          flex-wrap: wrap;
+        }
+
+        .video-status-live {
+          color: #10b981;
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          background: rgba(16, 185, 129, 0.15);
+          padding: 0.2rem 0.55rem;
+          border-radius: 12px;
+          font-size: 0.74rem;
+          letter-spacing: 0.5px;
+        }
+
+        .video-status-right {
+          font-size: 0.78rem;
+          color: #cbd5e1;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        /* Desktop height: 620px (preserving PC mode!) */
+        .video-iframe-container {
+          width: 100%;
+          height: 620px;
+          background: #000;
+          border-radius: 0 0 10px 10px;
+          overflow: hidden;
+          position: relative;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .video-iframe-container iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+          display: block;
+        }
+
+        .video-actions-bar {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .btn-video-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.45rem 0.85rem;
+          border-radius: 8px;
+          font-size: 0.82rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s;
+          text-decoration: none;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          color: #1e293b;
+        }
+
+        .btn-video-action:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+        }
+
+        .btn-video-primary {
+          background: #2563eb;
+          color: #ffffff;
+          border-color: #2563eb;
+        }
+
+        .btn-video-primary:hover {
+          background: #1d4ed8;
+          color: #ffffff;
+        }
+
+        /* Fullscreen Mode (Mobile, Tablet e PC) */
+        .video-conference-fullscreen {
+          position: fixed !important;
+          inset: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          z-index: 999999 !important;
+          background: #000 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+
+        .video-conference-fullscreen .video-status-bar {
+          border-radius: 0 !important;
+          padding: 0.5rem 1rem !important;
+          background: #071527 !important;
+          flex-shrink: 0 !important;
+        }
+
+        .video-conference-fullscreen .video-iframe-container {
+          flex: 1 !important;
+          height: calc(100vh - 46px) !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+        }
+
         /* ================= RESPONSIVIDADE (Mobile, Tablet e PC) ================= */
 
         /* TABLET (641px - 1024px) */
@@ -784,6 +935,14 @@ export default function HomeSchoolSalaVirtual() {
           }
           .sala-content-card {
             padding: 1.5rem;
+          }
+
+          /* Videoconferência Tablet */
+          .video-iframe-container {
+            height: 520px;
+          }
+          .video-status-bar {
+            padding: 0.65rem 0.85rem;
           }
         }
 
@@ -922,6 +1081,55 @@ export default function HomeSchoolSalaVirtual() {
             justify-content: center;
             text-align: center;
             padding: 0.65rem 1rem;
+          }
+
+          /* Videoconferência Mobile */
+          .video-iframe-container {
+            height: 68vh;
+            min-height: 380px;
+            max-height: 540px;
+            border-radius: 0 0 8px 8px;
+          }
+          .video-status-bar {
+            padding: 0.6rem 0.75rem;
+            flex-direction: column;
+            align-items: flex-start;
+            border-radius: 8px 8px 0 0;
+            gap: 0.4rem;
+          }
+          .video-status-left {
+            width: 100%;
+            justify-content: space-between;
+            font-size: 0.8rem;
+          }
+          .video-status-right {
+            font-size: 0.72rem;
+            width: 100%;
+            opacity: 0.85;
+          }
+          .video-actions-bar {
+            width: 100%;
+            flex-direction: column;
+            gap: 0.45rem;
+          }
+          .video-actions-bar .btn-video-action {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+          }
+        }
+
+        /* Mobile Landscape specific optimization */
+        @media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+          .video-iframe-container {
+            height: 75vh;
+            min-height: 260px;
+          }
+          .video-status-bar {
+            padding: 0.4rem 0.75rem;
           }
         }
       `}</style>
@@ -2531,50 +2739,94 @@ export default function HomeSchoolSalaVirtual() {
             )}
 
             {/* 16. VIDEOCONFERÊNCIA JITSI MEET */}
-            {activeTab === 'videoconferencia' && (
-              <div>
-                <div className="content-header-bar">
-                  <div>
-                    <h2 className="content-header-title">
-                      <span>📹</span> Sala de Aula Virtual &amp; Videoconferência Jitsi
-                    </h2>
-                    <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
-                      Sessão interactiva ao vivo com áudio, vídeo de alta definição, partilha de ecrã e conversação em tempo real.
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <a
-                      href={`https://meet.jit.si/ISPOTEC-${(sala?.codigo || actualId || 'GERAL').toString().replace(/[^a-zA-Z0-9-]/g, '-')}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.82rem' }}
-                    >
-                      ↗ Abrir em Nova Janela
-                    </a>
-                  </div>
-                </div>
+            {activeTab === 'videoconferencia' && (() => {
+              const jitsiRoom = `ISPOTEC-${(sala?.codigo || actualId || 'GERAL').toString().replace(/[^a-zA-Z0-9-]/g, '-')}`;
+              const jitsiUrl = `https://meet.jit.si/${jitsiRoom}#config.prejoinPageEnabled=false&interfaceConfig.MOBILE_APP_PROMO=false`;
 
-                <div style={{ background: '#091e3a', padding: '0.75rem 1rem', borderRadius: '10px 10px 0 0', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <span style={{ color: '#10b981', fontWeight: 800 }}>● AO VIVO</span>
-                    <span>Sala: <strong>{sala?.nome || 'Sala Virtual ISPOTEC'}</strong></span>
+              return (
+                <div>
+                  <div className="content-header-bar">
+                    <div>
+                      <h2 className="content-header-title">
+                        <span>📹</span> Sala de Aula Virtual &amp; Videoconferência
+                      </h2>
+                      <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                        Sessão interactiva ao vivo com áudio, vídeo de alta definição, partilha de ecrã e conversação em tempo real.
+                      </p>
+                    </div>
+                    <div className="video-actions-bar">
+                      <button
+                        type="button"
+                        className="btn-video-action btn-video-primary"
+                        onClick={() => setIsVideoFullscreen(!isVideoFullscreen)}
+                        title="Expandir videoconferência para ecrã inteiro no telemóvel, tablet ou PC"
+                      >
+                        {isVideoFullscreen ? '✕ Sair do Ecrã Inteiro' : '⛶ Ecrã Inteiro'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-video-action"
+                        onClick={() => handleCopyVideoLink(`https://meet.jit.si/${jitsiRoom}`)}
+                        title="Copiar link da videoconferência"
+                      >
+                        {copiedLink ? '✓ Link Copiado!' : '📋 Copiar Link'}
+                      </button>
+                      <a
+                        href={jitsiUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-video-action"
+                        title="Abrir a videoconferência diretamente numa nova janela do navegador"
+                      >
+                        ↗ Nova Janela
+                      </a>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
-                    Câmera • Microfone • Partilha de Ecrã • Chat
-                  </div>
-                </div>
 
-                <div style={{ width: '100%', height: '620px', background: '#000', borderRadius: '0 0 10px 10px', overflow: 'hidden' }}>
-                  <iframe
-                    src={`https://meet.jit.si/ISPOTEC-${(sala?.codigo || actualId || 'GERAL').toString().replace(/[^a-zA-Z0-9-]/g, '-')}`}
-                    allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen"
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    title="Videoconferência ISPOTEC AVA"
-                  />
+                  <div className={`video-conference-wrapper ${isVideoFullscreen ? 'video-conference-fullscreen' : ''}`}>
+                    <div className="video-status-bar">
+                      <div className="video-status-left">
+                        <span className="video-status-live">● AO VIVO</span>
+                        <span>Sala: <strong>{sala?.nome || 'Sala Virtual ISPOTEC'}</strong></span>
+                      </div>
+                      <div className="video-status-right">
+                        {isVideoFullscreen && (
+                          <button
+                            type="button"
+                            onClick={() => setIsVideoFullscreen(false)}
+                            style={{
+                              background: '#ef4444',
+                              color: '#fff',
+                              border: 'none',
+                              padding: '0.3rem 0.75rem',
+                              borderRadius: '6px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              fontSize: '0.8rem',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.3rem'
+                            }}
+                          >
+                            ✕ Sair do Ecrã Inteiro
+                          </button>
+                        )}
+                        <span>Câmera • Microfone • Ecrã • Chat</span>
+                      </div>
+                    </div>
+
+                    <div className="video-iframe-container">
+                      <iframe
+                        src={jitsiUrl}
+                        allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen; speaker"
+                        allowFullScreen={true}
+                        title="Videoconferência ISPOTEC AVA"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </main>
         </div>
       </div>
