@@ -366,6 +366,9 @@ export default function HomeSchoolSalaVirtual() {
       <style>{`
         .sala-virtual-wrap {
           max-width: 1200px;
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
           margin: 1.5rem auto 3rem;
           padding: 0 1rem;
         }
@@ -471,9 +474,12 @@ export default function HomeSchoolSalaVirtual() {
         /* Layout Grid */
         .sala-layout-grid {
           display: grid;
-          grid-template-columns: 270px 1fr;
+          grid-template-columns: 270px minmax(0, 1fr);
           gap: 1.5rem;
           align-items: start;
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
         }
 
         /* Sidebar Navigation */
@@ -485,6 +491,8 @@ export default function HomeSchoolSalaVirtual() {
           padding: 0.75rem;
           position: sticky;
           top: 1rem;
+          min-width: 0;
+          box-sizing: border-box;
         }
 
         .sala-sidebar-title {
@@ -549,6 +557,10 @@ export default function HomeSchoolSalaVirtual() {
           box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
           padding: 1.75rem;
           min-height: 520px;
+          min-width: 0;
+          width: 100%;
+          box-sizing: border-box;
+          word-break: break-word;
         }
 
         .content-header-bar {
@@ -903,21 +915,37 @@ export default function HomeSchoolSalaVirtual() {
         @media (min-width: 641px) and (max-width: 1024px) {
           .sala-virtual-wrap {
             padding: 0 1.25rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
           }
           .sala-hero {
             padding: 1.75rem 2rem;
+            width: 100%;
+            box-sizing: border-box;
           }
           .sala-hero h1 {
             font-size: 1.65rem;
+            word-break: break-word;
           }
           .sala-layout-grid {
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
             gap: 1.25rem;
           }
           .sala-sidebar {
             position: relative;
             top: 0;
             padding: 0.65rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow: hidden;
           }
           .sala-sidebar nav {
             display: flex;
@@ -925,6 +953,10 @@ export default function HomeSchoolSalaVirtual() {
             -webkit-overflow-scrolling: touch;
             gap: 0.4rem;
             padding-bottom: 0.4rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
           }
           .sala-nav-btn {
             white-space: nowrap;
@@ -935,6 +967,12 @@ export default function HomeSchoolSalaVirtual() {
           }
           .sala-content-card {
             padding: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            word-break: break-word;
           }
 
           /* Videoconferência Tablet */
@@ -949,18 +987,28 @@ export default function HomeSchoolSalaVirtual() {
         /* MOBILE (< 640px) */
         @media (max-width: 640px) {
           .sala-virtual-wrap {
-            padding: 0 0.75rem;
-            margin: 1rem auto 2.5rem;
+            padding: 0 0.5rem;
+            margin: 0.75rem auto 2.5rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
           }
           .sala-breadcrumbs {
             font-size: 0.78rem;
             gap: 0.35rem;
             margin-bottom: 0.75rem;
+            word-break: break-word;
           }
           .sala-hero {
             padding: 1.25rem 1rem;
             border-radius: 12px;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
           }
           .sala-hero::after {
             display: none;
@@ -969,24 +1017,37 @@ export default function HomeSchoolSalaVirtual() {
             font-size: 1.35rem;
             line-height: 1.25;
             margin-bottom: 0.35rem;
+            word-break: break-word;
           }
           .sala-subtitle {
             font-size: 0.88rem;
             margin-bottom: 0.5rem;
+            word-break: break-word;
           }
           .sala-desc {
             font-size: 0.84rem;
             line-height: 1.45;
+            word-break: break-word;
           }
           .sala-docente-box {
             font-size: 0.78rem;
-            padding: 0.35rem 0.65rem;
+            padding: 0.4rem 0.65rem;
             width: 100%;
             box-sizing: border-box;
-            justify-content: flex-start;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.3rem;
+          }
+          .sala-docente-box span:nth-child(2) {
+            display: none;
           }
           .sala-layout-grid {
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
             gap: 1rem;
           }
           .sala-sidebar {
@@ -994,6 +1055,11 @@ export default function HomeSchoolSalaVirtual() {
             top: 0;
             padding: 0.5rem;
             border-radius: 10px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow: hidden;
           }
           .sala-sidebar-title {
             padding: 0.35rem 0.5rem;
@@ -1004,11 +1070,19 @@ export default function HomeSchoolSalaVirtual() {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             gap: 0.35rem;
-            padding-bottom: 0.35rem;
-            scrollbar-width: none;
+            padding-bottom: 0.4rem;
+            scrollbar-width: thin;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
           }
           .sala-sidebar nav::-webkit-scrollbar {
-            display: none;
+            height: 4px;
+          }
+          .sala-sidebar nav::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
           }
           .sala-nav-btn {
             white-space: nowrap;
@@ -1018,9 +1092,15 @@ export default function HomeSchoolSalaVirtual() {
             font-size: 0.8rem;
           }
           .sala-content-card {
-            padding: 1rem;
+            padding: 1rem 0.75rem;
             border-radius: 12px;
             min-height: auto;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            word-break: break-word;
           }
           .content-header-bar {
             flex-direction: column;
@@ -1031,6 +1111,7 @@ export default function HomeSchoolSalaVirtual() {
           }
           .content-header-title {
             font-size: 1.15rem;
+            word-break: break-word;
           }
           .btn-action-add {
             width: 100%;
@@ -1038,7 +1119,10 @@ export default function HomeSchoolSalaVirtual() {
             padding: 0.65rem 1rem;
           }
           .item-box {
-            padding: 0.9rem;
+            padding: 0.85rem;
+            width: 100%;
+            box-sizing: border-box;
+            word-break: break-word;
           }
           .item-header {
             flex-direction: column;
@@ -1047,6 +1131,7 @@ export default function HomeSchoolSalaVirtual() {
           }
           .item-title {
             font-size: 0.95rem;
+            word-break: break-word;
           }
           .item-meta {
             font-size: 0.75rem;
@@ -1054,6 +1139,31 @@ export default function HomeSchoolSalaVirtual() {
           }
           .item-desc {
             font-size: 0.84rem;
+            word-break: break-word;
+          }
+          .plan-section-block {
+            padding: 0.9rem 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
+            word-break: break-word;
+            overflow-wrap: break-word;
+          }
+          .plan-section-block h4 {
+            font-size: 0.92rem;
+            word-break: break-word;
+          }
+          .plan-section-block p, .plan-section-block ul {
+            font-size: 0.85rem;
+            word-break: break-word;
+          }
+          .sala-content-card * {
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          .sala-content-card div[style*="display: grid"],
+          .sala-content-card div[style*="display:grid"] {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.65rem !important;
           }
           .modal-backdrop-hs {
             padding: 0.5rem;
@@ -1089,6 +1199,9 @@ export default function HomeSchoolSalaVirtual() {
             min-height: 380px;
             max-height: 540px;
             border-radius: 0 0 8px 8px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
           }
           .video-status-bar {
             padding: 0.6rem 0.75rem;
@@ -1096,6 +1209,9 @@ export default function HomeSchoolSalaVirtual() {
             align-items: flex-start;
             border-radius: 8px 8px 0 0;
             gap: 0.4rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
           }
           .video-status-left {
             width: 100%;
@@ -1119,6 +1235,15 @@ export default function HomeSchoolSalaVirtual() {
             padding: 0.6rem;
             font-size: 0.85rem;
             box-sizing: border-box;
+          }
+        }
+
+        /* Small screens (< 420px) */
+        @media (max-width: 420px) {
+          .sala-content-card div[style*="display: grid"],
+          .sala-content-card div[style*="display:grid"] {
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem !important;
           }
         }
 
