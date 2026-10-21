@@ -142,7 +142,7 @@ export default function IfoptecCursos() {
                 className="btn btn-primary"
                 style={{ width: '100%', borderRadius: '8px', fontWeight: 600, fontSize: '0.88rem' }}
               >
-                📝 Inscrever-se no Polo Matola-Rio ou Marracuene
+                📝 Inscrever-se no Polo Matola-Rio
               </Link>
             </div>
           </div>

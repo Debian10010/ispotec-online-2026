@@ -80,5 +80,4 @@ CREATE TABLE IF NOT EXISTS polos (
 
 INSERT INTO polos (instituicao_id, nome, endereco, telefones) VALUES
 ('ispotec', 'Campus Principal Matola', 'Rua da Mozal, 5453-Matola', '878787442 / 877906666'),
-('ifoptec', 'Polo Matola-Rio', 'Rua da Mozal, Matola-Rio', '840726974 / 870726974 / 869700700'),
-('ifoptec', 'Polo Marracuene', 'Rua da Facim, Marracuene', '840726974 / 870726974 / 869700700');
+('ifoptec', 'Polo Matola-Rio', 'Rua da Mozal, Matola-Rio', '840726974 / 870726974 / 869700700');

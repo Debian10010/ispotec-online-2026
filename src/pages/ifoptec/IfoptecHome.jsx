@@ -745,8 +745,8 @@ export default function IfoptecHome() {
           <div className="highlight-item">
             <div className="highlight-icon">📍</div>
             <div>
-              <div className="highlight-title">Dois Polos Práticos</div>
-              <div className="highlight-desc">Matola-Rio (Rua Mozal) &amp; Marracuene (Facim)</div>
+              <div className="highlight-title">Polo Matola-Rio</div>
+              <div className="highlight-desc">Matola-Rio (Rua da Mozal)</div>
             </div>
           </div>
           <div className="highlight-item">
@@ -891,13 +891,13 @@ export default function IfoptecHome() {
             </div>
           </div>
 
-          {/* Polos / Campuses Box */}
+          {/* Polo Matola-Rio Box */}
           <div className="info-box">
             <h3 className="info-box-title">
-              <span>📍</span> Polos Oficiais IFOPTEC
+              <span>📍</span> Polo Oficial IFOPTEC (Matola-Rio)
             </h3>
             <p style={{ fontSize: '0.86rem', color: '#64748b', marginBottom: '1.25rem' }}>
-              Infraestruturas pedagógicas equipadas com salas práticas e gabinetes de enfermagem:
+              Infraestrutura pedagógica equipada com salas práticas e gabinetes de enfermagem:
             </p>
 
             {POLOS_IFOPTEC.map((polo, idx) => (
@@ -1102,8 +1102,7 @@ export default function IfoptecHome() {
                           onChange={(e) => setFormData({ ...formData, polo: e.target.value })}
                           style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                         >
-                          <option value="Matola-Rio">Polo Matola-Rio (Rua Mozal)</option>
-                          <option value="Marracuene">Polo Marracuene (Rua Facim)</option>
+                          <option value="Matola-Rio">Polo Matola-Rio (Rua da Mozal)</option>
                         </select>
                       </div>
                       <div>

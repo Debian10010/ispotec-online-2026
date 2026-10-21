@@ -148,10 +148,6 @@ export default function Footer() {
                   <span className="footer-icon">📍</span>
                   <span>Matola-Rio (Rua Mozal)</span>
                 </span>
-                <span className="footer-contact-link" style={{ cursor: 'default', color: '#94a3b8' }}>
-                  <span className="footer-icon">📍</span>
-                  <span>Marracuene (Rua Facim)</span>
-                </span>
               </div>
             </div>
           </div>
@@ -161,7 +157,7 @@ export default function Footer() {
               <p>&copy; {currentYear} {institution.name} — Plataforma Multi-Institucional (ISPOTEC &amp; IFOPTEC). Todos os direitos reservados.</p>
               <div className="footer-location">
                 <span className="location-icon">📍</span>
-                <span>Matola-Rio, Rua da Mozal | Marracuene, Rua da Facim — Moçambique</span>
+                <span>Matola-Rio, Rua da Mozal — Moçambique</span>
               </div>
             </div>
 

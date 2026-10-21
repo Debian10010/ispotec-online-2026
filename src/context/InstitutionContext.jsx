@@ -44,8 +44,7 @@ export const INSTITUTIONS_DATA = {
       whatsapp: '258840726974',
       email: 'ifoptec.politecnica@gmail.com',
       locations: [
-        { nome: 'Polo Matola-Rio', endereco: 'Rua da Mozal' },
-        { nome: 'Polo Marracuene', endereco: 'Rua da Facim' }
+        { nome: 'Polo Matola-Rio', endereco: 'Rua da Mozal' }
       ]
     }
   }

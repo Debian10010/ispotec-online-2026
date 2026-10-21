@@ -147,10 +147,9 @@ export default function ContactsModal({ isOpen, onClose }) {
                     📍
                   </div>
                   <div className="contact-tile-info">
-                    <div className="contact-tile-label">Polos de Atendimento &amp; Práticas</div>
+                    <div className="contact-tile-label">Polo de Atendimento &amp; Práticas</div>
                     <div className="contact-tile-value" style={{ fontSize: '0.85rem' }}>
-                      • Polo Matola-Rio: Rua da Mozal<br />
-                      • Polo Marracuene: Rua da Facim
+                      Polo Matola-Rio: Rua da Mozal
                     </div>
                   </div>
                 </div>
