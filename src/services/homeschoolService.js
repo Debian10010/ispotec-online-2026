@@ -6,13 +6,16 @@ const STORAGE_KEY_GROUPS = 'ispotec_homeschool_groups_data';
 
 // Cursos institucionais padrão ISPOTEC
 export const CURSOS_ISPOTEC = [
+  'Mestrado em Saúde Pública',
+  'Licenciatura em Psicologia Clínica e Saúde no Trabalho',
+  'Licenciatura em Enfermagem Geral',
+  'Licenciatura em Saúde Pública',
+  'Licenciatura em Direito',
+  'Licenciatura em Administração e Gestão de Recursos Humanos',
+  'Licenciatura em Contabilidade e Finanças',
   'Licenciatura em Tecnologias de Informação',
   'Licenciatura em Engenharia Informática',
-  'Licenciatura em Gestão de Empresas',
-  'Licenciatura em Contabilidade e Auditoria',
-  'Licenciatura em Enfermagem Geral',
-  'Licenciatura em Farmácia',
-  'Licenciatura em Direito'
+  'Licenciatura em Farmácia'
 ];
 
 // Cursos institucionais IFOPTEC (Ensino Médio e Curta Duração)

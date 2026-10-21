@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { groupService } from '../../services/groupService';
 import { postService } from '../../services/postService';
+import TabelaCursosPropinasIspotec from '../../components/TabelaCursosPropinasIspotec';
 
 export default function Dashboard() {
   const { user, isAdmin } = useAuth();
@@ -308,6 +309,11 @@ export default function Dashboard() {
           </>
         )}
       </div>
+
+      {/* ========================================================
+          CURSOS & PROPINAS ISPOTEC (INSCRIÇÕES 2027)
+          ======================================================== */}
+      <TabelaCursosPropinasIspotec />
 
       {/* ========================================================
           3. 4 MAIN ACADEMIC MODULES
