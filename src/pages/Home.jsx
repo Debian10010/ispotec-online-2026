@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useInstitution } from '../context/InstitutionContext';
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
+  const { switchInstitution } = useInstitution();
 
   return (
     <>
@@ -62,7 +64,7 @@ export default function Home() {
         .hero-subtitle {
             font-size: 1.1rem;
             opacity: 0.9;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             font-weight: 400;
         }
         .hero-badge {
@@ -298,6 +300,32 @@ export default function Home() {
       <section className="hero">
         <div className="hero-content">
           <img src="/assets/img/logo-ispotec.png" alt="ISPOTEC" className="hero-logo" />
+
+          {/* New Multi-Institution Announcement Pill */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <Link
+              to="/ifoptec"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: 'rgba(255,255,255,0.18)',
+                border: '1px solid rgba(255,255,255,0.35)',
+                padding: '0.45rem 1.15rem',
+                borderRadius: '25px',
+                color: '#fef08a',
+                fontWeight: 700,
+                fontSize: '0.84rem',
+                textDecoration: 'none',
+                backdropFilter: 'blur(6px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }}
+              title="Aceder ao IFOPTEC Online — Ensino Médio e de Saúde"
+            >
+              <span>🏥 Portal Integrado IFOPTEC (Cursos Médios &amp; Saúde)</span>
+              <span>→</span>
+            </Link>
+          </div>
           
           {!isAuthenticated ? (
             <>
@@ -312,6 +340,9 @@ export default function Home() {
                 <Link to="/auth/register" className="hero-btn hero-btn-primary">
                   Criar Conta Grátis →
                 </Link>
+                <Link to="/ifoptec" className="hero-btn hero-btn-secondary" style={{ background: 'rgba(14, 165, 233, 0.25)', borderColor: 'rgba(14, 165, 233, 0.5)' }}>
+                  Aceder ao IFOPTEC ↗
+                </Link>
               </div>
             </>
           ) : (
@@ -323,6 +354,9 @@ export default function Home() {
               <div className="hero-buttons">
                 <Link to="/dashboard" className="hero-btn hero-btn-primary">
                   Ir para Dashboard →
+                </Link>
+                <Link to="/ifoptec" className="hero-btn hero-btn-secondary">
+                  Ver IFOPTEC Online ↗
                 </Link>
               </div>
             </div>
@@ -349,14 +383,28 @@ export default function Home() {
               Estrutura Institucional
             </span>
             <h2 className="features-title" style={{ margin: '0 0 0.5rem 0' }}>
-              Módulos Centrais ISPOTEC
+              Módulos Centrais ISPOTEC &amp; IFOPTEC
             </h2>
             <p className="features-subtitle" style={{ margin: 0 }}>
-              Ensino de excelência, extensão comunitária, investigação científica, inovação tecnológica e aprendizagem virtual
+              Ensino de excelência, extensão comunitária, investigação científica, inovação tecnológica e formação técnica
             </p>
           </div>
 
           <div className="enterprise-module-grid">
+            {/* IFOPTEC Card in the Grid */}
+            <Link to="/ifoptec" className="enterprise-module-card" style={{ borderColor: '#0284c7', background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)' }}>
+              <div className="module-card-top">
+                <div className="module-card-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>🏥</div>
+                <span className="module-card-badge" style={{ background: '#0284c7', color: '#fff' }}>IFOPTEC Online</span>
+              </div>
+              <h3 className="module-card-title">IFOPTEC (Ensino Médio &amp; Saúde)</h3>
+              <p className="module-card-desc">Cursos Técnicos Médios de 3 anos e Curta Duração de 6 meses (Medicina Geral, Enfermagem, Farmácia, Socorrismo).</p>
+              <div className="module-card-footer">
+                <span style={{ color: '#0284c7', fontWeight: 700 }}>Conhecer IFOPTEC</span>
+                <span>→</span>
+              </div>
+            </Link>
+
             <Link to="/ensino" className="enterprise-module-card">
               <div className="module-card-top">
                 <div className="module-card-icon" style={{ background: '#dbeafe', color: '#1d4ed8' }}>🎓</div>
@@ -496,10 +544,15 @@ export default function Home() {
         {!isAuthenticated && (
           <section className="cta">
             <h2 className="cta-title">Pronto para começar?</h2>
-            <p className="cta-text">Junte-se à comunidade ISPOTEC e potencialize a sua aprendizagem</p>
-            <Link to="/auth/register" className="btn btn-success" style={{ padding: '0.9rem 2.5rem', fontSize: '1rem' }}>
-              Criar Conta Grátis
-            </Link>
+            <p className="cta-text">Junte-se à comunidade ISPOTEC &amp; IFOPTEC e potencialize a sua aprendizagem</p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/auth/register" className="btn btn-success" style={{ padding: '0.9rem 2.5rem', fontSize: '1rem' }}>
+                Criar Conta Grátis
+              </Link>
+              <Link to="/ifoptec" className="btn btn-outline-primary" style={{ padding: '0.9rem 2.5rem', fontSize: '1rem' }}>
+                Ver IFOPTEC Online ↗
+              </Link>
+            </div>
           </section>
         )}
       </div>

@@ -15,6 +15,301 @@ export const CURSOS_ISPOTEC = [
   'Licenciatura em Direito'
 ];
 
+// Cursos institucionais IFOPTEC (Ensino Médio e Curta Duração)
+export const CURSOS_IFOPTEC = [
+  // Curta Duração
+  'Iniciação em Saúde-Cuidados Primários',
+  'Emergências e Primeiros Socorros',
+  'Higiene e Saúde no Trabalho',
+  // Técnico Médio
+  'Técnico de Medicina Geral',
+  'Técnico de Enfermagem Geral',
+  'Enfermagem de Saúde Materno e Infantil',
+  'Técnico de Farmácia',
+  'Gestão e Administração Hospitalar',
+  'Técnico de Saúde Preventiva - Agente Polivalente de Saúde'
+];
+
+export const CURSOS_IFOPTEC_CATALOGO = [
+  {
+    id: 'medicina-geral',
+    nome: 'Técnico de Medicina Geral',
+    tipo: 'Técnico Médio',
+    categoria: 'tecnico_medio',
+    duracao: '3 anos',
+    duracaoMeses: 36,
+    mensalidade: '3.800,00 Mts + 5% de IVA',
+    valorMensalidade: 3800,
+    matricula: '3.500 Mts',
+    inscricao: 'Incluída na Matrícula',
+    icone: '🩺',
+    grau: 'Técnico Médio Profissionalizante',
+    destaque: true,
+    descricao: 'Formação sólida para diagnosticar, tratar e encaminhar patologias clínicas prevalentes, atuando nos centros de saúde e unidades hospitalares.',
+    disciplinas: [
+      'Anatomia e Fisiologia Humana',
+      'Semiologia e Propedêutica Médica',
+      'Farmacologia Aplicada',
+      'Patologia Médica e Cirúrgica',
+      'Saúde Comunitária e Epidemiologia',
+      'Urgências Médicas e Suporte de Vida',
+      'Saúde Materno-Infantil'
+    ],
+    saidasProfissionais: [
+      'Centros de Saúde Urbanos e Rurais',
+      'Hospitais Gerais e Distritais',
+      'Clínicas Médicas e Postos de Saúde',
+      'Programas Nacionais de Saúde Comunitária'
+    ]
+  },
+  {
+    id: 'enfermagem-geral',
+    nome: 'Técnico de Enfermagem Geral',
+    tipo: 'Técnico Médio',
+    categoria: 'tecnico_medio',
+    duracao: '3 anos',
+    duracaoMeses: 36,
+    mensalidade: '3.800,00 Mts + 5% de IVA',
+    valorMensalidade: 3800,
+    matricula: '3.500 Mts',
+    inscricao: 'Incluída na Matrícula',
+    icone: '💉',
+    grau: 'Técnico Médio Profissionalizante',
+    destaque: true,
+    descricao: 'Capacitação prática em cuidados de enfermagem integrados, administração terapêutica, assistência ao doente acamado e suporte hospitalar.',
+    disciplinas: [
+      'Fundamentos de Enfermagem',
+      'Anatomia e Fisiologia',
+      'Farmacologia em Enfermagem',
+      'Enfermagem Médico-Cirúrgica',
+      'Cuidados Pré e Pós-Operatórios',
+      'Saúde Comunitária'
+    ],
+    saidasProfissionais: [
+      'Serviços de Internamento e Consulta Externa',
+      'Salas de Tratamento e Vacinação',
+      'Unidades de Cuidados Continuados',
+      'Empresas e Serviços de Saúde Ocupacional'
+    ]
+  },
+  {
+    id: 'saude-materno-infantil',
+    nome: 'Enfermagem de Saúde Materno e Infantil',
+    tipo: 'Técnico Médio',
+    categoria: 'tecnico_medio',
+    duracao: '3 anos',
+    duracaoMeses: 36,
+    mensalidade: '3.800,00 Mts + 5% de IVA',
+    valorMensalidade: 3800,
+    matricula: '3.500 Mts',
+    inscricao: 'Incluída na Matrícula',
+    icone: '👶',
+    grau: 'Técnico Médio Profissionalizante',
+    destaque: true,
+    descricao: 'Especialização no acompanhamento pré-natal, assistência humanizada ao parto, cuidados neonatais, puericultura e planeamento reprodutivo.',
+    disciplinas: [
+      'Saúde Reprodutiva e Sexual',
+      'Obstetrícia e Vigilância Pré-Natal',
+      'Assistência ao Parto e Puerpério',
+      'Pediatria e Puericultura',
+      'Nutrição Materno-Infantil e PAI (Vacinação)',
+      'Planeamento Familiar'
+    ],
+    saidasProfissionais: [
+      'Maternidades e Blocos de Parto',
+      'Consultas Pré-Natais e de Criança Sadia',
+      'Organizações de Apoio à Saúde da Mulher e da Criança'
+    ]
+  },
+  {
+    id: 'farmacia',
+    nome: 'Técnico de Farmácia',
+    tipo: 'Técnico Médio',
+    categoria: 'tecnico_medio',
+    duracao: '3 anos',
+    duracaoMeses: 36,
+    mensalidade: '3.800,00 Mts + 5% de IVA',
+    valorMensalidade: 3800,
+    matricula: '3.500 Mts',
+    inscricao: 'Incluída na Matrícula',
+    icone: '💊',
+    grau: 'Técnico Médio Profissionalizante',
+    destaque: false,
+    descricao: 'Gestão de medicamentos, farmacotécnica, controle de estoques, verificação de dosagens e atendimento de receituário farmacêutico.',
+    disciplinas: [
+      'Química Farmacêutica',
+      'Farmacologia e Toxicologia',
+      'Farmacotécnica e Formas Farmacêuticas',
+      'Gestão e Logística de Medicamentos',
+      'Dispensação e Deontologia Farmacêutica'
+    ],
+    saidasProfissionais: [
+      'Farmácias Comunitárias e Privadas',
+      'Farmácias Hospitalares e Centros de Distribuição',
+      'Depósitos de Medicamentos'
+    ]
+  },
+  {
+    id: 'gestao-hospitalar',
+    nome: 'Gestão e Administração Hospitalar',
+    tipo: 'Técnico Médio',
+    categoria: 'tecnico_medio',
+    duracao: '3 anos',
+    duracaoMeses: 36,
+    mensalidade: '3.800,00 Mts + 5% de IVA',
+    valorMensalidade: 3800,
+    matricula: '3.500 Mts',
+    inscricao: 'Incluída na Matrícula',
+    icone: '🏢',
+    grau: 'Técnico Médio Profissionalizante',
+    destaque: false,
+    descricao: 'Gestão operacional de unidades de saúde, fluxos de pacientes, documentação clínica, faturamento, regulação e atendimento administrativo.',
+    disciplinas: [
+      'Princípios de Administração e Gestão Hospitalar',
+      'Sistemas de Informação em Saúde (SIS)',
+      'Contabilidade e Faturação em Saúde',
+      'Logística e Aprovisionamento Hospitalar',
+      'Legislação e Ética Hospitalar'
+    ],
+    saidasProfissionais: [
+      'Administração de Clínicas e Hospitais',
+      'Secretaria Clínica e Faturação Médica',
+      'Gestão de Registos e Estatísticas em Saúde'
+    ]
+  },
+  {
+    id: 'saude-preventiva',
+    nome: 'Técnico de Saúde Preventiva - Agente Polivalente de Saúde',
+    tipo: 'Técnico Médio',
+    categoria: 'tecnico_medio',
+    duracao: '3 anos',
+    duracaoMeses: 36,
+    mensalidade: '3.800,00 Mts + 5% de IVA',
+    valorMensalidade: 3800,
+    matricula: '3.500 Mts',
+    inscricao: 'Incluída na Matrícula',
+    icone: '🛡️',
+    grau: 'Técnico Médio Profissionalizante',
+    destaque: false,
+    descricao: 'Promoção ativa de saúde comunitária, saneamento, prevenção de epidemias, imunização, vigilância entomológica e educação sanitária.',
+    disciplinas: [
+      'Higiene e Saneamento do Meio',
+      'Vigilância Epidemiológica',
+      'Doenças Endémicas e Parasitologia',
+      'Educação Comunitária em Saúde',
+      'Prevenção e Controlo de Doenças Transmissíveis'
+    ],
+    saidasProfissionais: [
+      'Brigadas de Saúde Comunitária',
+      'Programas de Combate à Malária, Tuberculose e HIV',
+      'Serviços Municipais de Saneamento e Higiene Pública'
+    ]
+  },
+  // Curta Duração
+  {
+    id: 'iniciacao-saude',
+    nome: 'Iniciação em Saúde-Cuidados Primários',
+    tipo: 'Curta Duração',
+    categoria: 'curta_duracao',
+    duracao: '6 meses',
+    duracaoMeses: 6,
+    mensalidade: '3.500 Mts + 5% IVA',
+    valorMensalidade: 3500,
+    matricula: '2.000 Mts',
+    inscricao: 'Inscrição Grátis',
+    icone: '🏥',
+    grau: 'Certificação Profissionalizante',
+    destaque: true,
+    descricao: 'Introdução intensiva aos conceitos e rotinas de cuidados primários de saúde, acolhimento de pacientes, sinais vitais e higiene hospitalar.',
+    disciplinas: [
+      'Introdução aos Serviços de Saúde',
+      'Aferição de Sinais Vitais (Tensão, Pulso, Temperatura)',
+      'Higiene e Biossegurança',
+      'Acolhimento e Orientação ao Utente'
+    ],
+    saidasProfissionais: [
+      'Apoio em Postos de Saúde e Consultórios',
+      'Assistência Domiciliária a Pacientes',
+      'Acolhimento Clínico'
+    ]
+  },
+  {
+    id: 'emergencias-primeiros-socorros',
+    nome: 'Emergências e Primeiros Socorros',
+    tipo: 'Curta Duração',
+    categoria: 'curta_duracao',
+    duracao: '6 meses',
+    duracaoMeses: 6,
+    mensalidade: '3.500 Mts + 5% IVA',
+    valorMensalidade: 3500,
+    matricula: '2.000 Mts',
+    inscricao: 'Inscrição Grátis',
+    icone: '🚨',
+    grau: 'Certificação Profissionalizante',
+    destaque: true,
+    descricao: 'Técnicas de intervenção rápida, reanimação cardiopulmonar (RCP), controlo de hemorragias agudas, queimaduras e imobilização de fraturas.',
+    disciplinas: [
+      'Suporte Básico de Vida (SBV) para Adultos e Crianças',
+      'Abordagem ao Politraumatizado',
+      'Técnicas de Imobilização e Transporte',
+      'Gestão de Crises e Triagem de Emergência'
+    ],
+    saidasProfissionais: [
+      'Equipas de Segurança e Socorrismo em Empresas',
+      'Apoio em Eventos Desportivos e Culturais',
+      'Centros de Transporte de Doentes e Apoio a Ambulâncias'
+    ]
+  },
+  {
+    id: 'higiene-saude-trabalho',
+    nome: 'Higiene e Saúde no Trabalho',
+    tipo: 'Curta Duração',
+    categoria: 'curta_duracao',
+    duracao: '6 meses',
+    duracaoMeses: 6,
+    mensalidade: '3.500 Mts + 5% IVA',
+    valorMensalidade: 3500,
+    matricula: '2.000 Mts',
+    inscricao: 'Inscrição Grátis',
+    icone: '⛑️',
+    grau: 'Certificação Profissionalizante',
+    destaque: true,
+    descricao: 'Normas de segurança ocupacional, identificação de riscos ambientais, equipamentos de proteção individual (EPI) e saúde do trabalhador.',
+    disciplinas: [
+      'Legislação de Higiene e Segurança no Trabalho',
+      'Identificação e Mapeamento de Riscos no Posto de Trabalho',
+      'Ergonomia e Prevenção de Lesões Laborais',
+      'Planos de Emergência e Proteção Coletiva'
+    ],
+    saidasProfissionais: [
+      'Setores de HST e Recursos Humanos de Empresas',
+      'Fábricas, Obras, Armazéns e Indústria',
+      'Auditoria Básica de Condições de Trabalho'
+    ]
+  }
+];
+
+export const REQUISITOS_MATRICULA_IFOPTEC = [
+  'Cópia autenticada de Certificado da 10ª ou 12ª Classe ou equivalente',
+  'Fotocópia de Bilhete de Identidade (BI) ou Passaporte',
+  'Duas fotografias tipo passe atualizadas',
+  'Cópia de NUIT (se tiver)',
+  'Inscrição Online sem sair de casa'
+];
+
+export const POLOS_IFOPTEC = [
+  {
+    nome: 'Polo Matola-Rio',
+    endereco: 'Rua da Mozal',
+    telefones: ['840726974', '870726974', '869700700']
+  },
+  {
+    nome: 'Polo Marracuene',
+    endereco: 'Rua da Facim',
+    telefones: ['840726974', '870726974', '869700700']
+  }
+];
+
 // Módulos / Disciplinas por curso
 export const MODULOS_POR_CURSO = {
   'Licenciatura em Tecnologias de Informação': [
@@ -47,6 +342,71 @@ export const MODULOS_POR_CURSO = {
     'Semiologia Médica',
     'Farmacologia Aplicada',
     'Saúde Comunitária e Preventiva'
+  ],
+  // IFOPTEC Módulos
+  'Técnico de Medicina Geral': [
+    'Anatomia e Fisiologia Humana',
+    'Semiologia e Propedêutica Médica',
+    'Farmacologia Aplicada',
+    'Patologia Médica e Cirúrgica',
+    'Saúde Comunitária e Epidemiologia',
+    'Urgências Médicas e Suporte de Vida',
+    'Saúde Materno-Infantil'
+  ],
+  'Técnico de Enfermagem Geral': [
+    'Fundamentos de Enfermagem',
+    'Anatomia e Fisiologia',
+    'Farmacologia em Enfermagem',
+    'Enfermagem Médico-Cirúrgica',
+    'Cuidados Pré e Pós-Operatórios',
+    'Saúde Comunitária'
+  ],
+  'Enfermagem de Saúde Materno e Infantil': [
+    'Saúde Reprodutiva e Sexual',
+    'Obstetrícia e Vigilância Pré-Natal',
+    'Assistência ao Parto e Puerpério',
+    'Pediatria e Puericultura',
+    'Nutrição Materno-Infantil e Vacinação',
+    'Planeamento Familiar'
+  ],
+  'Técnico de Farmácia': [
+    'Química Farmacêutica',
+    'Farmacologia e Toxicologia',
+    'Farmacotécnica e Formas Farmacêuticas',
+    'Gestão e Logística de Medicamentos',
+    'Dispensação e Deontologia Farmacêutica'
+  ],
+  'Gestão e Administração Hospitalar': [
+    'Princípios de Administração e Gestão Hospitalar',
+    'Sistemas de Informação em Saúde (SIS)',
+    'Contabilidade e Faturação em Saúde',
+    'Logística e Aprovisionamento Hospitalar',
+    'Legislação e Ética Hospitalar'
+  ],
+  'Técnico de Saúde Preventiva - Agente Polivalente de Saúde': [
+    'Higiene e Saneamento do Meio',
+    'Vigilância Epidemiológica',
+    'Doenças Endémicas e Parasitologia',
+    'Educação Comunitária em Saúde',
+    'Prevenção e Controlo de Doenças Transmissíveis'
+  ],
+  'Iniciação em Saúde-Cuidados Primários': [
+    'Introdução aos Serviços de Saúde',
+    'Aferição de Sinais Vitais',
+    'Higiene e Biossegurança',
+    'Acolhimento e Orientação ao Utente'
+  ],
+  'Emergências e Primeiros Socorros': [
+    'Suporte Básico de Vida (SBV)',
+    'Abordagem ao Politraumatizado',
+    'Técnicas de Imobilização e Transporte',
+    'Gestão de Crises e Triagem de Emergência'
+  ],
+  'Higiene e Saúde no Trabalho': [
+    'Legislação de Higiene e Segurança no Trabalho',
+    'Identificação e Mapeamento de Riscos no Posto de Trabalho',
+    'Ergonomia e Prevenção de Lesões Laborais',
+    'Planos de Emergência e Proteção Coletiva'
   ]
 };
 

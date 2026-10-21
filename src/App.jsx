@@ -31,6 +31,8 @@ import LaboratorioVirtual from './pages/laboratorio/LaboratorioVirtual';
 import HomeSchool from './pages/homeschool/HomeSchool';
 import HomeSchoolSalaVirtual from './pages/homeschool/HomeSchoolSalaVirtual';
 import TecnologiaInovacao from './pages/tecnologia/TecnologiaInovacao';
+import IfoptecHome from './pages/ifoptec/IfoptecHome';
+import IfoptecCursos from './pages/ifoptec/IfoptecCursos';
 
 export default function App() {
   return (
@@ -39,6 +41,72 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/index.php" element={<Home />} />
+
+        {/* IFOPTEC Multi-Institution Dedicated Routes */}
+        <Route path="/ifoptec" element={<IfoptecHome />} />
+        <Route path="/ifoptec/index.php" element={<IfoptecHome />} />
+        <Route path="/ifoptec/cursos" element={<IfoptecCursos />} />
+        <Route path="/ifoptec/cursos.php" element={<IfoptecCursos />} />
+        <Route path="/ifoptec/auth/login" element={<Login />} />
+        <Route path="/ifoptec/auth/register" element={<Register />} />
+
+        {/* IFOPTEC Core Modules Reused in IFOPTEC Context */}
+        <Route
+          path="/ifoptec/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ifoptec/feed"
+          element={
+            <ProtectedRoute>
+              <Feed />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ifoptec/ensino"
+          element={
+            <ProtectedRoute>
+              <Ensino />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ifoptec/homeschool"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ifoptec/ava"
+          element={
+            <ProtectedRoute>
+              <HomeSchool />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ifoptec/chatbot"
+          element={
+            <ProtectedRoute>
+              <Chatbot />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ifoptec/chat-global"
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          }
+        />
         
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/login.php" element={<Login />} />

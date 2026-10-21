@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useInstitution } from '../../context/InstitutionContext';
+import { CURSOS_IFOPTEC, CURSOS_ISPOTEC } from '../../services/homeschoolService';
 
 export default function Register() {
+  const [searchParams] = useSearchParams();
+  const { institution, isIfoptec } = useInstitution();
+
+  const initialInst = searchParams.get('instituicao') === 'ifoptec' || isIfoptec ? 'ifoptec' : 'ispotec';
+
+  const [instituicao, setInstituicao] = useState(initialInst);
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -10,7 +18,7 @@ export default function Register() {
     confirm_password: '',
     tipo: '',
     curso: '',
-    nivel_academico: ''
+    nivel_academico: initialInst === 'ifoptec' ? 'tecnico_medio' : ''
   });
 
   const [erro, setErro] = useState('');
@@ -19,9 +27,27 @@ export default function Register() {
 
   const { register } = useAuth();
 
+  useEffect(() => {
+    if (instituicao === 'ifoptec') {
+      if (!formData.nivel_academico || formData.nivel_academico === 'licenciatura' || formData.nivel_academico === 'mestrado') {
+        setFormData(prev => ({ ...prev, nivel_academico: 'tecnico_medio' }));
+      }
+    }
+  }, [instituicao]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleInstituicaoChange = (e) => {
+    const val = e.target.value;
+    setInstituicao(val);
+    setFormData(prev => ({
+      ...prev,
+      curso: '',
+      nivel_academico: val === 'ifoptec' ? 'tecnico_medio' : 'licenciatura'
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -53,31 +79,35 @@ export default function Register() {
       password,
       tipo,
       curso,
-      nivel_academico
+      nivel_academico,
+      instituicao_id: instituicao,
+      instituicao_nome: instituicao === 'ifoptec' ? 'IFOPTEC Online' : 'ISPOTEC Online'
     });
     setLoading(false);
 
     if (res.sucesso) {
-      setSucesso(res.mensagem);
+      setSucesso(res.mensagem || 'Registo realizado com sucesso!');
     } else {
-      setErro(res.mensagem);
+      setErro(res.mensagem || 'Ocorreu um erro no registo.');
     }
   };
 
+  const cursosDisponiveis = instituicao === 'ifoptec' ? CURSOS_IFOPTEC : CURSOS_ISPOTEC;
+
   return (
     <div style={{ padding: '2.5rem 1rem 4rem', minHeight: 'calc(100vh - 160px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: '520px' }}>
+      <div style={{ width: '100%', maxWidth: '540px' }}>
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <img 
-            src="/assets/img/logo-ispotec.png" 
-            alt="ISPOTEC Online"
-            style={{ height: '72px', width: 'auto', marginBottom: '1rem' }}
+            src={instituicao === 'ifoptec' ? '/assets/img/logo-ifoptec.png' : '/assets/img/logo-ispotec.png'} 
+            alt={instituicao === 'ifoptec' ? 'IFOPTEC Online' : 'ISPOTEC Online'}
+            style={{ height: '76px', width: 'auto', marginBottom: '1rem', borderRadius: instituicao === 'ifoptec' ? '50%' : '8px' }}
           />
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--isp-navy-950)', margin: '0 0 0.35rem' }}>
-            Registo Académico
+            Registo Académico Multi-Instituição
           </h1>
           <p style={{ fontSize: '0.88rem', color: 'var(--isp-slate-500)', margin: 0 }}>
-            Crie a sua conta de membro na comunidade ISPOTEC Online
+            Plataforma Integrada ISPOTEC &amp; IFOPTEC Online
           </p>
         </div>
 
@@ -100,8 +130,31 @@ export default function Register() {
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
+              {/* Institution Selection */}
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label htmlFor="instituicao" style={{ fontWeight: 700, color: '#0055a4' }}>
+                  🏛️ Selecione a Instituição
+                </label>
+                <select
+                  id="instituicao"
+                  value={instituicao}
+                  onChange={handleInstituicaoChange}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.8rem',
+                    borderRadius: '8px',
+                    border: '2px solid #bfdbfe',
+                    fontWeight: 600,
+                    fontSize: '0.92rem'
+                  }}
+                >
+                  <option value="ispotec">ISPOTEC Online — Instituto Superior Politécnico e de Tecnologias</option>
+                  <option value="ifoptec">IFOPTEC Online — Instituto de Formação Politécnica e de Tecnologias (Ensino Médio e Saúde)</option>
+                </select>
+              </div>
+
               <div className="form-group">
-                <label htmlFor="nome">Nome Completo</label>
+                <label htmlFor="nome">Nome Completo *</label>
                 <input 
                   type="text" 
                   id="nome" 
@@ -115,14 +168,14 @@ export default function Register() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="email">Email Institucional</label>
+                <label htmlFor="email">Email de Acesso *</label>
                 <input 
                   type="email" 
                   id="email" 
                   name="email" 
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="exemplo@ispotec.online"
+                  placeholder={instituicao === 'ifoptec' ? 'estudante@ifoptec.online' : 'estudante@ispotec.online'}
                   required 
                   autoComplete="email"
                 />
@@ -130,7 +183,7 @@ export default function Register() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
-                  <label htmlFor="tipo">Perfil de Acesso</label>
+                  <label htmlFor="tipo">Perfil de Acesso *</label>
                   <select 
                     id="tipo" 
                     name="tipo" 
@@ -139,44 +192,62 @@ export default function Register() {
                     required
                   >
                     <option value="">Seleccione...</option>
-                    <option value="estudante">Estudante</option>
-                    <option value="docente">Docente</option>
-                    <option value="especialista">Especialista (Admin)</option>
+                    <option value="estudante">Estudante / Aluno</option>
+                    <option value="docente">Docente / Formador</option>
+                    <option value="especialista">Especialista / Admin</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="nivel_academico">Nível Académico</label>
+                  <label htmlFor="nivel_academico">Nível Académico *</label>
                   <select 
                     id="nivel_academico" 
                     name="nivel_academico"
                     value={formData.nivel_academico}
                     onChange={handleChange}
                   >
-                    <option value="">Seleccione...</option>
-                    <option value="licenciatura">Licenciatura</option>
-                    <option value="mestrado">Mestrado</option>
-                    <option value="doutoramento">Doutoramento</option>
-                    <option value="tecnico">Técnico</option>
+                    {instituicao === 'ifoptec' ? (
+                      <>
+                        <option value="tecnico_medio">Técnico Médio (3 Anos)</option>
+                        <option value="curta_duracao">Curta Duração (6 Meses)</option>
+                        <option value="iniciacao">Iniciação Profissional</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="licenciatura">Licenciatura</option>
+                        <option value="mestrado">Mestrado</option>
+                        <option value="doutoramento">Doutoramento</option>
+                        <option value="tecnico">Técnico Superior</option>
+                      </>
+                    )}
                   </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="curso">Curso ou Especialidade</label>
+                <label htmlFor="curso">
+                  {instituicao === 'ifoptec' ? 'Curso Técnico ou Especialidade IFOPTEC *' : 'Curso ISPOTEC *'}
+                </label>
                 <input 
                   type="text" 
                   id="curso" 
                   name="curso" 
+                  list="lista_cursos"
                   value={formData.curso}
                   onChange={handleChange}
-                  placeholder="Ex: Engenharia Informática, Gestão..."
+                  placeholder={instituicao === 'ifoptec' ? 'Ex: Técnico de Medicina Geral, Enfermagem...' : 'Ex: Engenharia Informática, Gestão...'}
+                  required
                 />
+                <datalist id="lista_cursos">
+                  {cursosDisponiveis.map((c, i) => (
+                    <option key={i} value={c} />
+                  ))}
+                </datalist>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label htmlFor="password">Palavra-passe</label>
+                  <label htmlFor="password">Palavra-passe *</label>
                   <input 
                     type="password" 
                     id="password" 
@@ -190,14 +261,14 @@ export default function Register() {
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label htmlFor="confirm_password">Confirmar Palavra-passe</label>
+                  <label htmlFor="confirm_password">Confirmar Palavra-passe *</label>
                   <input 
                     type="password" 
                     id="confirm_password" 
                     name="confirm_password" 
                     value={formData.confirm_password}
                     onChange={handleChange}
-                    placeholder="Repita a palavra-passe"
+                    placeholder="Repita a password"
                     required 
                     autoComplete="new-password"
                   />
@@ -207,24 +278,20 @@ export default function Register() {
               <button 
                 type="submit" 
                 className="btn btn-primary" 
-                style={{ width: '100%', padding: '0.8rem', fontSize: '0.95rem' }}
+                style={{ width: '100%', padding: '0.85rem', fontSize: '1rem', fontWeight: 700 }}
                 disabled={loading}
               >
-                {loading ? 'A registar conta...' : 'Submeter Registo'}
+                {loading ? 'A registar conta...' : `Concluir Registo no ${instituicao.toUpperCase()}`}
               </button>
             </form>
           )}
 
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--isp-slate-100)', textAlign: 'center', fontSize: '0.88rem', color: 'var(--isp-slate-600)' }}>
-            Já tem uma conta registada?{' '}
-            <Link to="/auth/login" style={{ color: 'var(--isp-blue-600)', textDecoration: 'none', fontWeight: 700 }}>
-              Iniciar sessão
+          <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--isp-slate-100)', fontSize: '0.88rem' }}>
+            <span style={{ color: 'var(--isp-slate-500)' }}>Já tem uma conta criada? </span>
+            <Link to="/auth/login" style={{ color: 'var(--isp-blue-600)', fontWeight: 600 }}>
+              Iniciar Sessão
             </Link>
           </div>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.78rem', color: 'var(--isp-slate-400)' }}>
-          © {new Date().getFullYear()} ISPOTEC • Instituto Superior Politécnico de Tecnologias e Ciências
         </div>
       </div>
     </div>

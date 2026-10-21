@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useInstitution } from '../context/InstitutionContext';
 
 export default function Sidebar({
   isCollapsed,
@@ -10,6 +11,7 @@ export default function Sidebar({
   onOpenContacts
 }) {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { institution, isIfoptec, isIspotec, switchInstitution } = useInstitution();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,15 +41,16 @@ export default function Sidebar({
     >
       {/* Brand Header */}
       <div className="sidebar-brand-header">
-        <Link to="/" className="sidebar-brand-link" onClick={handleNavClick}>
+        <Link to={institution.homeUrl} className="sidebar-brand-link" onClick={handleNavClick}>
           <img
-            src="/assets/img/logo-ispotec.png"
-            alt="ISPOTEC"
+            src={institution.logo}
+            alt={institution.shortName}
             className="sidebar-brand-logo"
+            style={{ borderRadius: isIfoptec ? '50%' : '8px' }}
           />
           <div className="sidebar-brand-info">
-            <span className="sidebar-brand-title">ISPOTEC</span>
-            <span className="sidebar-brand-sub">Portal Académico</span>
+            <span className="sidebar-brand-title">{institution.shortName}</span>
+            <span className="sidebar-brand-sub">{institution.level}</span>
           </div>
         </Link>
 
@@ -62,6 +65,65 @@ export default function Sidebar({
           {isCollapsed ? '»' : '«'}
         </button>
       </div>
+
+      {/* Institution Switcher Widget (Desktop & Mobile) */}
+      {!isCollapsed && (
+        <div style={{
+          padding: '0.5rem 0.85rem',
+          margin: '0 0.5rem 0.5rem',
+          background: 'rgba(0,0,0,0.04)',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.35rem'
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Instituição Activa
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+            <button
+              type="button"
+              onClick={() => { switchInstitution('ispotec'); handleNavClick(); }}
+              style={{
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.35rem 0.4rem',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: isIspotec ? '#0055a4' : '#f1f5f9',
+                color: isIspotec ? '#fff' : '#475569',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.25rem'
+              }}
+            >
+              🏛️ ISPOTEC
+            </button>
+            <button
+              type="button"
+              onClick={() => { switchInstitution('ifoptec'); handleNavClick(); }}
+              style={{
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.35rem 0.4rem',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                background: isIfoptec ? '#02529c' : '#f1f5f9',
+                color: isIfoptec ? '#fff' : '#475569',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.25rem'
+              }}
+            >
+              🏥 IFOPTEC
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Nav Scroll Area */}
       <div className="sidebar-nav-scroll">
@@ -94,14 +156,34 @@ export default function Sidebar({
           ) : (
             <Link
               to="/"
-              className={`sidebar-nav-item ${isActive('/') ? 'active' : ''}`}
+              className={`sidebar-nav-item ${isActive('/') && location.pathname !== '/ifoptec' && !location.pathname.startsWith('/ifoptec') ? 'active' : ''}`}
               onClick={handleNavClick}
-              data-tooltip="Início"
+              data-tooltip="Início ISPOTEC"
             >
               <span className="sidebar-item-icon">🏛️</span>
-              <span className="sidebar-item-label">Início</span>
+              <span className="sidebar-item-label">Início ISPOTEC</span>
             </Link>
           )}
+
+          <Link
+            to="/ifoptec"
+            className={`sidebar-nav-item ${location.pathname === '/ifoptec' ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="IFOPTEC Online"
+          >
+            <span className="sidebar-item-icon">🏥</span>
+            <span className="sidebar-item-label">IFOPTEC Online</span>
+          </Link>
+
+          <Link
+            to="/ifoptec/cursos"
+            className={`sidebar-nav-item ${location.pathname === '/ifoptec/cursos' ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Cursos IFOPTEC"
+          >
+            <span className="sidebar-item-icon">📋</span>
+            <span className="sidebar-item-label">Cursos Médios &amp; Saúde</span>
+          </Link>
         </div>
 
         {/* ================= ACADEMIC (Ensino, Extensão, Investigação, Tecnologia e Inovação, Ambiente Virtual e Aprendizagem) ================= */}

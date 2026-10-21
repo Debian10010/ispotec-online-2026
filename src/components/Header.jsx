@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useInstitution } from '../context/InstitutionContext';
 import { notificationService } from '../services/notificationService';
 
 export default function Header({
@@ -10,6 +11,7 @@ export default function Header({
   onOpenContacts,
 }) {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { institution, isIfoptec, isIspotec, switchInstitution } = useInstitution();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -250,6 +252,41 @@ export default function Header({
           color: #94a3b8;
           font-size: 0.85rem;
         }
+        .header-inst-pill-group {
+          display: inline-flex;
+          align-items: center;
+          background: rgba(0, 0, 0, 0.22);
+          padding: 2px 3px;
+          border-radius: 20px;
+          margin-left: 0.6rem;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .header-inst-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.22rem 0.6rem;
+          border-radius: 14px;
+          border: none;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 0.73rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .header-inst-btn:hover {
+          color: white;
+          background: rgba(255, 255, 255, 0.12);
+        }
+        .header-inst-btn.active {
+          background: white;
+          color: #003366;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+        @media (max-width: 640px) {
+          .header-inst-pill-group { display: none; }
+        }
       `}</style>
 
       {/* Left side: Toggles & Breadcrumb */}
@@ -278,10 +315,32 @@ export default function Header({
 
         {/* Institutional Breadcrumb */}
         <nav className="header-breadcrumb" aria-label="Caminho da página">
-          <Link to="/">ISPOTEC</Link>
+          <Link to={institution.homeUrl}>{institution.shortName}</Link>
           <span>/</span>
           <span className="header-breadcrumb-active">{getBreadcrumb()}</span>
         </nav>
+
+        {/* Multi-institution Switcher */}
+        <div className="header-inst-pill-group" role="group" aria-label="Seletor de Instituição">
+          <button
+            type="button"
+            className={`header-inst-btn ${isIspotec ? 'active' : ''}`}
+            onClick={() => switchInstitution('ispotec')}
+            title="ISPOTEC — Instituto Superior Politécnico e de Tecnologias"
+          >
+            <img src="/assets/img/logo-ispotec.png" alt="ISPOTEC" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
+            <span>ISPOTEC</span>
+          </button>
+          <button
+            type="button"
+            className={`header-inst-btn ${isIfoptec ? 'active' : ''}`}
+            onClick={() => switchInstitution('ifoptec')}
+            title="IFOPTEC — Instituto de Formação Politécnica e de Tecnologias"
+          >
+            <img src="/assets/img/logo-ifoptec.png" alt="IFOPTEC" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
+            <span>IFOPTEC</span>
+          </button>
+        </div>
       </div>
 
       {/* Right side: Quick actions & User menu */}
