@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useInstitution } from '../context/InstitutionContext';
+import TabelaCursosPropinasIspotec from '../components/TabelaCursosPropinasIspotec';
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
@@ -364,9 +365,12 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="container">
+      <div className="container" style={{ paddingTop: '2.5rem' }}>
+        {/* Tabela Oficial de Cursos e Propinas ISPOTEC (Inscrições 2027) */}
+        <TabelaCursosPropinasIspotec />
+
         {/* Core Academic Modules Section (Ensino, Extensão, Investigação, Tecnologia & Inovação, Ambiente Virtual e Aprendizagem) */}
-        <section style={{ margin: '3rem 0 1rem 0' }}>
+        <section style={{ margin: '1.5rem 0 1rem 0' }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <span style={{
               fontSize: '0.78rem',
