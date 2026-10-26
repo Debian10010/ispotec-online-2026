@@ -33,6 +33,9 @@ import HomeSchoolSalaVirtual from './pages/homeschool/HomeSchoolSalaVirtual';
 import TecnologiaInovacao from './pages/tecnologia/TecnologiaInovacao';
 import IfoptecHome from './pages/ifoptec/IfoptecHome';
 import IfoptecCursos from './pages/ifoptec/IfoptecCursos';
+import PreInscricao2027 from './pages/candidaturas/PreInscricao2027';
+import ConsultarCandidatura from './pages/candidaturas/ConsultarCandidatura';
+import GestaoPreInscricoes from './pages/dashboard/GestaoPreInscricoes';
 
 export default function App() {
   return (
@@ -41,6 +44,13 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/index.php" element={<Home />} />
+
+        {/* Candidaturas & Pré-Inscrição 2027 */}
+        <Route path="/pre-inscricao" element={<PreInscricao2027 />} />
+        <Route path="/pre-inscricao.php" element={<PreInscricao2027 />} />
+        <Route path="/inscricao-2027" element={<PreInscricao2027 />} />
+        <Route path="/consultar-candidatura" element={<ConsultarCandidatura />} />
+        <Route path="/consultar-candidatura.php" element={<ConsultarCandidatura />} />
 
         {/* IFOPTEC Multi-Institution Dedicated Routes */}
         <Route path="/ifoptec" element={<IfoptecHome />} />
@@ -253,6 +263,30 @@ export default function App() {
         />
 
         {/* Admin Routes */}
+        <Route 
+          path="/dashboard/pre-inscricoes" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <GestaoPreInscricoes />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/pre-inscricoes.php" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <GestaoPreInscricoes />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/candidaturas" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <GestaoPreInscricoes />
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="/dashboard/users-list" 
           element={

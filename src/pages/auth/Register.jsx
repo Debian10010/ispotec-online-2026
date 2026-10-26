@@ -217,7 +217,7 @@ export default function Register() {
                         <option value="licenciatura">Licenciatura</option>
                         <option value="mestrado">Mestrado</option>
                         <option value="doutoramento">Doutoramento</option>
-                        <option value="tecnico">Técnico Superior</option>
+                        <option value="tecnico">Técnico Médio</option>
                       </>
                     )}
                   </select>
@@ -235,7 +235,7 @@ export default function Register() {
                   list="lista_cursos"
                   value={formData.curso}
                   onChange={handleChange}
-                  placeholder={instituicao === 'ifoptec' ? 'Ex: Técnico de Medicina Geral, Enfermagem...' : 'Ex: Engenharia Informática, Gestão...'}
+                  placeholder={instituicao === 'ifoptec' ? 'Ex: Técnico de Medicina Geral, Enfermagem...' : 'Ex: Enfermagem Geral, Direito, Gestão...'}
                   required
                 />
                 <datalist id="lista_cursos">

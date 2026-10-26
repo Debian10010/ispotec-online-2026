@@ -335,11 +335,14 @@ export default function Home() {
               <p className="hero-subtitle">Plataforma de aprendizagem colaborativa do Instituto Superior Politécnico e de Tecnologias</p>
               
               <div className="hero-buttons">
+                <Link to="/pre-inscricao" className="hero-btn hero-btn-primary" style={{ background: 'linear-gradient(135deg, #0284c7, #0055a4)', boxShadow: '0 4px 15px rgba(2, 132, 199, 0.4)' }}>
+                  📝 Pré-Inscrição 2027 →
+                </Link>
+                <Link to="/consultar-candidatura" className="hero-btn hero-btn-secondary">
+                  🔍 Consultar Candidatura
+                </Link>
                 <Link to="/auth/login" className="hero-btn hero-btn-secondary">
                   Entrar
-                </Link>
-                <Link to="/auth/register" className="hero-btn hero-btn-primary">
-                  Criar Conta Grátis →
                 </Link>
                 <Link to="/ifoptec" className="hero-btn hero-btn-secondary" style={{ background: 'rgba(14, 165, 233, 0.25)', borderColor: 'rgba(14, 165, 233, 0.5)' }}>
                   Aceder ao IFOPTEC ↗

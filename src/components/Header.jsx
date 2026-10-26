@@ -89,6 +89,9 @@ export default function Header({
   const getBreadcrumb = () => {
     const path = location.pathname;
     if (path === '/' || path === '/index.php') return 'Início';
+    if (path.startsWith('/pre-inscricao') || path.startsWith('/inscricao-2027')) return 'Pré-Inscrição Online 2027';
+    if (path.startsWith('/consultar-candidatura')) return 'Consultar Candidatura';
+    if (path.startsWith('/dashboard/pre-inscricoes') || path.startsWith('/dashboard/candidaturas')) return 'Gestão de Pré-Inscrições 2027';
     if (path.startsWith('/dashboard/feed')) return 'Feed Académico';
     if (path.startsWith('/dashboard/chat-global')) return 'Chat Geral ISPOTEC';
     if (path.startsWith('/dashboard/chat-group')) return 'Chat da Disciplina';
@@ -483,16 +486,29 @@ export default function Header({
                   </Link>
 
                   {isAdmin && (
-                    <Link
-                      to="/dashboard/users-list"
-                      className="dropdown-item"
-                      onClick={() => setUserDropdownOpen(false)}
-                      role="menuitem"
-                      style={{ color: '#1d4ed8', fontWeight: 600 }}
-                    >
-                      <span>👥</span>
-                      <span>Gestão de Utilizadores</span>
-                    </Link>
+                    <>
+                      <Link
+                        to="/dashboard/pre-inscricoes"
+                        className="dropdown-item"
+                        onClick={() => setUserDropdownOpen(false)}
+                        role="menuitem"
+                        style={{ color: '#0055a4', fontWeight: 600 }}
+                      >
+                        <span>📋</span>
+                        <span>Pré-Inscrições 2027</span>
+                      </Link>
+
+                      <Link
+                        to="/dashboard/users-list"
+                        className="dropdown-item"
+                        onClick={() => setUserDropdownOpen(false)}
+                        role="menuitem"
+                        style={{ color: '#1d4ed8', fontWeight: 600 }}
+                      >
+                        <span>👥</span>
+                        <span>Gestão de Utilizadores</span>
+                      </Link>
+                    </>
                   )}
 
                   <button
@@ -510,6 +526,19 @@ export default function Header({
           </>
         ) : (
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Link
+              to="/pre-inscricao"
+              className="btn btn-primary btn-sm"
+              style={{
+                padding: '0.45rem 0.95rem',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                background: '#0284c7',
+                borderColor: '#0284c7'
+              }}
+            >
+              📝 Pré-Inscrição 2027
+            </Link>
             <Link
               to="/auth/login"
               className="btn btn-secondary btn-sm"

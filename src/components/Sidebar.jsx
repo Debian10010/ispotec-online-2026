@@ -184,6 +184,26 @@ export default function Sidebar({
             <span className="sidebar-item-icon">📋</span>
             <span className="sidebar-item-label">Cursos Médios &amp; Saúde</span>
           </Link>
+
+          <Link
+            to="/pre-inscricao"
+            className={`sidebar-nav-item ${isActive('/pre-inscricao') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Pré-Inscrição Online 2027"
+          >
+            <span className="sidebar-item-icon">📝</span>
+            <span className="sidebar-item-label">Pré-Inscrição 2027</span>
+          </Link>
+
+          <Link
+            to="/consultar-candidatura"
+            className={`sidebar-nav-item ${isActive('/consultar-candidatura') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Consultar Candidatura"
+          >
+            <span className="sidebar-item-icon">🔍</span>
+            <span className="sidebar-item-label">Consultar Candidatura</span>
+          </Link>
         </div>
 
         {/* ================= ACADEMIC (Ensino, Extensão, Investigação, Tecnologia e Inovação, Ambiente Virtual e Aprendizagem) ================= */}
@@ -331,6 +351,16 @@ export default function Sidebar({
                 >
                   <span className="sidebar-item-icon">📚</span>
                   <span className="sidebar-item-label">Disciplinas &amp; Grupos</span>
+                </Link>
+
+                <Link
+                  to="/dashboard/pre-inscricoes"
+                  className={`sidebar-nav-item ${isActive('/dashboard/pre-inscricoes') || isActive('/dashboard/candidaturas') ? 'active' : ''}`}
+                  onClick={handleNavClick}
+                  data-tooltip="Gestão de Pré-Inscrições 2027"
+                >
+                  <span className="sidebar-item-icon">📋</span>
+                  <span className="sidebar-item-label">Pré-Inscrições 2027</span>
                 </Link>
               </>
             ) : (

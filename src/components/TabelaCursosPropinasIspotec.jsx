@@ -302,11 +302,18 @@ export default function TabelaCursosPropinasIspotec() {
             💬 Inscrever-se via WhatsApp
           </a>
           <Link
-            to="/auth/register"
+            to="/pre-inscricao"
             className="btn btn-primary"
             style={{ padding: '0.55rem 1rem', fontSize: '0.84rem', fontWeight: 700 }}
           >
-            📝 Inscrição Online
+            📝 Pré-Inscrição 2027
+          </Link>
+          <Link
+            to="/consultar-candidatura"
+            className="btn btn-outline-secondary"
+            style={{ padding: '0.55rem 1rem', fontSize: '0.84rem', fontWeight: 600 }}
+          >
+            🔍 Consultar Candidatura
           </Link>
         </div>
       </div>
@@ -454,7 +461,7 @@ export default function TabelaCursosPropinasIspotec() {
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <Link
-                        to="/auth/register"
+                        to="/pre-inscricao"
                         className="btn btn-outline-primary"
                         style={{ padding: '0.3rem 0.75rem', fontSize: '0.78rem' }}
                       >
@@ -608,7 +615,7 @@ export default function TabelaCursosPropinasIspotec() {
 
         <div>
           <Link
-            to="/auth/register"
+            to="/pre-inscricao"
             className="btn btn-primary"
             style={{ fontSize: '0.86rem', padding: '0.5rem 1.25rem', fontWeight: 700 }}
           >

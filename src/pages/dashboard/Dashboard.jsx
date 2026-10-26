@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import { groupService } from '../../services/groupService';
 import { postService } from '../../services/postService';
+import { candidaturaService } from '../../services/candidaturaService';
 import TabelaCursosPropinasIspotec from '../../components/TabelaCursosPropinasIspotec';
 
 export default function Dashboard() {
@@ -16,6 +17,7 @@ export default function Dashboard() {
   });
   const [myGroupsCount, setMyGroupsCount] = useState(0);
   const [recentPosts, setRecentPosts] = useState([]);
+  const [candStats, setCandStats] = useState({ total: 0, aguardandoPagamento: 0, emAnalise: 0, aprovadas: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,8 +31,12 @@ export default function Dashboard() {
         ]);
 
         let userCounts = { aprovados: 0, pendentes: 0 };
+        let cStats = { total: 0, aguardandoPagamento: 0, emAnalise: 0, aprovadas: 0 };
         if (isAdmin) {
           userCounts = await userService.getCounts();
+          try {
+            cStats = await candidaturaService.getEstatisticas();
+          } catch (_) {}
         }
 
         let myGroups = [];
@@ -46,6 +52,7 @@ export default function Dashboard() {
           totalGrupos: groups.length || 0,
           totalPosts: totalPosts || 0
         });
+        setCandStats(cStats);
         setMyGroupsCount(myGroups.length || 0);
         setRecentPosts(recentFeed || []);
       } catch (err) {
@@ -207,7 +214,7 @@ export default function Dashboard() {
           border: '1px solid var(--isp-amber-100)',
           borderRadius: 'var(--isp-radius-md)',
           padding: '1rem 1.25rem',
-          marginBottom: '1.75rem',
+          marginBottom: '1.25rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -232,6 +239,43 @@ export default function Dashboard() {
           >
             Rever Pendentes →
           </Link>
+        </div>
+      )}
+
+      {/* Candidaturas 2027 Banner (Admin) */}
+      {isAdmin && (
+        <div style={{
+          background: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: 'var(--isp-radius-md)',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '1.4rem' }}>📋</span>
+            <div>
+              <strong style={{ color: '#0369a1', display: 'block', fontSize: '0.95rem' }}>
+                Pré-Inscrições &amp; Candidaturas 2027
+              </strong>
+              <span style={{ color: '#475569', fontSize: '0.88rem' }}>
+                Total: <strong>{candStats.total}</strong> | Pagamentos Pendentes: <strong>{candStats.aguardandoPagamento}</strong> | Aprovadas: <strong>{candStats.aprovadas}</strong>
+              </span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Link
+              to="/dashboard/pre-inscricoes"
+              className="btn btn-primary"
+              style={{ padding: '0.45rem 1rem', fontSize: '0.85rem', fontWeight: 700 }}
+            >
+              Gerir Candidaturas 2027 →
+            </Link>
+          </div>
         </div>
       )}
 
