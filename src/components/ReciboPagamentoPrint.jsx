@@ -1,5 +1,6 @@
 import React from 'react';
 import { candidaturaService } from '../services/candidaturaService';
+import LOGO_ISPOTEC_BASE64 from '../assets/logoIspotecBase64';
 
 /**
  * Componente Oficial para Impressão e Download em PDF:
@@ -338,10 +339,9 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
         {/* HEADER */}
         <div className="r-header">
           <img
-            src="/images/logo.png"
+            src={LOGO_ISPOTEC_BASE64}
             alt="Logótipo ISPOTEC"
             className="r-logo"
-            onError={(e) => { e.target.style.display = 'none'; }}
           />
 
           <div className="r-header-text">

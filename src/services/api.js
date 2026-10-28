@@ -94,7 +94,20 @@ class ApiClient {
   }
 
   async request(endpoint, options = {}) {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    let finalEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    if (options.params && typeof options.params === 'object') {
+      const q = new URLSearchParams();
+      Object.entries(options.params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') {
+          q.append(k, v);
+        }
+      });
+      const qs = q.toString();
+      if (qs) {
+        finalEndpoint += (finalEndpoint.includes('?') ? '&' : '?') + qs;
+      }
+    }
+    const url = `${this.baseUrl}${finalEndpoint}`;
     const isFormData = options.body instanceof FormData;
 
     const config = {

@@ -1,8 +1,9 @@
 import React from 'react';
+import LOGO_ISPOTEC_BASE64 from '../assets/logoIspotecBase64';
 
 /**
  * Componente de Impressão Oficial A4:
- * 1) Ficha Individual do Processo do Candidato (Dossiê Completo)
+ * 1) Ficha Individual do Processo do Candidato (Dossiê Completo - 1 PÁGINA RIGOROSA)
  * 2) Relatório / Pauta de Candidaturas Selecionadas (Modo Lista)
  */
 export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = null, onClose }) {
@@ -19,9 +20,7 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
       return d.toLocaleDateString('pt-MZ', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric'
       });
     } catch (_) {
       return iso;
@@ -32,6 +31,16 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
     if (!val && val !== 0) return '—';
     return Number(val).toLocaleString('pt-MZ') + ' MT';
   };
+
+  const dp = candidatura?.dadosPessoais || {};
+  const da = candidatura?.dadosAcademicos || {};
+  const docs = candidatura?.documentos || {};
+  const compDoc = docs.comprovativoPagamento || null;
+
+  // Informações bancárias adequadas ao grau
+  const isLic = (da.grau || '').toLowerCase().includes('licenciatura');
+  const contaBCI = isLic ? '22076375610001' : '22076375610002';
+  const nibBCI = isLic ? '0008 0000 20763756101 13' : '0008 0000 20763756102 10';
 
   return (
     <div className="ficha-print-overlay">
@@ -49,65 +58,56 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 2rem 1rem;
+          padding: 1.5rem 1rem;
         }
 
         .ficha-print-toolbar {
           background: white;
-          padding: 0.75rem 1.5rem;
+          padding: 0.65rem 1.25rem;
           border-radius: 8px;
           display: flex;
           gap: 1rem;
           align-items: center;
           box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-          margin-bottom: 1.5rem;
+          margin-bottom: 1rem;
           position: sticky;
-          top: 1rem;
+          top: 0.5rem;
           z-index: 10;
         }
 
         .ficha-print-sheet {
           background: white;
           width: 210mm;
-          min-height: 297mm;
-          padding: 18mm 18mm 15mm 18mm;
+          max-width: 100%;
+          min-height: 295mm;
+          max-height: 297mm;
+          padding: 10mm 14mm 8mm 14mm;
           box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-          color: #1e293b;
+          color: #0f172a;
           font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-          font-size: 10pt;
-          line-height: 1.45;
+          font-size: 8pt;
+          line-height: 1.3;
           box-sizing: border-box;
           position: relative;
+          overflow: hidden;
+          page-break-inside: avoid;
         }
 
         /* HEADER INSTITUCIONAL */
         .f-header {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 14px;
           border-bottom: 2px solid #003366;
-          padding-bottom: 12px;
-          margin-bottom: 14px;
+          padding-bottom: 8px;
+          margin-bottom: 8px;
         }
 
         .f-logo-img {
-          width: 72px;
-          height: 72px;
+          width: 62px;
+          height: 62px;
           object-fit: contain;
-        }
-
-        .f-logo-fallback {
-          width: 70px;
-          height: 70px;
-          border-radius: 8px;
-          background: linear-gradient(135deg, #003366, #0284c7);
-          color: white;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          font-weight: 800;
-          font-size: 15pt;
+          flex-shrink: 0;
         }
 
         .f-header-text {
@@ -116,44 +116,45 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
         }
 
         .f-header-text h1 {
-          font-size: 12.5pt;
+          font-size: 11pt;
           font-weight: 900;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
           color: #003366;
           margin: 0;
           text-transform: uppercase;
         }
 
         .f-header-text h2 {
-          font-size: 10pt;
+          font-size: 8.5pt;
           font-weight: 700;
           color: #0284c7;
-          margin: 3px 0;
+          margin: 2px 0;
           text-transform: uppercase;
-          letter-spacing: 0.3px;
+          letter-spacing: 0.2px;
         }
 
         .f-header-text p {
-          font-size: 7.8pt;
+          font-size: 6.8pt;
           color: #475569;
-          margin: 2px 0 0 0;
+          margin: 1px 0 0 0;
+          line-height: 1.25;
         }
 
         /* PROCESS TITLE BAR */
         .f-title-bar {
           background: #f1f5f9;
           border: 1px solid #cbd5e1;
-          border-left: 5px solid #003366;
-          padding: 7px 12px;
+          border-left: 4px solid #003366;
+          padding: 5px 10px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 14px;
+          margin-bottom: 8px;
         }
 
         .f-title-bar h3 {
           margin: 0;
-          font-size: 11pt;
+          font-size: 9.5pt;
           font-weight: 800;
           color: #0f172a;
           text-transform: uppercase;
@@ -161,54 +162,55 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
 
         .f-num-candidatura {
           font-family: monospace;
-          font-size: 12pt;
+          font-size: 10pt;
           font-weight: 800;
           color: #003366;
           background: white;
           border: 1px solid #94a3b8;
-          padding: 2px 10px;
+          padding: 2px 8px;
           border-radius: 4px;
         }
 
         /* SECTIONS */
         .f-section {
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
 
         .f-section-title {
-          font-size: 8.5pt;
+          font-size: 7.5pt;
           font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
           color: #003366;
-          border-bottom: 1px solid #e2e8f0;
-          padding-bottom: 3px;
-          margin-bottom: 8px;
+          border-bottom: 1px solid #cbd5e1;
+          padding-bottom: 2px;
+          margin-bottom: 5px;
           display: flex;
           justify-content: space-between;
+          align-items: center;
         }
 
         .f-grid-2 {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 6px 14px;
+          gap: 4px 10px;
         }
 
         .f-grid-3 {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
-          gap: 6px 12px;
+          gap: 4px 10px;
         }
 
         .f-grid-personal {
           display: grid;
-          grid-template-columns: 110px 1fr;
-          gap: 14px;
+          grid-template-columns: 85px 1fr;
+          gap: 10px;
         }
 
         .f-photo-box {
-          width: 105px;
-          height: 130px;
+          width: 85px;
+          height: 100px;
           border: 1px dashed #94a3b8;
           border-radius: 4px;
           display: flex;
@@ -217,10 +219,10 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
           justify-content: center;
           background: #f8fafc;
           overflow: hidden;
-          font-size: 7.5pt;
+          font-size: 6.5pt;
           color: #64748b;
           text-align: center;
-          padding: 4px;
+          padding: 2px;
         }
 
         .f-photo-box img {
@@ -232,16 +234,16 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
         .f-field {
           display: flex;
           flex-direction: column;
-          font-size: 8.5pt;
-          margin-bottom: 4px;
+          font-size: 7.8pt;
+          margin-bottom: 2px;
         }
 
         .f-label {
-          font-size: 7pt;
+          font-size: 6.2pt;
           font-weight: 700;
           color: #64748b;
           text-transform: uppercase;
-          letter-spacing: 0.3px;
+          letter-spacing: 0.2px;
           margin-bottom: 1px;
         }
 
@@ -249,13 +251,14 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
           color: #0f172a;
           font-weight: 600;
           word-break: break-word;
+          line-height: 1.25;
         }
 
         .f-badge {
           display: inline-block;
-          padding: 2px 8px;
+          padding: 1px 6px;
           border-radius: 3px;
-          font-size: 7.5pt;
+          font-size: 6.8pt;
           font-weight: 700;
           text-transform: uppercase;
           width: fit-content;
@@ -266,17 +269,30 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
         .f-badge-blue  { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
         .f-badge-red   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
 
+        /* COMPROVATIVO DESTAQUE */
+        .f-comp-box {
+          background: #f0fdf4;
+          border: 1.5px solid #86efac;
+          border-radius: 6px;
+          padding: 6px 10px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          margin-top: 4px;
+        }
+
         /* TABLES */
         .f-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 8pt;
-          margin-top: 4px;
+          font-size: 7.2pt;
+          margin-top: 3px;
         }
 
         .f-table th, .f-table td {
           border: 1px solid #cbd5e1;
-          padding: 5px 8px;
+          padding: 3px 6px;
           text-align: left;
         }
 
@@ -285,55 +301,50 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
           font-weight: 700;
           color: #334155;
           text-transform: uppercase;
-          font-size: 7.2pt;
+          font-size: 6.5pt;
         }
 
         /* AUDIT & SIGNATURES */
         .f-declaration {
-          font-size: 7.5pt;
+          font-size: 6.5pt;
           color: #475569;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
-          padding: 8px 10px;
-          margin: 14px 0;
-          line-height: 1.35;
+          padding: 5px 8px;
+          margin: 6px 0 8px 0;
+          line-height: 1.25;
           border-radius: 4px;
         }
 
         .f-signatures {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 30px;
-          margin-top: 25px;
+          gap: 25px;
+          margin-top: 12px;
           text-align: center;
         }
 
         .f-sig-line {
           border-top: 1px solid #334155;
-          padding-top: 4px;
-          font-size: 8pt;
+          padding-top: 3px;
+          font-size: 7.2pt;
           font-weight: 700;
           color: #1e293b;
         }
 
         .f-sig-sub {
-          font-size: 7pt;
+          font-size: 6.2pt;
           color: #64748b;
         }
 
-        /* WATERMARK / NOTICE */
-        .f-notice {
-          border: 1px dashed #0284c7;
-          background: #f0f9ff;
-          padding: 6px 10px;
-          font-size: 7.5pt;
-          color: #0369a1;
-          margin-top: 10px;
-          border-radius: 4px;
-        }
-
-        /* PRINT STYLES */
+        /* PRINT STYLES - RIGID 1 PAGE A4 */
         @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            overflow: hidden !important;
+          }
           body * {
             visibility: hidden;
           }
@@ -341,29 +352,34 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
             visibility: visible;
           }
           .ficha-print-overlay {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: auto;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
             background: none !important;
             padding: 0 !important;
             backdrop-filter: none !important;
+            overflow: visible !important;
           }
           .ficha-print-toolbar {
             display: none !important;
           }
           .ficha-print-sheet {
             box-shadow: none !important;
-            padding: 10mm 15mm !important;
-            margin: 0 !important;
+            padding: 6mm 10mm 4mm 10mm !important;
+            margin: 0 auto !important;
             width: 100% !important;
-            min-height: auto !important;
-            page-break-after: always;
+            max-width: 100% !important;
+            max-height: 285mm !important;
+            height: auto !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            overflow: hidden !important;
           }
           @page {
             size: A4 portrait;
-            margin: 10mm;
+            margin: 5mm 8mm;
           }
         }
       `}</style>
@@ -373,71 +389,59 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
         <button
           onClick={handlePrint}
           className="btn btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, padding: '0.45rem 1rem' }}
         >
-          🖨️ Imprimir / Guardar como PDF
+          🖨️ Descarregar Ficha em PDF / Imprimir (A4 - 1 Página)
         </button>
         <button
           onClick={onClose}
           className="btn btn-outline-secondary"
-          style={{ fontWeight: 600 }}
+          style={{ fontWeight: 600, padding: '0.45rem 0.9rem' }}
         >
           ✕ Fechar
         </button>
-        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-          Formato otimizado para papel A4 com carimbos e cabeçalho institucional.
+        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+          Documento oficial com logótipo ISPOTEC e comprovativo de pagamento incluído.
         </span>
       </div>
 
-      {/* SINGLE CANDIDATE DOSSIER */}
+      {/* SINGLE CANDIDATE DOSSIER (EXATAMENTE 1 PÁGINA) */}
       {!isLista && candidatura && (
         <div className="ficha-print-sheet">
-          {/* HEADER */}
+          {/* HEADER COM LOGÓTIPO OFICIAL DO ISPOTEC */}
           <div className="f-header">
             <img
-              src="/images/logo.png"
+              src={LOGO_ISPOTEC_BASE64}
               alt="Logótipo ISPOTEC"
               className="f-logo-img"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-              }}
             />
-            <div className="f-logo-fallback" style={{ display: 'none' }}>
-              ISP
-            </div>
 
             <div className="f-header-text">
               <h1>Instituto Superior Politécnico e de Tecnologias</h1>
-              <h2>ISPOTEC — Direcção Pedagógica e Secretaria Geral</h2>
+              <h2>ISPOTEC — Secretaria Geral &amp; Direcção Pedagógica</h2>
               <p>
-                Rua da Mozal, Paragem Antena, Matola-Rio, Maputo • Contactos: (+258) 878 787 442 / 877 906 666 / 873 045 610
+                Campus Matola-Rio: Rua da Mozal, 5354, Paragem Antena, Matola-Rio • Província de Maputo
                 <br />
-                Correio Electrónico: Ispotec.politecnica@gmail.com • Website: ispotec-online.vercel.app
+                Telefones Oficiais: (+258) 878 787 442 / 879 6666 / 873 045 610 • E-mail: ispotec.politecnica@gmail.com
               </p>
             </div>
           </div>
 
-          {/* TITLE BAR */}
+          {/* PROCESS TITLE BAR */}
           <div className="f-title-bar">
             <div>
-              <h3>Ficha de Pré-Inscrição &amp; Processo de Candidatura — 2027</h3>
-              <div style={{ fontSize: '7.5pt', color: '#64748b', marginTop: '2px' }}>
-                Ano Lectivo de 2027 • Registado em: {formatarData(candidatura.criadoEm || candidatura.dataSubmissao)}
+              <h3>Ficha Oficial de Pré-Inscrição &amp; Candidatura 2027</h3>
+              <div style={{ fontSize: '6.8pt', color: '#64748b' }}>
+                Ano Lectivo 2027 • Submetido em: {formatarData(candidatura.dataSubmissao || candidatura.createdAt)}
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '7pt', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                N.º de Candidatura
+            <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div>
+                <div style={{ fontSize: '6pt', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  N.º Candidatura
+                </div>
+                <div className="f-num-candidatura">{candidatura.numeroCandidatura}</div>
               </div>
-              <div className="f-num-candidatura">{candidatura.numeroCandidatura}</div>
-            </div>
-          </div>
-
-          {/* ESTADO GERAL */}
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '12px', background: '#f8fafc', padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
-            <div className="f-field" style={{ margin: 0 }}>
-              <span className="f-label">Estado da Candidatura</span>
               <span className={`f-badge ${
                 candidatura.estado === 'Aprovada' ? 'f-badge-green' :
                 candidatura.estado === 'Rejeitada' ? 'f-badge-red' :
@@ -446,40 +450,28 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
                 {candidatura.estado || 'Submetida'}
               </span>
             </div>
-            <div className="f-field" style={{ margin: 0 }}>
-              <span className="f-label">Validação Financeira (Taxa de Pré-Inscrição)</span>
-              <span className={`f-badge ${
-                candidatura.estadoPagamento === 'Validado' ? 'f-badge-green' :
-                candidatura.estadoPagamento === 'Rejeitado' ? 'f-badge-red' : 'f-badge-amber'
-              }`}>
-                {candidatura.estadoPagamento || 'Pendente de verificação'}
-              </span>
-            </div>
-            <div className="f-field" style={{ margin: 0, marginLeft: 'auto', textAlign: 'right' }}>
-              <span className="f-label">Natureza do Documento</span>
-              <span style={{ fontSize: '7.5pt', fontWeight: 700, color: '#0369a1' }}>
-                Comprovativo de Candidatura Provisória (Pré-Inscrição)
-              </span>
-            </div>
           </div>
 
-          {/* DADOS PESSOAIS */}
+          {/* 1. DADOS PESSOAIS */}
           <div className="f-section">
             <div className="f-section-title">
-              <span>1. Identificação e Dados Pessoais do Candidato</span>
+              <span>1. Identificação e Dados Pessoais do Estudante</span>
+              <span style={{ fontSize: '6.5pt', color: '#64748b', textTransform: 'none' }}>
+                {dp.provincia} • {dp.distrito}
+              </span>
             </div>
 
             <div className="f-grid-personal">
               {/* FOTOGRAFIA */}
               <div className="f-photo-box">
-                {candidatura.dadosPessoais?.fotoPreview || candidatura.documentos?.fotografia?.url ? (
+                {dp.fotoPreview || docs.fotografia?.url ? (
                   <img
-                    src={candidatura.dadosPessoais?.fotoPreview || candidatura.documentos?.fotografia?.url}
+                    src={dp.fotoPreview || docs.fotografia?.url}
                     alt="Foto do Candidato"
                   />
                 ) : (
                   <>
-                    <span style={{ fontSize: '24pt', color: '#94a3b8' }}>👤</span>
+                    <span style={{ fontSize: '18pt', color: '#94a3b8' }}>👤</span>
                     <span>Fotografia Tipo Passe</span>
                   </>
                 )}
@@ -489,65 +481,52 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
               <div>
                 <div className="f-grid-2">
                   <div className="f-field" style={{ gridColumn: 'span 2' }}>
-                    <span className="f-label">Nome Completo do Candidato</span>
-                    <span className="f-value" style={{ fontSize: '10pt', color: '#003366' }}>
-                      {candidatura.dadosPessoais?.nome || '—'}
+                    <span className="f-label">Nome Completo do Estudante</span>
+                    <span className="f-value" style={{ fontSize: '9pt', color: '#003366', fontWeight: 800 }}>
+                      {dp.nome || '—'}
                     </span>
                   </div>
 
                   <div className="f-field">
-                    <span className="f-label">N.º do Bilhete de Identidade (B.I.) / Passaporte</span>
-                    <span className="f-value">{candidatura.dadosPessoais?.bi || '—'}</span>
+                    <span className="f-label">N.º Bilhete de Identidade (B.I.)</span>
+                    <span className="f-value">{dp.bi || '—'}</span>
                   </div>
 
                   <div className="f-field">
                     <span className="f-label">Data de Nascimento</span>
-                    <span className="f-value">{candidatura.dadosPessoais?.dataNascimento || '—'}</span>
+                    <span className="f-value">{dp.dataNascimento || '—'}</span>
                   </div>
 
                   <div className="f-field">
                     <span className="f-label">Telefone Principal</span>
-                    <span className="f-value">{candidatura.dadosPessoais?.telefonePrincipal || '—'}</span>
+                    <span className="f-value">{dp.telefonePrincipal || '—'}</span>
                   </div>
 
                   <div className="f-field">
-                    <span className="f-label">Telefone Adicional (1 / 2)</span>
+                    <span className="f-label">Contactos Adicionais</span>
                     <span className="f-value">
-                      {[candidatura.dadosPessoais?.telefoneAdicional1, candidatura.dadosPessoais?.telefoneAdicional2]
-                        .filter(Boolean)
-                        .join(' / ') || 'Nenhum registado'}
+                      {[dp.telefoneAdicional1, dp.telefoneAdicional2].filter(Boolean).join(' / ') || 'Nenhum'}
                     </span>
                   </div>
 
                   <div className="f-field">
-                    <span className="f-label">Província / Município</span>
+                    <span className="f-label">Morada / Bairro</span>
                     <span className="f-value">
-                      {candidatura.dadosPessoais?.provincia || '—'} / {candidatura.dadosPessoais?.distrito || '—'}
-                    </span>
-                  </div>
-
-                  <div className="f-field">
-                    <span className="f-label">Bairro / Morada Completa</span>
-                    <span className="f-value">
-                      {candidatura.dadosPessoais?.bairro ? `${candidatura.dadosPessoais.bairro}, ` : ''}
-                      {candidatura.dadosPessoais?.morada || '—'}
+                      {dp.bairro ? `${dp.bairro}, ` : ''}{dp.morada || '—'}
                     </span>
                   </div>
 
                   <div className="f-field">
                     <span className="f-label">Encarregado de Educação</span>
-                    <span className="f-value">{candidatura.dadosPessoais?.nomeEncarregado || '—'}</span>
+                    <span className="f-value">
+                      {dp.nomeEncarregado ? `${dp.nomeEncarregado} (${dp.contactoEncarregado || 's/ contacto'})` : 'Não informado'}
+                    </span>
                   </div>
 
-                  <div className="f-field">
-                    <span className="f-label">Contacto do Encarregado</span>
-                    <span className="f-value">{candidatura.dadosPessoais?.contactoEncarregado || '—'}</span>
-                  </div>
-
-                  {candidatura.dadosPessoais?.localTrabalho && (
+                  {dp.localTrabalho && (
                     <div className="f-field" style={{ gridColumn: 'span 2' }}>
-                      <span className="f-label">Local de Trabalho / Ocupação Profissional</span>
-                      <span className="f-value">{candidatura.dadosPessoais.localTrabalho}</span>
+                      <span className="f-label">Local de Trabalho / Profissão</span>
+                      <span className="f-value">{dp.localTrabalho}</span>
                     </div>
                   )}
                 </div>
@@ -555,157 +534,169 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
             </div>
           </div>
 
-          {/* DADOS ACADÉMICOS E CURSO */}
+          {/* 2. DADOS ACADÉMICOS E CURSO */}
           <div className="f-section">
             <div className="f-section-title">
-              <span>2. Opção de Curso e Habilitações Literárias de Ingresso (2027)</span>
+              <span>2. Curso Seleccionado e Enquadramento Académico (2027)</span>
+              <span style={{ fontSize: '6.5pt', color: '#003366', fontWeight: 700 }}>
+                {da.duracao || '4 anos com estágios'}
+              </span>
             </div>
 
             <div className="f-grid-3">
               <div className="f-field" style={{ gridColumn: 'span 2' }}>
-                <span className="f-label">Curso Solicitado</span>
-                <span className="f-value" style={{ fontSize: '9.5pt', color: '#003366', fontWeight: 800 }}>
-                  {candidatura.dadosAcademicos?.cursoNome || '—'}
+                <span className="f-label">Curso Pretendido</span>
+                <span className="f-value" style={{ fontSize: '8.8pt', color: '#003366', fontWeight: 800 }}>
+                  {da.cursoNome || '—'}
                 </span>
               </div>
 
               <div className="f-field">
                 <span className="f-label">Grau Académico</span>
-                <span className="f-value">{candidatura.dadosAcademicos?.grau || '—'}</span>
+                <span className="f-value">{da.grau || '—'}</span>
               </div>
 
               <div className="f-field">
                 <span className="f-label">Regime de Frequência</span>
-                <span className="f-value">{candidatura.dadosAcademicos?.regime || '—'}</span>
+                <span className="f-value">{da.regime || '—'}</span>
               </div>
 
               <div className="f-field">
                 <span className="f-label">Modalidade de Ensino</span>
-                <span className="f-value">{candidatura.dadosAcademicos?.modalidade || '—'}</span>
+                <span className="f-value">{da.modalidade || '—'}</span>
               </div>
 
               <div className="f-field">
-                <span className="f-label">Nível Académico de Ingresso</span>
-                <span className="f-value">{candidatura.dadosAcademicos?.nivelIngresso || '—'}</span>
+                <span className="f-label">Nível de Ingresso</span>
+                <span className="f-value">{da.nivelIngresso || '12.ª Classe'}</span>
               </div>
 
               <div className="f-field" style={{ gridColumn: 'span 2' }}>
                 <span className="f-label">Instituição de Ensino de Proveniência</span>
-                <span className="f-value">{candidatura.dadosAcademicos?.instituicaoProveniencia || '—'}</span>
+                <span className="f-value">{da.instituicaoProveniencia || 'Não indicada'}</span>
               </div>
 
               <div className="f-field">
                 <span className="f-label">Ano de Conclusão</span>
-                <span className="f-value">{candidatura.dadosAcademicos?.anoConclusao || '—'}</span>
+                <span className="f-value">{da.anoConclusao || '—'}</span>
               </div>
             </div>
 
-            {/* ENQUADRAMENTO FINANCEIRO */}
-            <div style={{ marginTop: '6px', background: '#f1f5f9', padding: '6px 10px', borderRadius: '4px', display: 'flex', gap: '20px', fontSize: '8pt' }}>
+            {/* TIRA DE VALORES */}
+            <div style={{ marginTop: '4px', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '7.2pt' }}>
               <div>
-                <strong>Propina Mensal Prevista:</strong>{' '}
-                <span style={{ color: '#003366', fontWeight: 700 }}>
-                  {formatarValor(candidatura.dadosAcademicos?.propinaMensal)}
-                </span>
+                <strong>Propina Mensal:</strong>{' '}
+                <span style={{ color: '#003366', fontWeight: 700 }}>{formatarValor(da.propinaMensal)}</span>
               </div>
               <div>
-                <strong>Inscrição / Matrícula:</strong>{' '}
-                <span style={{ color: '#003366', fontWeight: 700 }}>
-                  {formatarValor(candidatura.dadosAcademicos?.matricula)}
-                </span>
+                <strong>Taxa de Inscrição/Matrícula:</strong>{' '}
+                <span style={{ color: '#003366', fontWeight: 700 }}>{formatarValor(da.matricula)}</span>
               </div>
               <div>
-                <strong>Duração Curricular:</strong> {candidatura.dadosAcademicos?.duracao || 'Conforme plano de estudos'}
+                <strong>Regime de Propinas:</strong> BCI / ISPOTEC (Sujeito a IVA 5%)
               </div>
             </div>
           </div>
 
-          {/* DOCUMENTOS APRESENTADOS */}
+          {/* 3. COMPROVATIVO DE PAGAMENTO & DOCUMENTOS (TRABALHO DETALHADO) */}
           <div className="f-section">
             <div className="f-section-title">
-              <span>3. Documentos Submetidos no Processo</span>
+              <span>3. Comprovativo de Pagamento e Documentos Anexados</span>
+              <span className={`f-badge ${
+                candidatura.estadoPagamento === 'Validado' ? 'f-badge-green' :
+                candidatura.estadoPagamento === 'Rejeitado' ? 'f-badge-red' : 'f-badge-amber'
+              }`}>
+                Pagamento: {candidatura.estadoPagamento || 'Pendente de verificação'}
+              </span>
             </div>
 
+            {/* DESTAQUE PRINCIPAL: COMPROVATIVO DE PAGAMENTO */}
+            <div className="f-comp-box">
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                  <span style={{ fontSize: '11pt' }}>🏦</span>
+                  <strong style={{ fontSize: '7.8pt', color: '#166534' }}>
+                    Comprovativo de Pagamento da Taxa de Pré-Inscrição ({formatarValor(da.matricula || 4000)})
+                  </strong>
+                </div>
+                <div style={{ fontSize: '6.8pt', color: '#334155' }}>
+                  <strong>Banco:</strong> BCI • <strong>Conta:</strong> <code>{contaBCI}</code> • <strong>NIB:</strong> <code>{nibBCI}</code>
+                </div>
+                <div style={{ fontSize: '6.8pt', color: '#475569', marginTop: '1px' }}>
+                  <strong>Ficheiro Anexado:</strong> {compDoc?.nomeFicheiro || docs.comprovativoPagamentoNome || 'comprovativo_pagamento.pdf'} • <strong>Data Envio:</strong> {formatarData(compDoc?.dataUpload || candidatura.dataSubmissao)}
+                </div>
+              </div>
+
+              {/* MINIATURA OU BADGE DE AUTENTICAÇÃO */}
+              <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                {compDoc?.url && compDoc.url.startsWith('data:image') ? (
+                  <img
+                    src={compDoc.url}
+                    alt="Miniatura Comprovativo"
+                    style={{ height: '42px', maxWidth: '80px', objectFit: 'contain', border: '1px solid #86efac', borderRadius: '3px', background: 'white' }}
+                  />
+                ) : (
+                  <div style={{ background: '#dcfce7', border: '1px solid #86efac', padding: '3px 8px', borderRadius: '4px', fontSize: '6.5pt', color: '#15803d', fontWeight: 700 }}>
+                    {candidatura.estadoPagamento === 'Validado' ? '✓ Recibo BCI Validado' : '⏳ Comprovativo em Verificação'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* TABELA DE DEMAIS DOCUMENTOS */}
             <table className="f-table">
               <thead>
                 <tr>
-                  <th style={{ width: '35%' }}>Documento</th>
-                  <th style={{ width: '30%' }}>Nome do Ficheiro</th>
-                  <th style={{ width: '20%' }}>Data de Envio</th>
-                  <th style={{ width: '15%' }}>Conformidade</th>
+                  <th style={{ width: '38%' }}>Documento</th>
+                  <th style={{ width: '37%' }}>Ficheiro Anexado</th>
+                  <th style={{ width: '25%' }}>Estado de Recepção</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Comprovativo de Pagamento (Taxa)</strong></td>
-                  <td>{candidatura.documentos?.comprovativoPagamento?.nomeFicheiro || 'Anexo carregado'}</td>
-                  <td>{formatarData(candidatura.documentos?.comprovativoPagamento?.dataUpload || candidatura.criadoEm)}</td>
-                  <td>
-                    <span className={`f-badge ${
-                      candidatura.estadoPagamento === 'Validado' ? 'f-badge-green' :
-                      candidatura.estadoPagamento === 'Rejeitado' ? 'f-badge-red' : 'f-badge-amber'
-                    }`}>
-                      {candidatura.estadoPagamento || 'Pendente'}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
                   <td>Cópia do Bilhete de Identidade (B.I.)</td>
-                  <td>{candidatura.documentos?.bi?.nomeFicheiro || (candidatura.documentos?.bi ? 'Anexo disponível' : 'Não anexado')}</td>
-                  <td>{formatarData(candidatura.documentos?.bi?.dataUpload || candidatura.criadoEm)}</td>
-                  <td>{candidatura.documentos?.bi ? 'Apresentado' : 'Pendente'}</td>
+                  <td>{docs.bi?.nomeFicheiro || docs.biNome || 'Documento carregado no sistema'}</td>
+                  <td><span className="f-badge f-badge-green">Apresentado</span></td>
                 </tr>
                 <tr>
                   <td>Certificado de Habilitações Literárias</td>
-                  <td>{candidatura.documentos?.certificado?.nomeFicheiro || (candidatura.documentos?.certificado ? 'Anexo disponível' : 'Não anexado')}</td>
-                  <td>{formatarData(candidatura.documentos?.certificado?.dataUpload || candidatura.criadoEm)}</td>
-                  <td>{candidatura.documentos?.certificado ? 'Apresentado' : 'Pendente'}</td>
-                </tr>
-                <tr>
-                  <td>Fotografia Tipo Passe</td>
-                  <td>{candidatura.documentos?.fotografia?.nomeFicheiro || (candidatura.dadosPessoais?.fotoPreview ? 'Imagem carregada' : 'Pendente')}</td>
-                  <td>{formatarData(candidatura.criadoEm)}</td>
-                  <td>{candidatura.dadosPessoais?.fotoPreview || candidatura.documentos?.fotografia ? 'Apresentada' : 'Pendente'}</td>
+                  <td>{docs.certificado?.nomeFicheiro || docs.certificadoNome || 'Certificado submetido'}</td>
+                  <td><span className="f-badge f-badge-green">Apresentado</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          {/* OBSERVAÇÕES ADMINISTRATIVAS */}
+          {/* 4. OBSERVAÇÕES / DESPACHO SE HOUVER */}
           {candidatura.observacoesAdmin && (
-            <div className="f-section">
-              <div className="f-section-title">
-                <span>4. Despacho / Observações dos Serviços Académicos</span>
-              </div>
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', padding: '6px 10px', fontSize: '8pt', color: '#92400e', borderRadius: '4px' }}>
-                {candidatura.observacoesAdmin}
-              </div>
+            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', padding: '4px 8px', fontSize: '6.8pt', color: '#92400e', borderRadius: '4px', marginBottom: '6px' }}>
+              <strong>Despacho da Secretaria:</strong> {candidatura.observacoesAdmin}
             </div>
           )}
 
-          {/* TERMO DE RESPONSABILIDADE */}
+          {/* TERMO DE COMPROMISSO E DECLARAÇÃO LEGAL */}
           <div className="f-declaration">
-            <strong>Declaração de Veracidade e Advertência Legal:</strong> O candidato declara, sob compromisso de honra, que todas as informações prestadas e os documentos submetidos nesta pré-inscrição correspondem rigorosamente à verdade. Tem conhecimento de que a presente pré-inscrição confere apenas o direito de candidatura para o Ano Académico de 2027, ficando a admissão e matrícula definitivas sujeitas à verificação documental e cumprimento dos requisitos previstos no Regulamento Pedagógico do ISPOTEC.
+            <strong>Declaração de Veracidade e Compromisso de Honra:</strong> O candidato declara que os dados prestados e documentos anexados correspondem integralmente à verdade. A presente pré-inscrição constitui candidatura para o Ano Lectivo de 2027, sendo a confirmação e matrícula definitivas efectivadas após a validação física dos documentos originais e confirmação bancária pelos Serviços Financeiros do ISPOTEC.
           </div>
 
           {/* ASSINATURAS */}
           <div className="f-signatures">
             <div>
-              <div style={{ height: '40px' }}></div>
-              <div className="f-sig-line">Assinatura do(a) Candidato(a)</div>
-              <div className="f-sig-sub">Data: _____ / _____ / 202___</div>
+              <div style={{ height: '28px' }}></div>
+              <div className="f-sig-line">O(A) Candidato(a) / Estudante</div>
+              <div className="f-sig-sub">Assinatura de Conformidade</div>
             </div>
             <div>
-              <div style={{ height: '40px' }}></div>
+              <div style={{ height: '28px' }}></div>
               <div className="f-sig-line">Serviços Académicos &amp; Secretaria Geral — ISPOTEC</div>
-              <div className="f-sig-sub">Carimbo e Visto Institucional</div>
+              <div className="f-sig-sub">Prof. Dr. Jacob Massuanganhe • Carimbo Oficial</div>
             </div>
           </div>
 
           {/* RODAPÉ DO DOCUMENTO */}
-          <div style={{ borderTop: '1px solid #cbd5e1', marginTop: '20px', paddingTop: '6px', fontSize: '6.8pt', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
-            <span>ISPOTEC Online — Sistema Integrado de Gestão Académica (Matola-Rio)</span>
-            <span>Documento processado por computador • Código: {candidatura.numeroCandidatura}</span>
+          <div style={{ borderTop: '1px solid #cbd5e1', marginTop: '10px', paddingTop: '4px', fontSize: '6pt', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
+            <span>ISPOTEC — Instituto Superior Politécnico e de Tecnologias (Campus Matola-Rio)</span>
+            <span>Documento Oficial de Pré-Inscrição • Processo: {candidatura.numeroCandidatura}</span>
           </div>
         </div>
       )}
@@ -713,25 +704,24 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
       {/* MULTIPLE CANDIDATES LIST (PAUTA) */}
       {isLista && (
         <div className="ficha-print-sheet">
-          {/* HEADER */}
           <div className="f-header">
+            <img src={LOGO_ISPOTEC_BASE64} alt="Logótipo ISPOTEC" className="f-logo-img" />
             <div className="f-header-text">
               <h1>Instituto Superior Politécnico e de Tecnologias (ISPOTEC)</h1>
               <h2>Pauta Geral de Pré-Inscrições e Candidaturas — 2027</h2>
-              <p>Rua da Mozal, Paragem Antena, Matola-Rio, Maputo • Total de Candidatos Selecionados: {listaCandidaturas.length}</p>
+              <p>Campus Matola-Rio • Total de Candidatos Selecionados: {listaCandidaturas.length}</p>
             </div>
           </div>
 
           <table className="f-table">
             <thead>
               <tr>
-                <th style={{ width: '12%' }}>N.º Candidatura</th>
+                <th style={{ width: '15%' }}>N.º Candidatura</th>
                 <th style={{ width: '22%' }}>Nome do Candidato</th>
-                <th style={{ width: '12%' }}>B.I. / Telefone</th>
-                <th style={{ width: '24%' }}>Curso Pretendido</th>
-                <th style={{ width: '10%' }}>Regime/Mod.</th>
-                <th style={{ width: '10%' }}>Pagamento</th>
-                <th style={{ width: '10%' }}>Estado</th>
+                <th style={{ width: '13%' }}>B.I. / Telefone</th>
+                <th style={{ width: '25%' }}>Curso Pretendido</th>
+                <th style={{ width: '12%' }}>Regime/Mod.</th>
+                <th style={{ width: '13%' }}>Pagamento</th>
               </tr>
             </thead>
             <tbody>
@@ -750,27 +740,18 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
                       {c.estadoPagamento || 'Pendente'}
                     </span>
                   </td>
-                  <td>
-                    <span className={`f-badge ${
-                      c.estado === 'Aprovada' ? 'f-badge-green' :
-                      c.estado === 'Rejeitada' ? 'f-badge-red' :
-                      c.estado === 'Em análise' ? 'f-badge-blue' : 'f-badge-amber'
-                    }`}>
-                      {c.estado || 'Submetida'}
-                    </span>
-                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className="f-signatures" style={{ marginTop: '40px' }}>
+          <div className="f-signatures" style={{ marginTop: '30px' }}>
             <div>
-              <div style={{ height: '40px' }}></div>
+              <div style={{ height: '30px' }}></div>
               <div className="f-sig-line">Responsável pelas Admissões</div>
             </div>
             <div>
-              <div style={{ height: '40px' }}></div>
+              <div style={{ height: '30px' }}></div>
               <div className="f-sig-line">Direcção Pedagógica — ISPOTEC</div>
             </div>
           </div>
