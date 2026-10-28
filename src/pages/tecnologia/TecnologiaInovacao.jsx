@@ -387,7 +387,7 @@ export default function TecnologiaInovacao() {
 
       {/* Header Banner */}
       <div className="tec-header">
-        <h1>💡 Tecnologia &amp; Inovação</h1>
+        <h1>💡 Inovação & Tecnologia</h1>
         <p>
           Ecossistema do ISPOTEC dedicado à incubação tecnológica, desenvolvimento de competências digitais,
           pesquisa experimental aplicada e integração com o ecossistema empresarial e científico.

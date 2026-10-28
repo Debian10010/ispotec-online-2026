@@ -331,7 +331,7 @@ export default function Home() {
           {!isAuthenticated ? (
             <>
               <div className="hero-badge">🎓 Rede Social Académica</div>
-              <h1 className="hero-title">Bem-vindo à ISPOTEC Online</h1>
+              <h1 className="hero-title">ISPOTEC Online</h1>
               <p className="hero-subtitle">Plataforma de aprendizagem colaborativa do Instituto Superior Politécnico e de Tecnologias</p>
               
               <div className="hero-buttons">
@@ -456,10 +456,10 @@ export default function Home() {
                 <div className="module-card-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>💡</div>
                 <span className="module-card-badge" style={{ background: '#f0f9ff', color: '#0284c7' }}>5 Áreas</span>
               </div>
-              <h3 className="module-card-title">Tecnologia &amp; Inovação</h3>
+              <h3 className="module-card-title">Inovação & Tecnologia</h3>
               <p className="module-card-desc">Projectos Tecnológicos, Laboratório de Inovação, Desenvolvimento de Competências, Exposição de Protótipos e Parcerias Empresariais.</p>
               <div className="module-card-footer">
-                <span>Conhecer Tecnologia &amp; Inovação</span>
+                <span>Conhecer Inovação & Tecnologia</span>
                 <span>→</span>
               </div>
             </Link>
@@ -469,7 +469,7 @@ export default function Home() {
                 <div className="module-card-icon" style={{ background: '#fef3c7', color: '#d97706' }}>🏫</div>
                 <span className="module-card-badge" style={{ background: '#fffbeb', color: '#d97706' }}>Híbrido</span>
               </div>
-              <h3 className="module-card-title">Ambiente Virtual e Aprendizagem</h3>
+              <h3 className="module-card-title">Ambiente Virtual de Aprendizagem</h3>
               <p className="module-card-desc">Ambiente oficial de aprendizagem híbrida e salas de aula virtuais. Acompanhe aulas teóricas e práticas, planos e laboratórios digitais.</p>
               <div className="module-card-footer">
                 <span>Aceder ao Ambiente Virtual</span>

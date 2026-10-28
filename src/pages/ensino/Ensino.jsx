@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ensinoService } from '../../services/ensinoService';
 import { planoAnaliticoService } from '../../services/planoAnaliticoService';
@@ -223,6 +223,21 @@ const css = `
   .cal-item:last-child { border-bottom:none; }
   .cal-item-label { color:#374151; }
   .cal-item-date { color:#0055a4; font-weight:600; }
+  .curso-edital-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.35rem; margin-bottom: 2.5rem; }
+  .curso-edital-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.4rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; }
+  .curso-edital-card:hover { transform: translateY(-3px); box-shadow: 0 10px 18px -3px rgba(0,0,0,0.09); border-color: #93c5fd; }
+  .curso-edital-header { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 0.85rem; }
+  .curso-edital-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+  .curso-edital-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.85rem; }
+  .curso-meta-tag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.55rem; border-radius: 6px; font-size: 0.74rem; font-weight: 600; background: #f1f5f9; color: #475569; }
+  .curso-section-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 0.65rem; }
+  .curso-section-box h4 { margin: 0 0 0.3rem; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0055a4; display: flex; align-items: center; gap: 0.35rem; }
+  .curso-section-box p { margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5; }
+  .curso-aplicacao-list { margin: 0; padding-left: 1.15rem; font-size: 0.84rem; color: #334155; line-height: 1.55; }
+  .curso-aplicacao-list li { margin-bottom: 0.25rem; }
+  .curso-filter-btn { padding: 0.45rem 0.9rem; border-radius: 20px; border: 1px solid #cbd5e1; background: #fff; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .curso-filter-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+  .curso-filter-btn.active { background: #0055a4; color: #fff; border-color: #0055a4; box-shadow: 0 2px 6px rgba(0,85,164,0.3); }
   @media(max-width:960px){
     .ensino-layout { flex-direction:column; }
     .ensino-sidebar { width:100%; position:static; }
@@ -233,13 +248,14 @@ const css = `
   @media(max-width:600px){
     .ensino-header { padding:1.5rem 1.1rem; }
     .ensino-header h1 { font-size:1.4rem; }
-    .ensino-grid,.ensino-grid-2 { grid-template-columns:1fr; }
+    .ensino-grid,.ensino-grid-2,.curso-edital-grid { grid-template-columns:1fr; }
     .stat-block { grid-template-columns:repeat(2,1fr); }
     .form-row-2 { grid-template-columns: 1fr; }
   }
 `;
 
 const SECCOES = [
+  { key:'cursos-oferta',         label:'Oferta de Cursos',      icon:'🎓' },
   { key:'projetos-educativos',   label:'Projetos Educativos',   icon:'🎯' },
   { key:'plano-analitico',       label:'Plano Analítico',       icon:'📋' },
   { key:'projetos-curriculares', label:'Projetos Curriculares',  icon:'📜' },
@@ -271,6 +287,676 @@ function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, 
         <button onClick={onAdd} className="btn-add-action" style={{ display: 'inline-flex' }}>
           + Adicionar Registo
         </button>
+      )}
+    </div>
+  );
+}
+
+// ── Cursos Oficiais do Edital ISPOTEC (Sem informação de pagamento) ─────────
+export const CURSOS_EDITAL_ISPOTEC = [
+  // 1. Mestrado
+  {
+    id: 'mestrado-saude-publica',
+    grau: 'Mestrado',
+    categoria: 'Mestrado',
+    nome: 'Mestrado em Saúde Pública',
+    departamento: 'Departamento de Pós-Graduação e Pesquisa',
+    duracao: '2 anos com Trabalho de Conclusão de Curso (TCC)',
+    regime: 'Modular (Semi-Presencial e Online)',
+    requisito: 'Licenciatura em Ciências de Saúde, Ciências Sociais, Ciências Biológicas ou áreas afins',
+    icone: '🔬',
+    corIcone: '#dbeafe',
+    corTextoIcone: '#1d4ed8',
+    badgeCor: 'badge-blue',
+    descricao: 'Programa de formação científica e metodológica avançada orientado para a análise epidemiológica, sistemas de saúde pública e planeamento de intervenções sanitárias estratégicas.',
+    objectivo: 'Capacitar profissionais da Saúde e áreas afins que se interessem pela Investigação em Saúde Pública, habilitando-os para a liderança técnica, formulação de políticas sanitárias e tomada de decisão fundamentada em evidências.',
+    aplicacao: [
+      'Epidemiologia e Vigilância Sanitária em órgãos governamentais e internacionais',
+      'Saúde da Comunidade e Medicina Preventiva em contextos urbanos e rurais',
+      'Políticas Públicas e Promoção em Saúde no planeamento nacional',
+      'Planeamento e Gestão em Sistemas e Serviços de Saúde'
+    ]
+  },
+
+  // 2. Licenciaturas - Ciências de Saúde e Biomédicas
+  {
+    id: 'lic-enfermagem-geral',
+    grau: 'Licenciatura',
+    categoria: 'Licenciatura',
+    nome: 'Enfermagem Geral',
+    departamento: 'Departamento de Ciências de Saúde e Biomédicas',
+    duracao: '4 anos com Estágios Práticos Semestrais desde o 1º semestre',
+    regime: 'Laboral e Pós-laboral | Aulas Práticas todas as 3ª e 5ª feiras',
+    requisito: 'Nível Médio / 12ª Classe ou equivalente',
+    icone: '💉',
+    corIcone: '#ccfbf1',
+    corTextoIcone: '#0f766e',
+    badgeCor: 'badge-green',
+    descricao: 'Formação superior em enfermagem com elevado rigor técnico-científico e compromisso humanista, capacitando para o cuidado holístico ao indivíduo, família e comunidade.',
+    objectivo: 'Formar enfermeiros gerais aptos a prestar assistência clínica de excelência hospitalar e comunitária, actuar na reabilitação, prevenção de agravos e gestão de equipas de saúde.',
+    aplicacao: [
+      'Assistência hospitalar em medicina interna, urgências, cirurgia, pediatria e cuidados intensivos',
+      'Centros de Saúde, saúde materno-infantil e programas de saúde comunitária',
+      'Estágios práticos semestrais em hospitais parceiros desde o 1º semestre e práticas às 3ª e 5ª',
+      'Direcção, coordenação e supervisão de serviços e unidades de enfermagem'
+    ]
+  },
+  {
+    id: 'lic-saude-publica',
+    grau: 'Licenciatura',
+    categoria: 'Licenciatura',
+    nome: 'Saúde Pública',
+    departamento: 'Departamento de Ciências de Saúde e Biomédicas',
+    duracao: '4 anos com Estágios Práticos Semestrais',
+    regime: 'Laboral e Pós-laboral',
+    requisito: 'Nível Médio / 12ª Classe ou equivalente',
+    icone: '🩺',
+    corIcone: '#cffafe',
+    corTextoIcone: '#0e7490',
+    badgeCor: 'badge-green',
+    descricao: 'Curso multidisciplinar centrado nos determinantes sociais e biológicos da saúde, monitoramento epidemiológico e gestão participativa de programas sanitários.',
+    objectivo: 'Capacitar quadros aptos a conceber, monitorar e avaliar políticas e programas de saúde pública, prevenindo endemias e fortalecendo as redes sanitárias distritais e provinciais.',
+    aplicacao: [
+      'Vigilância epidemiológica e controlo sanitário a nível distrital, provincial e nacional',
+      'Gestão de programas de combate a malária, HIV/SIDA, tuberculose e doenças emergentes',
+      'Actuação em Organizações Não-Governamentais (ONGs) e agências internacionais de saúde',
+      'Direcções Provinciais de Saúde (DPS) e Serviços Distritais (SDSMAS)'
+    ]
+  },
+  {
+    id: 'lic-psicologia-clinica',
+    grau: 'Licenciatura',
+    categoria: 'Licenciatura',
+    nome: 'Psicologia Clínica e Saúde no Trabalho',
+    departamento: 'Departamento de Ciências de Saúde e Biomédicas',
+    duracao: '4 anos com Estágios Práticos Curriculares',
+    regime: 'Laboral e Pós-laboral',
+    requisito: 'Nível Médio / 12ª Classe ou equivalente',
+    icone: '🧠',
+    corIcone: '#ede9fe',
+    corTextoIcone: '#6d28d9',
+    badgeCor: 'badge-purple',
+    descricao: 'Formação integradora que conjuga o diagnóstico e a intervenção psicoterapêutica clínica à prevenção de riscos psicossociais e gestão do bem-estar nas organizações de trabalho.',
+    objectivo: 'Preparar psicólogos habilitados ao diagnóstico e tratamento de perturbações mentais e do comportamento, bem como ao desenho de planos de ergonomia psicossocial e prevenção do burnout.',
+    aplicacao: [
+      'Avaliação diagnóstica e psicoterapia em clínicas, hospitais e gabinetes especializados',
+      'Saúde ocupacional, prevenção de estresse laboral e melhoria do clima nas empresas',
+      'Consultoria em recursos humanos, avaliação de perfil e orientação profissional',
+      'Programas de reinserção social, apoio comunitário e mediação psicossocial'
+    ]
+  },
+
+  // 3. Licenciaturas - Administração e Ciências Jurídicas
+  {
+    id: 'lic-direito',
+    grau: 'Licenciatura',
+    categoria: 'Licenciatura',
+    nome: 'Direito',
+    departamento: 'Departamento de Administração e Ciências Jurídicas',
+    duracao: '4 anos com Estágios e Práticas Profissionais no CRC',
+    regime: 'Regular, Semi-Presencial e Online',
+    requisito: 'Nível Médio / 12ª Classe ou equivalente',
+    icone: '⚖️',
+    corIcone: '#dbeafe',
+    corTextoIcone: '#1e40af',
+    badgeCor: 'badge-blue',
+    descricao: 'Formação jurídica de referência nacional, estruturada no ordenamento moçambicano e internacional, associando a teoria doutrinária à prática forense e à mediação.',
+    objectivo: 'Formar juristas éticos, reflexivos e tecnicamente qualificados para a defesa dos direitos dos cidadãos, actuação no contencioso judiciário e assessoria jurídica institucional.',
+    aplicacao: [
+      'Advocacia, magistratura judicial, ministério público e defensoria pública',
+      'Assessoria jurídica corporativa, contratos mercantis e conformidade regulatória',
+      'Práticas profissionais e mediação no Centro de Resolução de Conflitos (CRC)',
+      'Contencioso civil, criminal, laboral, comercial, fiscal e administrativo'
+    ]
+  },
+  {
+    id: 'lic-administracao-rh',
+    grau: 'Licenciatura',
+    categoria: 'Licenciatura',
+    nome: 'Administração e Gestão de Recursos Humanos',
+    departamento: 'Departamento de Administração e Ciências Jurídicas',
+    duracao: '4 anos com Estágios Práticos Profissionais',
+    regime: 'Laboral e Pós-laboral',
+    requisito: 'Nível Médio / 12ª Classe ou equivalente',
+    icone: '📊',
+    corIcone: '#d1fae5',
+    corTextoIcone: '#065f46',
+    badgeCor: 'badge-green',
+    descricao: 'Curso focado na administração estratégica moderna, gestão de talentos, relações laborais, liderança de equipas e transformação digital das organizações.',
+    objectivo: 'Capacitar gestores aptos a alinhar o capital humano aos objectivos estratégicos organizacionais, gerindo pessoas com metodologias ágeis e respeito à legislação de trabalho.',
+    aplicacao: [
+      'Direcção e coordenação de recursos humanos em empresas públicas e privadas',
+      'Recrutamento, selecção, desenho de carreiras, remuneração e avaliação de desempenho',
+      'Gestão de relações laborais, negociação com sindicatos e auditoria social',
+      'Consultoria em organização, métodos e desenvolvimento institucional'
+    ]
+  },
+  {
+    id: 'lic-contabilidade-financas',
+    grau: 'Licenciatura',
+    categoria: 'Licenciatura',
+    nome: 'Contabilidade e Finanças',
+    departamento: 'Departamento de Administração e Ciências Jurídicas',
+    duracao: '4 anos com Práticas Contabilísticas e Laboratório Financeiro',
+    regime: 'Laboral e Pós-laboral',
+    requisito: 'Nível Médio / 12ª Classe ou equivalente',
+    icone: '💰',
+    corIcone: '#fef3c7',
+    corTextoIcone: '#b45309',
+    badgeCor: 'badge-orange',
+    descricao: 'Ensino aprofundado de contabilidade geral, contabilidade analítica, relato financeiro segundo as normas IFRS/PGC-NIRF, fiscalidade e auditoria.',
+    objectivo: 'Formar especialistas capazes de assegurar a fiabilidade dos demonstrativos contabilísticos, planear estratégias fiscais e orientar investimentos financeiros corporativos.',
+    aplicacao: [
+      'Contabilidade empresarial e analítica em sectores bancários, comerciais e industriais',
+      'Auditoria interna, auditoria externa e perícia contabilística oficial',
+      'Consultoria e planeamento tributário perante a administração fiscal',
+      'Análise económico-financeira de investimentos e gestão de tesouraria'
+    ]
+  },
+
+  // 4. Pós-Graduações
+  {
+    id: 'pos-enfermagem-clinica-saude-integrativa',
+    grau: 'Pós-Graduação',
+    categoria: 'Pós-Graduação',
+    nome: 'Enfermagem Clínica e Saúde Integrativa',
+    departamento: 'Ciências de Saúde e Clínicas',
+    duracao: '7 meses + 1 mês de TCC (Monografia)',
+    regime: 'Modular (Online) | Aulas 2 semanas por mês | Pós-laboral',
+    requisito: 'Licenciatura em Enfermagem ou Ciências de Saúde',
+    icone: '🏥',
+    corIcone: '#ccfbf1',
+    corTextoIcone: '#0f766e',
+    badgeCor: 'badge-teal',
+    descricao: 'Aprofundamento de competências clínicas em cuidados intensivos e terapêuticas integrativas em saúde para suporte ao doente crítico e crónico.',
+    objectivo: 'Capacitar enfermeiros para liderança clínica avançada, tomada de decisão fundamentada e implementação de protocolos humanizados.',
+    aplicacao: [
+      'Serviços hospitalares de alta dependência e internamento especializado',
+      'Centros de reabilitação e acompanhamento de doentes crónicos',
+      'Supervisão clínica e consultoria especializada em saúde integrativa'
+    ]
+  },
+  {
+    id: 'pos-governacao-inteligencia',
+    grau: 'Pós-Graduação',
+    categoria: 'Pós-Graduação',
+    nome: 'Governação e Inteligência Estratégica',
+    departamento: 'Administração e Ciências Jurídicas',
+    duracao: '7 meses + 1 mês de TCC (Monografia)',
+    regime: 'Modular (Online) | Aulas 2 semanas por mês | Pós-laboral',
+    requisito: 'Licenciatura em Direito, Administração, Ciências Sociais ou afins',
+    icone: '🌐',
+    corIcone: '#dbeafe',
+    corTextoIcone: '#1e40af',
+    badgeCor: 'badge-blue',
+    descricao: 'Especialização executiva em prospecção de cenários, segurança institucional, tomada de decisão em conjunturas complexas e integridade governamental.',
+    objectivo: 'Qualificar decisores, assessores e quadros dirigentes com ferramentas analíticas e estratégicas para liderar instituições públicas e privadas.',
+    aplicacao: [
+      'Ministérios, autarquias e entidades da administração pública',
+      'Conselhos de administração e direcções corporativas de grandes empresas',
+      'Gestão de riscos institucionais, conformidade e planeamento prospectivo'
+    ]
+  },
+  {
+    id: 'pos-direito-trabalho',
+    grau: 'Pós-Graduação',
+    categoria: 'Pós-Graduação',
+    nome: 'Direito do Trabalho e Processo Laboral',
+    departamento: 'Administração e Ciências Jurídicas',
+    duracao: '7 meses + 1 mês de TCC (Monografia)',
+    regime: 'Modular (Online) | Aulas 2 semanas por mês | Pós-laboral',
+    requisito: 'Licenciatura em Direito, Gestão de RH ou áreas afins',
+    icone: '📜',
+    corIcone: '#ede9fe',
+    corTextoIcone: '#6d28d9',
+    badgeCor: 'badge-purple',
+    descricao: 'Análise aprofundada da Lei do Trabalho moçambicana, contratação laboral, segurança social, regimes de responsabilidade disciplinar e contencioso nos tribunais.',
+    objectivo: 'Capacitar profissionais para a negociação de acordos colectivos de trabalho, instrução de processos disciplinares e patrocínio judiciário especializado.',
+    aplicacao: [
+      'Assessoria jurídica a empresas comerciais, industriais e agrícolas',
+      'Patrocínio forense especializado em tribunais de trabalho',
+      'Mediação de conflitos laborais e consultoria em recursos humanos'
+    ]
+  },
+  {
+    id: 'pos-direito-penal',
+    grau: 'Pós-Graduação',
+    categoria: 'Pós-Graduação',
+    nome: 'Direito Penal e Processual Penal',
+    departamento: 'Administração e Ciências Jurídicas',
+    duracao: '7 meses + 1 mês de TCC (Monografia)',
+    regime: 'Modular (Online) | Aulas 2 semanas por mês | Pós-laboral',
+    requisito: 'Licenciatura em Direito',
+    icone: '🛡️',
+    corIcone: '#fee2e2',
+    corTextoIcone: '#b91c1c',
+    badgeCor: 'badge-red',
+    descricao: 'Estudo aprofundado da teoria do crime, investigação criminal moderna, novas formas de criminalidade económica e cibernética e garantias do processo penal acusatório.',
+    objectivo: 'Qualificar operadores judiciais para a aplicação rigorosa do direito penal material e adjectivo, assegurando a protecção de direitos fundamentais.',
+    aplicacao: [
+      'Advocacia forense criminal e defesa de garantias fundamentais',
+      'Magistratura judicial, ministério público e assessoria a órgãos de investigação criminal',
+      'Consultoria em compliance criminal e prevenção do branqueamento de capitais'
+    ]
+  },
+  {
+    id: 'pos-direito-civil',
+    grau: 'Pós-Graduação',
+    categoria: 'Pós-Graduação',
+    nome: 'Direito Civil e Processual Civil',
+    departamento: 'Administração e Ciências Jurídicas',
+    duracao: '7 meses + 1 mês de TCC (Monografia)',
+    regime: 'Modular (Online) | Aulas 2 semanas por mês | Pós-laboral',
+    requisito: 'Licenciatura em Direito',
+    icone: '📑',
+    corIcone: '#dbeafe',
+    corTextoIcone: '#1d4ed8',
+    badgeCor: 'badge-blue',
+    descricao: 'Aprofundamento dogmático e jurisprudencial em contratos civis complexos, responsabilidade civil contratual e extracontratual, e aceleração da tutela executiva.',
+    objectivo: 'Preparar juristas para a redacção de contratos de alto valor e patrocínio célere de litígios cíveis nos tribunais judiciais.',
+    aplicacao: [
+      'Contencioso cível e comercial em escritórios de advocacia',
+      'Estruturação de contratos mercantis e bancários',
+      'Assessoria em litígios imobiliários, sucessórios e de família'
+    ]
+  },
+  {
+    id: 'pos-mediacao-arbitragem',
+    grau: 'Pós-Graduação',
+    categoria: 'Pós-Graduação',
+    nome: 'Mediação, Conciliação e Arbitragem',
+    departamento: 'Administração e Ciências Jurídicas',
+    duracao: '7 meses + 1 mês de TCC (Monografia)',
+    regime: 'Modular (Online) | Aulas 2 semanas por mês | Pós-laboral',
+    requisito: 'Licenciatura em Direito ou áreas afins',
+    icone: '🤝',
+    corIcone: '#fef3c7',
+    corTextoIcone: '#b45309',
+    badgeCor: 'badge-orange',
+    descricao: 'Especialização prática em meios extrajudiciais de resolução de disputas, técnicas de negociação colaborativa e condução de arbitragens confidenciais e expeditas.',
+    objectivo: 'Formar mediadores e árbitros qualificados para intervir em litígios comerciais e civis, reduzindo a morosidade judiciária e promovendo a cultura de paz.',
+    aplicacao: [
+      'Actuação no Centro de Resolução de Conflitos (CRC) e centros de arbitragem',
+      'Mediação de disputas contratuais, societárias e comunitárias',
+      'Consultoria preventiva de gestão e desfecho amigável de litígios'
+    ]
+  },
+
+  // 5. Cursos de Especialização
+  {
+    id: 'esp-primeiros-socorros',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Primeiros Socorros e Segurança no Trabalho',
+    departamento: 'Ciências de Saúde & Ocupacional',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '🦺',
+    corIcone: '#fee2e2',
+    corTextoIcone: '#b91c1c',
+    badgeCor: 'badge-red',
+    descricao: 'Treinamento avançado em suporte básico de vida, socorrismo ocupacional, prevenção de acidentes e normas de Higiene e Segurança no Trabalho (HST).',
+    objectivo: 'Capacitar profissionais para atuar prontamente em sinistros laborais e implantar programas preventivos de segurança física nos locais de trabalho.',
+    aplicacao: ['Empresas industriais, mineiras, construção civil, brigadas de emergência e centros de saúde ocupacional']
+  },
+  {
+    id: 'esp-saude-publica-cuidados-primarios',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Saúde Pública e Cuidados Primários em Saúde',
+    departamento: 'Ciências de Saúde',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '🌿',
+    corIcone: '#d1fae5',
+    corTextoIcone: '#065f46',
+    badgeCor: 'badge-green',
+    descricao: 'Capacitação prática nos princípios da atenção primária sanitária, gestão de postos de saúde, imunização e campanhas preventivas comunitárias.',
+    objectivo: 'Fortalecer a capacidade técnica de intervenção nos cuidados de saúde essenciais e na promoção do bem-estar das comunidades.',
+    aplicacao: ['Unidades sanitárias básicas, organizações de desenvolvimento comunitário e centros de saúde distritais']
+  },
+  {
+    id: 'esp-psicoterapia-saude-ocupacional',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Psicoterapia e Saúde Ocupacional',
+    departamento: 'Psicologia & Saúde Mental',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '🧘',
+    corIcone: '#ede9fe',
+    corTextoIcone: '#6d28d9',
+    badgeCor: 'badge-purple',
+    descricao: 'Abordagens psicoterapêuticas focadas na gestão de transtornos de ansiedade, estresse ocupacional e promoção de saúde mental laboral.',
+    objectivo: 'Habilitar profissionais para oferecer suporte psicológico e implementar programas corporativos de qualidade de vida no trabalho.',
+    aplicacao: ['Gabinetes de apoio psicológico empresarial, clínicas privadas e programas de saúde do trabalhador']
+  },
+  {
+    id: 'esp-direito-administracao-publica',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Direito e Administração Pública',
+    departamento: 'Ciências Jurídicas e Governação',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '🏛️',
+    corIcone: '#dbeafe',
+    corTextoIcone: '#1e40af',
+    badgeCor: 'badge-blue',
+    descricao: 'Procedimento administrativo, contratação de bens e serviços públicos, responsabilidade funcional e probidade na administração.',
+    objectivo: 'Formar técnicos e assessores da administração pública para conduzir os processos estatais com legalidade, eficiência e transparência.',
+    aplicacao: ['Ministérios, municípios, autarquias locais, institutos públicos e gabinetes de fiscalização']
+  },
+  {
+    id: 'esp-direito-laboral-rh',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Direito Laboral para Gestores de RH',
+    departamento: 'Ciências Jurídicas & Recursos Humanos',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '👥',
+    corIcone: '#ccfbf1',
+    corTextoIcone: '#0f766e',
+    badgeCor: 'badge-teal',
+    descricao: 'Aplicação prática da Lei do Trabalho para directores e gestores: contratação, sanções disciplinares, licenças, despedimentos e segurança social.',
+    objectivo: 'Garantir que a gestão do pessoal cumpra rigorosamente o ordenamento jurídico, prevenindo riscos de litígios laborais dispendiosos.',
+    aplicacao: ['Departamentos de gestão de recursos humanos e chefias em organizações privadas e públicas']
+  },
+  {
+    id: 'esp-pedagogia-ead',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Pedagogia, Didáctica e Ensino Virtual (EaD)',
+    departamento: 'Educação e Tecnologias Pedagógicas',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '💻',
+    corIcone: '#cffafe',
+    corTextoIcone: '#0e7490',
+    badgeCor: 'badge-cyan',
+    descricao: 'Metodologias pedagógicas activas, desenho instrucional, concepção de materiais multimédia e tutoria online em ambientes virtuais de aprendizagem.',
+    objectivo: 'Capacitar docentes e formadores para leccionar no ensino a distância com alto engajamento pedagógico e eficácia de aprendizagem.',
+    aplicacao: ['Instituições de ensino superior e médio, centros de formação profissional e plataformas de ensino online']
+  },
+  {
+    id: 'esp-ia-saude',
+    grau: 'Especialização',
+    categoria: 'Especialização',
+    nome: 'Inteligência Artificial na Investigação em Saúde',
+    departamento: 'Tecnologias em Saúde & Bioinformática',
+    duracao: '5 meses + 1 TCC',
+    regime: 'Modular | Aulas uma semana por mês',
+    requisito: 'Licenciatura concluída',
+    icone: '🤖',
+    corIcone: '#ede9fe',
+    corTextoIcone: '#6d28d9',
+    badgeCor: 'badge-purple',
+    descricao: 'Aplicações inovadoras de inteligência artificial, processamento de grandes volumes de dados epidemiológicos e ferramentas analíticas de investigação.',
+    objectivo: 'Dotar investigadores da saúde de ferramentas de IA para aceleração do diagnóstico, análise de dados e publicação científica.',
+    aplicacao: ['Centros de investigação biomédica, laboratórios de tecnologia sanitária e instituições de pesquisa']
+  },
+
+  // 6. Cursos de Curta Duração
+  {
+    id: 'curta-pedagogia-gestao-saude',
+    grau: 'Curta Duração',
+    categoria: 'Curta Duração',
+    nome: 'Pedagogia e Gestão Académica no Ensino em Saúde',
+    departamento: 'Ensino em Saúde',
+    duracao: 'Formação Intensiva de Curta Duração',
+    regime: 'Presencial / Online',
+    requisito: 'Docentes, enfermeiros e profissionais de saúde',
+    icone: '📚',
+    corIcone: '#dbeafe',
+    corTextoIcone: '#1e40af',
+    badgeCor: 'badge-blue',
+    descricao: 'Capacitação didáctica prática para profissionais da área biomédica que exercem funções docentes em instituições de formação sanitária.',
+    objectivo: 'Aperfeiçoar as competências pedagógicas no ensino clínico, supervisão de estágios e avaliação de competências em saúde.',
+    aplicacao: ['Institutos de formação em saúde, escolas de enfermagem e centros hospitalares formadores']
+  },
+  {
+    id: 'curta-emergencias-medicas',
+    grau: 'Curta Duração',
+    categoria: 'Curta Duração',
+    nome: 'Emergências Médicas e Primeiros Socorros',
+    departamento: 'Saúde & Emergências',
+    duracao: 'Formação Prática Intensiva',
+    regime: 'Presencial',
+    requisito: 'Aberto a profissionais, estudantes e cidadãos interessados',
+    icone: '🚑',
+    corIcone: '#fee2e2',
+    corTextoIcone: '#b91c1c',
+    badgeCor: 'badge-red',
+    descricao: 'Práticas de Suporte Básico de Vida (SBV), reanimação cardiopulmonar, controlo de hemorragias externas, imobilização e triagem de urgência.',
+    objectivo: 'Dotar os participantes de reflexos rápidos e seguros para actuar em emergências que ameacem a vida nos primeiros minutos de socorro.',
+    aplicacao: ['Empresas de todos os sectores, escolas, brigadas de proteção civil e equipas comunitárias']
+  },
+  {
+    id: 'curta-empreendedorismo-projectos',
+    grau: 'Curta Duração',
+    categoria: 'Curta Duração',
+    nome: 'Empreendedorismo e Gestão de Projectos',
+    departamento: 'Gestão & Negócios',
+    duracao: 'Formação Prática Intensiva',
+    regime: 'Presencial / Online',
+    requisito: 'Empreendedores, gestores e profissionais de todas as áreas',
+    icone: '🚀',
+    corIcone: '#fef3c7',
+    corTextoIcone: '#b45309',
+    badgeCor: 'badge-orange',
+    descricao: 'Concepção de modelos de negócio sustentáveis, gestão orçamental, planeamento de projectos com metodologias ágeis e mobilização de recursos.',
+    objectivo: 'Capacitar empreendedores para estruturar planos de negócios sólidos e executar projectos dentro do prazo e custos previstos.',
+    aplicacao: ['Startups, gestão de pequenas e médias empresas e liderança de projectos de desenvolvimento']
+  },
+  {
+    id: 'curta-lideranca-rh',
+    grau: 'Curta Duração',
+    categoria: 'Curta Duração',
+    nome: 'Liderança e Gestão de Recursos Humanos',
+    departamento: 'Gestão de Pessoas',
+    duracao: 'Formação Executiva Intensiva',
+    regime: 'Presencial / Online',
+    requisito: 'Supervisores, gestores de equipas e coordenadores',
+    icone: '⭐',
+    corIcone: '#d1fae5',
+    corTextoIcone: '#065f46',
+    badgeCor: 'badge-green',
+    descricao: 'Liderança situacional, comunicação assertiva, feedback construtivo, gestão de conflitos e motivação de equipas para alta performance.',
+    objectivo: 'Desenvolver gestores capazes de inspirar colaboradores, resolver tensões na equipa e manter um ambiente de cooperação e produtividade.',
+    aplicacao: ['Chefias intermédias e de topo em organizações privadas e instituições públicas']
+  }
+];
+
+function CursosOficiaisEdital() {
+  const [categoriaAtiva, setCategoriaAtiva] = useState('Todos');
+  const [busca, setBusca] = useState('');
+
+  const categorias = ['Todos', 'Licenciatura', 'Mestrado', 'Pós-Graduação', 'Especialização', 'Curta Duração'];
+
+  const cursosFiltrados = useMemo(() => {
+    return CURSOS_EDITAL_ISPOTEC.filter(c => {
+      const matchCat = categoriaAtiva === 'Todos' || c.categoria === categoriaAtiva;
+      const b = busca.toLowerCase().trim();
+      if (!b) return matchCat;
+      const matchText = (
+        c.nome.toLowerCase().includes(b) ||
+        c.departamento.toLowerCase().includes(b) ||
+        c.descricao.toLowerCase().includes(b) ||
+        c.objectivo.toLowerCase().includes(b) ||
+        c.aplicacao.some(a => a.toLowerCase().includes(b))
+      );
+      return matchCat && matchText;
+    });
+  }, [categoriaAtiva, busca]);
+
+  return (
+    <div>
+      {/* Header Banner Oficial */}
+      <div className="ensino-header" style={{ background: 'linear-gradient(135deg, #0055a4 0%, #003366 100%)' }}>
+        <div className="ensino-badge">🎓 EDITAL OFICIAL ISPOTEC 2027</div>
+        <h1>Oferta de Cursos &amp; Programas Académicos</h1>
+        <p>
+          Conheça a oferta formativa oficial do Instituto Superior Politécnico e de Tecnologias (ISPOTEC).
+          Consulte a descrição dos programas, objectivos pedagógicos, áreas de aplicação prática e saídas profissionais de acordo com o Edital Oficial.
+        </p>
+      </div>
+
+      {/* Barra de Filtros e Busca */}
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.75rem', boxShadow: '0 2px 5px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {categorias.map(cat => (
+              <button
+                key={cat}
+                type="button"
+                className={`curso-filter-btn ${categoriaAtiva === cat ? 'active' : ''}`}
+                onClick={() => setCategoriaAtiva(cat)}
+              >
+                {cat === 'Todos' ? '✨ Todos os Cursos' : cat}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+            A exibir <strong>{cursosFiltrados.length}</strong> de {CURSOS_EDITAL_ISPOTEC.length} cursos
+          </div>
+        </div>
+
+        {/* Input de Pesquisa */}
+        <div style={{ position: 'relative' }}>
+          <input
+            type="text"
+            className="ensino-input"
+            placeholder="🔍 Pesquisar por nome do curso, área científica, palavras-chave do objectivo ou saídas..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+            style={{ paddingLeft: '2.5rem', background: '#f8fafc', fontSize: '0.9rem' }}
+          />
+          <span style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.6 }}>
+            🔍
+          </span>
+          {busca && (
+            <button
+              type="button"
+              onClick={() => setBusca('')}
+              style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontWeight: 'bold' }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Grid de Cursos */}
+      {cursosFiltrados.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#fff', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.6rem' }}>🔍</div>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>Nenhum curso encontrado</h3>
+          <p style={{ fontSize: '0.88rem', color: '#64748b' }}>Tente ajustar os filtros ou o termo de pesquisa.</p>
+          <button
+            type="button"
+            className="curso-filter-btn active"
+            onClick={() => { setCategoriaAtiva('Todos'); setBusca(''); }}
+            style={{ marginTop: '0.75rem' }}
+          >
+            Ver Todos os Cursos
+          </button>
+        </div>
+      ) : (
+        <div className="curso-edital-grid">
+          {cursosFiltrados.map(curso => (
+            <div key={curso.id} className="curso-edital-card">
+              <div>
+                {/* Header do Card */}
+                <div className="curso-edital-header">
+                  <div
+                    className="curso-edital-icon"
+                    style={{ background: curso.corIcone, color: curso.corTextoIcone }}
+                  >
+                    {curso.icone}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                      <span className={`card-badge ${curso.badgeCor}`}>{curso.grau}</span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{curso.departamento}</span>
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#1e293b', lineHeight: 1.35 }}>
+                      {curso.nome}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Metadados: Duração, Regime, Requisitos */}
+                <div className="curso-edital-meta">
+                  <span className="curso-meta-tag" title="Duração do Curso">
+                    ⏱️ {curso.duracao}
+                  </span>
+                  <span className="curso-meta-tag" title="Regime de Aulas">
+                    📅 {curso.regime}
+                  </span>
+                  <span className="curso-meta-tag" title="Requisito de Acesso">
+                    📋 {curso.requisito}
+                  </span>
+                </div>
+
+                {/* Descrição de acordo com o Edital */}
+                <div className="curso-section-box">
+                  <h4>📖 Descrição</h4>
+                  <p>{curso.descricao}</p>
+                </div>
+
+                {/* Objectivo de acordo com o Edital */}
+                <div className="curso-section-box">
+                  <h4>🎯 Objectivo</h4>
+                  <p>{curso.objectivo}</p>
+                </div>
+
+                {/* Aplicação & Saídas de acordo com o Edital */}
+                <div className="curso-section-box" style={{ background: '#f0f9ff', borderColor: '#bae6fd' }}>
+                  <h4 style={{ color: '#0369a1' }}>🚀 Aplicação &amp; Saídas Profissionais</h4>
+                  <ul className="curso-aplicacao-list">
+                    {curso.aplicacao.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Botão de Candidatura Online (Sem info de pagamentos) */}
+              <div style={{ marginTop: '1.1rem', paddingTop: '0.85rem', borderTop: '1px solid #f1f5f9' }}>
+                <Link
+                  to={`/pre-inscricao?curso=${encodeURIComponent(curso.nome)}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    background: '#0055a4',
+                    color: '#fff',
+                    padding: '0.65rem 1rem',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    transition: 'all 0.15s'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.background = '#003e7a'}
+                  onMouseOut={e => e.currentTarget.style.background = '#0055a4'}
+                >
+                  <span>📝 Fazer Pré-Inscrição Online 2027</span>
+                  <span>→</span>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -2284,7 +2970,7 @@ function CalendarioAcademico() {
 export default function Ensino() {
   const { canAdd, canEdit, canDelete } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const paramSeccao = searchParams.get('seccao') || searchParams.get('tab') || 'projetos-educativos';
+  const paramSeccao = searchParams.get('seccao') || searchParams.get('tab') || 'cursos-oferta';
   const [seccao, setSeccao] = useState(paramSeccao);
 
   useEffect(() => {
@@ -2303,6 +2989,7 @@ export default function Ensino() {
   const renderContent = () => {
     const props = { canAdd, canEdit, canDelete };
     switch(seccao) {
+      case 'cursos-oferta':          return <CursosOficiaisEdital />;
       case 'projetos-educativos':    return <ProjetosEducativos {...props} />;
       case 'plano-analitico':        return <PlanoAnaliticoSection {...props} />;
       case 'projetos-curriculares':  return <ProjetosCurriculares {...props} />;
@@ -2312,7 +2999,7 @@ export default function Ensino() {
       case 'estatistica-pedagogica': return <EstatisticaPedagogica />;
       case 'calendario':             return <CalendarioAcademico />;
       case 'eventos':                return <EventosCientificos {...props} />;
-      default:                       return <ProjetosEducativos {...props} />;
+      default:                       return <CursosOficiaisEdital />;
     }
   };
 

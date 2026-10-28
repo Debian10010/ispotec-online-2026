@@ -343,7 +343,7 @@ export default function HomeSchoolSalaVirtual() {
     return (
       <div className="container" style={{ padding: '3rem 1rem', textAlign: 'center' }}>
         <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⏳</div>
-        <p style={{ color: '#64748b' }}>A carregar a Sala de Aula do Ambiente Virtual e Aprendizagem...</p>
+        <p style={{ color: '#64748b' }}>A carregar a Sala de Aula do Ambiente Virtual de Aprendizagem...</p>
       </div>
     );
   }
@@ -355,7 +355,7 @@ export default function HomeSchoolSalaVirtual() {
         <h3>Sala Virtual Não Encontrada</h3>
         <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>O grupo ou sala de aula virtual solicitado não está disponível.</p>
         <Link to="/homeschool" className="btn btn-primary">
-          ← Voltar ao Ambiente Virtual e Aprendizagem
+          ← Voltar ao Ambiente Virtual de Aprendizagem
         </Link>
       </div>
     );
@@ -1262,7 +1262,7 @@ export default function HomeSchoolSalaVirtual() {
       <div className="sala-virtual-wrap">
         {/* Breadcrumb */}
         <div className="sala-breadcrumbs">
-          <Link to="/homeschool">🏫 Ambiente Virtual e Aprendizagem</Link>
+          <Link to="/homeschool">🏫 Ambiente Virtual de Aprendizagem</Link>
           <span>›</span>
           <span>{sala.curso}</span>
           <span>›</span>
@@ -2856,7 +2856,7 @@ export default function HomeSchoolSalaVirtual() {
                   <h4>🏛️ Responsabilidades do Docente Tutor</h4>
                   <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
                     <li>Acompanhar a evolução académica e sinalizar dificuldades precocemente.</li>
-                    <li>Recomendar leituras, metodologias de estudo e recursos do Ambiente Virtual e Aprendizagem.</li>
+                    <li>Recomendar leituras, metodologias de estudo e recursos do Ambiente Virtual de Aprendizagem.</li>
                     <li>Registar as sessões de orientação mantendo o histórico protegido e acessível aos intervenientes.</li>
                   </ul>
                 </div>

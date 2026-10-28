@@ -1206,8 +1206,8 @@ export default function HomeSchool() {
       <div className="ava-wrap">
         {/* Hero */}
         <div className="ava-hero">
-          <div className="ava-hero-badge">🏫 ISPOTEC — AMBIENTE VIRTUAL E APRENDIZAGEM</div>
-          <h1>Ambiente Virtual e Aprendizagem</h1>
+          <div className="ava-hero-badge">🏫 ISPOTEC — AMBIENTE VIRTUAL DE APRENDIZAGEM</div>
+          <h1>Ambiente Virtual de Aprendizagem</h1>
           <p>
             Espaço digital integrado de ensino, aprendizagem, comunicação e acompanhamento dos estudantes.
             Planifique sessões, registe sumários, acompanhe estudantes e gerencie tutorias num único portal institucional.

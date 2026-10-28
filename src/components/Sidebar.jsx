@@ -221,16 +221,6 @@ export default function Sidebar({
           </Link>
 
           <Link
-            to="/homeschool"
-            className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/ambiente-virtual-aprendizagem') || isActive('/ava') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
-            onClick={handleNavClick}
-            data-tooltip="Ambiente Virtual e Aprendizagem"
-          >
-            <span className="sidebar-item-icon">🏫</span>
-            <span className="sidebar-item-label">Ambiente Virtual e Aprendizagem</span>
-          </Link>
-
-          <Link
             to="/extensao"
             className={`sidebar-nav-item ${isActive('/extensao') ? 'active' : ''}`}
             onClick={handleNavClick}
@@ -254,10 +244,20 @@ export default function Sidebar({
             to="/tecnologia-inovacao"
             className={`sidebar-nav-item ${isActive('/tecnologia-inovacao') ? 'active' : ''}`}
             onClick={handleNavClick}
-            data-tooltip="Tecnologia e Inovação"
+            data-tooltip="Inovação & Tecnologia"
           >
             <span className="sidebar-item-icon">💡</span>
-            <span className="sidebar-item-label">Tecnologia e Inovação</span>
+            <span className="sidebar-item-label">Inovação & Tecnologia</span>
+          </Link>
+
+          <Link
+            to="/homeschool"
+            className={`sidebar-nav-item ${isActive('/homeschool') || isActive('/ambiente-virtual-aprendizagem') || isActive('/ava') || isActive('/grupo-de-estudos') ? 'active' : ''}`}
+            onClick={handleNavClick}
+            data-tooltip="Ambiente Virtual de Aprendizagem"
+          >
+            <span className="sidebar-item-icon">🏫</span>
+            <span className="sidebar-item-label">Ambiente Virtual de Aprendizagem</span>
           </Link>
         </div>
 

@@ -455,7 +455,7 @@ export default function Dashboard() {
                 5 Áreas
               </span>
             </div>
-            <h3 className="module-card-title">Tecnologia &amp; Inovação</h3>
+            <h3 className="module-card-title">Inovação & Tecnologia</h3>
             <p className="module-card-desc">
               Projectos Tecnológicos, Laboratório de Inovação, Desenvolvimento de Competências, Exposição de Protótipos e Parcerias Empresariais.
             </p>
@@ -475,7 +475,7 @@ export default function Dashboard() {
                 Híbrido
               </span>
             </div>
-            <h3 className="module-card-title">Ambiente Virtual e Aprendizagem</h3>
+            <h3 className="module-card-title">Ambiente Virtual de Aprendizagem</h3>
             <p className="module-card-desc">
               Ambiente oficial de aprendizagem híbrida e salas de aula virtuais. Acompanhe aulas teóricas e práticas, sumários, manuais, guias e tutoria.
             </p>
@@ -662,7 +662,7 @@ export default function Dashboard() {
               <span style={{ fontSize: '1.5rem' }}>💡</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '700', fontSize: '0.92rem', color: '#0369a1' }}>
-                  Tecnologia &amp; Inovação
+                  Inovação & Tecnologia
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
                   Projectos tecnológicos, laboratório de inovação e protótipos
