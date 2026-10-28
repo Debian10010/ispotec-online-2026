@@ -336,14 +336,13 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
           display: inline-flex;
           align-items: center;
           gap: 5px;
-          background: #dcfce7;
-          color: #15803d;
-          border: 1.5px solid #86efac;
+          background: #fef3c7;
+          color: #92400e;
+          border: 1.5px solid #fde68a;
           font-weight: 800;
           font-size: 8.5pt;
           padding: 3px 10px;
           border-radius: 16px;
-          text-transform: uppercase;
           white-space: nowrap;
         }
 
@@ -886,7 +885,7 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
 
           <div style={{ textAlign: 'right' }}>
             <span className="r-badge-pago">
-              ✓ Liquidado &amp; Confirmado
+              Sujeito a confirmação
             </span>
           </div>
         </div>

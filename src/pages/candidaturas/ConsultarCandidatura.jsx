@@ -210,11 +210,80 @@ export default function ConsultarCandidatura() {
           margin-bottom: 1.5rem;
         }
 
+        .cc-confirm-banner {
+          background: #f0fdf4;
+          border: 1.5px solid #86efac;
+          border-radius: 10px;
+          padding: 1.25rem 1.5rem;
+          margin-bottom: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+          box-sizing: border-box;
+          max-width: 100%;
+          overflow: hidden;
+        }
+
+        .cc-confirm-title {
+          font-size: 1rem;
+          font-weight: 800;
+          color: #166534;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
+        .cc-confirm-subtitle {
+          font-size: 0.85rem;
+          color: #15803d;
+          margin-top: 3px;
+        }
+
+        .cc-confirm-actions {
+          display: flex;
+          gap: 0.65rem;
+          flex-wrap: wrap;
+          max-width: 100%;
+        }
+
+        .cc-confirm-actions .btn {
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.6rem 1.15rem;
+          box-sizing: border-box;
+        }
+
+        .cc-action-bar {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .cc-action-group {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .cc-action-group .btn {
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          box-sizing: border-box;
+        }
+
         /* RESPONSIVIDADE MOBILE E TABLET */
         @media screen and (max-width: 820px) {
           .consultar-candidatura-page {
             margin: 1rem auto;
-            padding: 0 1rem 3rem 1rem;
+            padding: 0 1rem 4rem 1rem;
           }
           .cc-search-card, .cc-result-card {
             padding: 1.25rem;
@@ -232,48 +301,92 @@ export default function ConsultarCandidatura() {
           }
         }
 
-        @media screen and (max-width: 600px) {
+        @media screen and (max-width: 680px) {
           .consultar-candidatura-page {
-            margin: 0.5rem auto;
-            padding: 0 0.5rem 2.5rem 0.5rem;
+            margin: 0.5rem auto !important;
+            padding: 0 0.65rem 9rem 0.65rem !important; /* Margem ampla para não sobrepor o assistente flutuante */
           }
           .cc-search-card, .cc-result-card {
-            padding: 1rem;
-            border-radius: 10px;
+            padding: 1rem !important;
+            border-radius: 10px !important;
+            box-sizing: border-box !important;
           }
           .cc-search-title {
-            font-size: 1.15rem;
+            font-size: 1.15rem !important;
           }
           .cc-search-box {
-            flex-direction: column;
+            flex-direction: column !important;
           }
           .cc-search-box .btn {
-            width: 100%;
+            width: 100% !important;
           }
           .cc-header-row {
-            flex-direction: column;
-            gap: 0.5rem;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
           }
           .cc-num {
-            font-size: 1.25rem;
+            font-size: 1.25rem !important;
           }
           .cc-info-grid {
-            grid-template-columns: 1fr;
-            padding: 1rem 0.75rem;
-            gap: 0.75rem;
+            grid-template-columns: 1fr !important;
+            padding: 1rem 0.75rem !important;
+            gap: 0.75rem !important;
           }
           .cc-step {
-            width: 100%;
-            flex-direction: row;
-            gap: 0.75rem;
-            text-align: left;
+            width: 100% !important;
+            flex-direction: row !important;
+            gap: 0.75rem !important;
+            text-align: left !important;
           }
           .cc-step-dot {
-            margin-bottom: 0;
-            flex-shrink: 0;
+            margin-bottom: 0 !important;
+            flex-shrink: 0 !important;
           }
           .cc-step-label {
-            font-size: 0.8rem;
+            font-size: 0.8rem !important;
+          }
+
+          /* Banner Verde de Confirmação no Mobile */
+          .cc-confirm-banner {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 1rem 0.85rem !important;
+            gap: 0.85rem !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+          }
+          .cc-confirm-actions {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+          }
+          .cc-confirm-actions .btn {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 0.65rem 0.75rem !important;
+            font-size: 0.82rem !important;
+            white-space: normal !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+          }
+
+          /* Barra de Ações no Mobile */
+          .cc-action-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 1rem !important;
+          }
+          .cc-action-group {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+          }
+          .cc-action-group .btn {
+            width: 100% !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            white-space: normal !important;
+            text-align: center !important;
           }
         }
       `}</style>
@@ -450,32 +563,20 @@ export default function ConsultarCandidatura() {
 
           {/* BANNER DE PRÉ-INSCRIÇÃO CONFIRMADA & RECIBO DISPONÍVEL */}
           {(candidatura.estado === 'Aprovada' || candidatura.estadoPagamento === 'Validado') && (
-            <div style={{
-              background: '#f0fdf4',
-              border: '1.5px solid #86efac',
-              borderRadius: '10px',
-              padding: '1.25rem 1.5rem',
-              marginBottom: '1.5rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '1rem'
-            }}>
+            <div className="cc-confirm-banner">
               <div>
-                <div style={{ fontSize: '1rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div className="cc-confirm-title">
                   <span>🎉</span> Pré-Inscrição Confirmada &amp; Pagamento Validado!
                 </div>
-                <div style={{ fontSize: '0.85rem', color: '#15803d', marginTop: '3px' }}>
+                <div className="cc-confirm-subtitle">
                   O seu Recibo Oficial de Pagamento e Pré-Inscrição 2027 encontra-se emitido e disponível para download.
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+              <div className="cc-confirm-actions">
                 <button
                   type="button"
                   className="btn btn-success"
-                  style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.15rem' }}
                   onClick={() => setReciboAberto(true)}
                 >
                   📄 Baixar Recibo de Pagamento (PDF)
@@ -486,7 +587,7 @@ export default function ConsultarCandidatura() {
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-outline-success"
-                  style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'white' }}
+                  style={{ background: 'white' }}
                 >
                   💬 Partilhar no WhatsApp
                 </a>
@@ -511,12 +612,11 @@ export default function ConsultarCandidatura() {
           )}
 
           {/* BOTÕES DE AÇÃO */}
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="cc-action-bar">
+            <div className="cc-action-group">
               <button
                 type="button"
                 className="btn btn-primary"
-                style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 onClick={() => setImprimirAberto(true)}
               >
                 🖨️ Imprimir Ficha do Processo (A4)
@@ -526,7 +626,6 @@ export default function ConsultarCandidatura() {
                 <button
                   type="button"
                   className="btn btn-outline-success"
-                  style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                   onClick={() => setReciboAberto(true)}
                 >
                   📄 Recibo Oficial (PDF)
