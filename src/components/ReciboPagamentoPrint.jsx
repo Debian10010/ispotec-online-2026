@@ -50,6 +50,12 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
 
   const linkWhatsApp = candidaturaService.gerarLinkWhatsApp(candidatura);
 
+  // URL para consulta rápida no telemóvel via QR Code
+  const baseUrl = (typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost'))
+    ? window.location.origin
+    : 'https://ispotec-online.vercel.app';
+  const qrCodeUrl = `${baseUrl}/consultar-candidatura?codigo=${encodeURIComponent(candidatura.numeroCandidatura || candidatura.bi || '')}`;
+
   // Detalhes bancários do BCI de acordo com o grau
   const ehLicenciatura = da.grau === 'Licenciatura';
   const infoBancoBCI = ehLicenciatura
@@ -354,14 +360,68 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
           line-height: 1.35;
         }
 
-        /* ASSINATURAS */
+        /* ASSINATURAS E QR CODE */
         .r-signatures {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 28px;
+          grid-template-columns: 1.15fr 1fr;
+          gap: 20px;
           margin-top: 6px;
           margin-bottom: 8px;
+          align-items: flex-end;
           text-align: center;
+        }
+
+        .r-qr-container {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          text-align: left;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 4px 7px;
+        }
+
+        .r-qr-code-img {
+          width: 52px;
+          height: 52px;
+          border: 1px solid #cbd5e1;
+          border-radius: 4px;
+          background: #fff;
+          padding: 2px;
+          flex-shrink: 0;
+        }
+
+        .r-qr-details {
+          min-width: 0;
+          flex: 1;
+        }
+
+        .r-qr-title {
+          font-weight: 800;
+          font-size: 7.2pt;
+          color: #003366;
+          text-transform: uppercase;
+          letter-spacing: 0.2px;
+          line-height: 1.2;
+        }
+
+        .r-qr-desc {
+          font-size: 6.4pt;
+          color: #64748b;
+          margin-top: 2px;
+          line-height: 1.25;
+        }
+
+        .r-qr-code-val {
+          font-size: 6.4pt;
+          color: #0055a4;
+          font-family: monospace;
+          font-weight: 700;
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .r-sig-space {
@@ -552,10 +612,20 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
 
           .r-signatures {
             display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 25px !important;
+            grid-template-columns: 1.15fr 1fr !important;
+            gap: 18px !important;
             margin-top: 4px !important;
             margin-bottom: 4px !important;
+            align-items: flex-end !important;
+          }
+
+          .r-qr-container {
+            padding: 3px 6px !important;
+          }
+
+          .r-qr-code-img {
+            width: 46px !important;
+            height: 46px !important;
           }
 
           .r-sig-space {
@@ -770,12 +840,25 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
           </div>
         </div>
 
-        {/* ASSINATURAS E CARIMBO */}
+        {/* ASSINATURA, CARIMBO E QR CODE DE CONSULTA */}
         <div className="r-signatures">
-          <div>
-            <div className="r-sig-space"></div>
-            <div className="r-sig-line">O(A) Estudante / Candidato(a)</div>
-            <div style={{ fontSize: '6.8pt', color: '#64748b' }}>Assinatura de Receção</div>
+          <div className="r-qr-container">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=2&data=${encodeURIComponent(qrCodeUrl)}`}
+              alt="QR Code Consulta de Candidatura — ISPOTEC 2027"
+              className="r-qr-code-img"
+            />
+            <div className="r-qr-details">
+              <div className="r-qr-title">
+                Consulta de Candidatura — ISPOTEC 2027
+              </div>
+              <div className="r-qr-desc">
+                Escaneie com a câmara do telemóvel para consultar e acompanhar o processo online.
+              </div>
+              <div className="r-qr-code-val">
+                Candidatura: {candidatura.numeroCandidatura}
+              </div>
+            </div>
           </div>
 
           <div>
