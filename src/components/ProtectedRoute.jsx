@@ -18,9 +18,25 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  const rawRole = user?.tipo || user?.role || user?.perfil || 'estudante';
+  const rawRole = user?.tipo || user?.role || user?.perfil || '';
   const userTipo = String(rawRole).toLowerCase().trim();
-  if (adminOnly && userTipo !== 'especialista' && userTipo !== 'admin') {
+  const userEmail = String(user?.email || '').toLowerCase().trim();
+  const isAdmin = Boolean(
+    user && (
+      userTipo === 'admin' ||
+      userTipo === 'administrador' ||
+      userTipo === 'especialista' ||
+      userTipo === 'diretor' ||
+      user?.is_admin === true ||
+      user?.is_admin === 1 ||
+      user?.isAdmin === true ||
+      userEmail === 'admin@ispotec.online' ||
+      userEmail === 'admin@ispotec.ac.mz' ||
+      userEmail.includes('admin')
+    )
+  );
+
+  if (adminOnly && !isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 

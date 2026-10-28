@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   candidaturaService,
   ESTADOS_CANDIDATURA,
@@ -11,6 +12,9 @@ import FichaCandidatoPrint from '../../components/FichaCandidatoPrint';
 import ReciboPagamentoPrint from '../../components/ReciboPagamentoPrint';
 
 export default function GestaoPreInscricoes() {
+  const { user, isAdmin } = useAuth();
+  const [carregando, setCarregando] = useState(false);
+  const [erroCarregamento, setErroCarregamento] = useState('');
   const [candidaturas, setCandidaturas] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -56,10 +60,67 @@ export default function GestaoPreInscricoes() {
   }, [filtros]);
 
   const carregarDados = async () => {
-    const lista = await candidaturaService.listarCandidaturas(filtros);
-    setCandidaturas(lista);
-    const s = await candidaturaService.getEstatisticas();
-    setStats(s);
+    try {
+      setCarregando(true);
+      setErroCarregamento('');
+      const lista = await candidaturaService.listarCandidaturas(filtros);
+      setCandidaturas(lista || []);
+      const s = await candidaturaService.getEstatisticas();
+      if (s) setStats(s);
+    } catch (err) {
+      console.error('[GestaoPreInscricoes] Erro ao carregar dados:', err);
+      setErroCarregamento('Não foi possível carregar candidaturas do servidor. A utilizar dados locais.');
+      try {
+        const fallback = await candidaturaService.getCandidaturas(filtros);
+        setCandidaturas(fallback || []);
+      } catch (_) {}
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  // Acção rápida de validação de pagamento (Exclusivo Administrador)
+  const handleValidarPagamentoRapido = async (cand) => {
+    if (!isAdmin) {
+      alert('Acesso negado: Apenas o Administrador pode validar pagamentos.');
+      return;
+    }
+    const conf = window.confirm(`Deseja validar o comprovativo de pagamento da taxa de pré-inscrição de ${cand.dadosPessoais?.nome}?`);
+    if (!conf) return;
+
+    try {
+      await candidaturaService.atualizarEstadoPagamento(
+        cand.id,
+        'Validado',
+        'Comprovativo bancário BCI conferido e validado pela Secretaria.',
+        user?.nome || 'Administrador'
+      );
+      await carregarDados();
+    } catch (err) {
+      alert('Erro ao validar pagamento: ' + err.message);
+    }
+  };
+
+  // Acção rápida de aprovação de candidatura (Exclusivo Administrador)
+  const handleAprovarCandidaturaRapido = async (cand) => {
+    if (!isAdmin) {
+      alert('Acesso negado: Apenas o Administrador pode aprovar candidaturas.');
+      return;
+    }
+    const conf = window.confirm(`Deseja aprovar a candidatura de ${cand.dadosPessoais?.nome} (${cand.numeroCandidatura})?`);
+    if (!conf) return;
+
+    try {
+      await candidaturaService.atualizarEstadoCandidatura(
+        cand.id,
+        'Aprovada',
+        'Candidatura aprovada pela Direcção Académica.',
+        user?.nome || 'Administrador'
+      );
+      await carregarDados();
+    } catch (err) {
+      alert('Erro ao aprovar candidatura: ' + err.message);
+    }
   };
 
   const limparFiltros = () => {
@@ -632,39 +693,74 @@ export default function GestaoPreInscricoes() {
                           ✏️ Editar
                         </button>
 
-                        {/* CONFIRMAR PRÉ-INSCRIÇÃO SE PENDENTE */}
-                        {!podeRecibo ? (
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-success"
-                            title="Confirmar Pré-Inscrição & Emitir Recibo"
-                            onClick={() => handleConfirmarPreInscricao(c)}
-                          >
-                            ✅ Confirmar
-                          </button>
-                        ) : (
+                        {/* ACÇÕES EXCLUSIVAS DO ADMINISTRADOR */}
+                        {isAdmin ? (
                           <>
-                            {/* BAIXAR RECIBO */}
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-success"
-                              title="Baixar Recibo de Pagamento (PDF)"
-                              onClick={() => setCandidaturaParaRecibo(c)}
-                            >
-                              🧾 Recibo
-                            </button>
+                            {/* VALIDAR TAXA SE PENDENTE */}
+                            {c.estadoPagamento === 'Pendente de verificação' && (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-success"
+                                title="Validar Comprovativo de Pagamento da Taxa"
+                                style={{ fontWeight: 700 }}
+                                onClick={() => handleValidarPagamentoRapido(c)}
+                              >
+                                💳 Validar Taxa
+                              </button>
+                            )}
 
-                            {/* PARTILHAR WHATSAPP */}
-                            <a
-                              href={candidaturaService.gerarLinkWhatsApp(c)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-sm btn-outline-success"
-                              title="Partilhar Recibo via WhatsApp"
-                            >
-                              💬
-                            </a>
+                            {/* APROVAR CANDIDATURA SE SUBMETIDA OU EM ANÁLISE */}
+                            {(c.estado === 'Submetida' || c.estado === 'Em análise') && (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-primary"
+                                title="Aprovar Candidatura do Estudante"
+                                style={{ fontWeight: 700 }}
+                                onClick={() => handleAprovarCandidaturaRapido(c)}
+                              >
+                                🎓 Aprovar
+                              </button>
+                            )}
+
+                            {/* CONFIRMAÇÃO TOTAL EM 1 CLIQUE */}
+                            {!podeRecibo && (
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-success"
+                                title="Confirmar Tudo (Aprovar + Validar Taxa + Emitir Recibo)"
+                                style={{ fontWeight: 800 }}
+                                onClick={() => handleConfirmarPreInscricao(c)}
+                              >
+                                ✅ Confirmar Tudo
+                              </button>
+                            )}
+
+                            {podeRecibo && (
+                              <>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-success"
+                                  title="Baixar Recibo de Pagamento (PDF)"
+                                  onClick={() => setCandidaturaParaRecibo(c)}
+                                >
+                                  🧾 Recibo
+                                </button>
+                                <a
+                                  href={candidaturaService.gerarLinkWhatsApp(c)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-sm btn-outline-success"
+                                  title="Partilhar Recibo via WhatsApp"
+                                >
+                                  💬
+                                </a>
+                              </>
+                            )}
                           </>
+                        ) : (
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', padding: '4px' }}>
+                            🔒 Reservado ao Admin
+                          </span>
                         )}
 
                         {/* IMPRIMIR PROCESSO A4 */}

@@ -791,11 +791,19 @@ export const candidaturaService = {
   },
 
   // Obter todas as candidaturas com filtros
+  async listarCandidaturas(filtros = {}) {
+    return this.getCandidaturas(filtros);
+  },
+
   async getCandidaturas(filtros = {}) {
     try {
       const res = await api.get('/candidaturas', { params: filtros });
       if (res && res.dados) {
-        return res.dados;
+        const dadosArray = Array.isArray(res.dados) ? res.dados : [res.dados];
+        return dadosArray.map(c => ({
+          ...c,
+          id: c.id || c._id || c.numeroCandidatura
+        }));
       }
     } catch (_) {}
 
@@ -867,7 +875,7 @@ export const candidaturaService = {
   // Atualizar estado da candidatura (Aprovar, Rejeitar, etc.)
   async atualizarEstadoCandidatura(id, novoEstado, observacao = '', adminNome = 'Administrador') {
     const lista = getStoredCandidaturas();
-    const index = lista.findIndex(c => c.id === id || c.numeroCandidatura === id);
+    const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
     if (index === -1) throw new Error('Candidatura não encontrada');
 
     const item = { ...lista[index] };
@@ -903,7 +911,7 @@ export const candidaturaService = {
   // Validar ou rejeitar comprovativo de pagamento
   async atualizarEstadoPagamento(id, novoEstadoPagamento, observacao = '', adminNome = 'Administrador') {
     const lista = getStoredCandidaturas();
-    const index = lista.findIndex(c => c.id === id || c.numeroCandidatura === id);
+    const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
     if (index === -1) throw new Error('Candidatura não encontrada');
 
     const item = { ...lista[index] };
@@ -955,7 +963,7 @@ export const candidaturaService = {
   // Atualizar dados completos da candidatura (edição pelo Administrador)
   async atualizarDadosCompletos(id, novosDados, adminNome = 'Administrador') {
     const lista = getStoredCandidaturas();
-    const index = lista.findIndex(c => c.id === id || c.numeroCandidatura === id);
+    const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
     if (index === -1) throw new Error('Candidatura não encontrada');
 
     const item = { ...lista[index] };
@@ -1023,7 +1031,7 @@ export const candidaturaService = {
   // Confirmar pré-inscrição e gerar recibo oficial
   async confirmarPreInscricao(id, observacao = '', adminNome = 'Administrador') {
     const lista = getStoredCandidaturas();
-    const index = lista.findIndex(c => c.id === id || c.numeroCandidatura === id);
+    const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
     if (index === -1) throw new Error('Candidatura não encontrada');
 
     const item = { ...lista[index] };

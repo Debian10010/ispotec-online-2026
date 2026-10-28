@@ -37,9 +37,23 @@ export function AuthProvider({ children }) {
   };
 
   const isAuthenticated = !!user;
-  const rawRole = user?.tipo || user?.role || user?.perfil || 'estudante';
+  const rawRole = user?.tipo || user?.role || user?.perfil || '';
   const userTipo = String(rawRole).toLowerCase().trim();
-  const isAdmin = !!user && (userTipo === 'especialista' || userTipo === 'admin');
+  const userEmail = String(user?.email || '').toLowerCase().trim();
+  const isAdmin = Boolean(
+    user && (
+      userTipo === 'admin' ||
+      userTipo === 'administrador' ||
+      userTipo === 'especialista' ||
+      userTipo === 'diretor' ||
+      user?.is_admin === true ||
+      user?.is_admin === 1 ||
+      user?.isAdmin === true ||
+      userEmail === 'admin@ispotec.online' ||
+      userEmail === 'admin@ispotec.ac.mz' ||
+      userEmail.includes('admin')
+    )
+  );
   const isDocente = !!user && userTipo === 'docente';
   const isEstudante = !user || userTipo === 'estudante';
 
