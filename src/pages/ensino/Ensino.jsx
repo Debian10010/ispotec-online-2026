@@ -255,16 +255,7 @@ const css = `
 `;
 
 const SECCOES = [
-  { key:'cursos-oferta',         label:'Oferta de Cursos',      icon:'🎓' },
-  { key:'projetos-educativos',   label:'Projetos Educativos',   icon:'🎯' },
-  { key:'plano-analitico',       label:'Plano Analítico',       icon:'📋' },
-  { key:'projetos-curriculares', label:'Projetos Curriculares',  icon:'📜' },
-  { key:'bibliotecas',           label:'Bibliotecas',            icon:'📚' },
-  { key:'laboratorios',          label:'Laboratórios',           icon:'🔬' },
-  { key:'estatistica-academica', label:'Estatística Académica',  icon:'📊' },
-  { key:'estatistica-pedagogica',label:'Estatística Pedagógica', icon:'📈' },
-  { key:'calendario',            label:'Calendário Académico',   icon:'📅' },
-  { key:'eventos',               label:'Eventos Científicos',    icon:'🎤' },
+  { key:'cursos-oferta', label:'Oferta de Cursos', icon:'🎓' },
 ];
 
 function estadoBadge(e) {
@@ -2987,19 +2978,10 @@ export default function Ensino() {
   };
 
   const renderContent = () => {
-    const props = { canAdd, canEdit, canDelete };
     switch(seccao) {
-      case 'cursos-oferta':          return <CursosOficiaisEdital />;
-      case 'projetos-educativos':    return <ProjetosEducativos {...props} />;
-      case 'plano-analitico':        return <PlanoAnaliticoSection {...props} />;
-      case 'projetos-curriculares':  return <ProjetosCurriculares {...props} />;
-      case 'bibliotecas':            return <Bibliotecas {...props} />;
-      case 'laboratorios':           return <Laboratorios {...props} />;
-      case 'estatistica-academica':  return <EstatisticaAcademica />;
-      case 'estatistica-pedagogica': return <EstatisticaPedagogica />;
-      case 'calendario':             return <CalendarioAcademico />;
-      case 'eventos':                return <EventosCientificos {...props} />;
-      default:                       return <CursosOficiaisEdital />;
+      case 'cursos-oferta':
+      default:
+        return <CursosOficiaisEdital />;
     }
   };
 
