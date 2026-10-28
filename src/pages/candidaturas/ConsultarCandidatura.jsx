@@ -210,9 +210,71 @@ export default function ConsultarCandidatura() {
           margin-bottom: 1.5rem;
         }
 
-        @media (max-width: 600px) {
-          .cc-search-box { flex-direction: column; }
-          .cc-info-grid { grid-template-columns: 1fr; }
+        /* RESPONSIVIDADE MOBILE E TABLET */
+        @media screen and (max-width: 820px) {
+          .consultar-candidatura-page {
+            margin: 1rem auto;
+            padding: 0 1rem 3rem 1rem;
+          }
+          .cc-search-card, .cc-result-card {
+            padding: 1.25rem;
+          }
+          .cc-timeline {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+          }
+          .cc-timeline::before {
+            display: none;
+          }
+          .cc-step {
+            width: 48%;
+            margin-bottom: 0.5rem;
+          }
+        }
+
+        @media screen and (max-width: 600px) {
+          .consultar-candidatura-page {
+            margin: 0.5rem auto;
+            padding: 0 0.5rem 2.5rem 0.5rem;
+          }
+          .cc-search-card, .cc-result-card {
+            padding: 1rem;
+            border-radius: 10px;
+          }
+          .cc-search-title {
+            font-size: 1.15rem;
+          }
+          .cc-search-box {
+            flex-direction: column;
+          }
+          .cc-search-box .btn {
+            width: 100%;
+          }
+          .cc-header-row {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          .cc-num {
+            font-size: 1.25rem;
+          }
+          .cc-info-grid {
+            grid-template-columns: 1fr;
+            padding: 1rem 0.75rem;
+            gap: 0.75rem;
+          }
+          .cc-step {
+            width: 100%;
+            flex-direction: row;
+            gap: 0.75rem;
+            text-align: left;
+          }
+          .cc-step-dot {
+            margin-bottom: 0;
+            flex-shrink: 0;
+          }
+          .cc-step-label {
+            font-size: 0.8rem;
+          }
         }
       `}</style>
 

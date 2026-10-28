@@ -448,12 +448,13 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
         }
 
         /* RESPONSIVIDADE EM TELAS PEQUENAS (MOBILE / TABLET) */
-        @media screen and (max-width: 820px) {
+        @media screen and (max-width: 992px) {
           .recibo-print-overlay {
-            padding: 0.5rem;
+            padding: 0.6rem 0.5rem;
           }
           .recibo-sheet {
-            width: 100%;
+            width: 100% !important;
+            max-width: 100% !important;
             min-height: auto;
             padding: 1.25rem 1rem;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -462,41 +463,104 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
             position: relative;
             top: 0;
             width: 100%;
-            padding: 0.6rem 0.8rem;
+            padding: 0.65rem 0.85rem;
+            gap: 0.5rem;
           }
           .recibo-toolbar .btn {
             font-size: 0.82rem;
-            padding: 0.5rem 0.8rem;
+            padding: 0.5rem 0.85rem;
+          }
+          .r-signatures {
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+          .r-qr-container {
+            width: 100%;
+            box-sizing: border-box;
           }
         }
 
         @media screen and (max-width: 640px) {
+          .recibo-print-overlay {
+            padding: 0.35rem 0.25rem;
+          }
+          .recibo-sheet {
+            padding: 1rem 0.75rem;
+            border-radius: 8px;
+            font-size: 9pt;
+          }
+          .recibo-toolbar {
+            flex-direction: column;
+            width: 100%;
+            gap: 0.45rem;
+          }
+          .recibo-toolbar .btn {
+            width: 100%;
+            justify-content: center;
+          }
           .r-header {
             flex-direction: column;
             text-align: center;
             gap: 8px;
+            padding-bottom: 8px;
+          }
+          .r-logo {
+            width: 55px;
+            height: 55px;
+          }
+          .r-header-text h1 {
+            font-size: 10pt;
+          }
+          .r-header-text h2 {
+            font-size: 8.2pt;
+          }
+          .r-header-text p {
+            font-size: 6.8pt;
           }
           .r-title-banner {
             flex-direction: column;
             text-align: center;
             gap: 6px;
+            padding: 8px 10px;
+          }
+          .r-title-banner h3 {
+            font-size: 9.5pt !important;
           }
           .r-info-grid {
             grid-template-columns: 1fr;
             gap: 8px;
+          }
+          .r-table th, .r-table td {
+            padding: 5px 6px;
+            font-size: 7.5pt;
           }
           .r-total-bar {
             flex-direction: column;
             align-items: flex-start;
             gap: 6px;
           }
+          .r-stamp-box {
+            font-size: 7pt;
+            padding: 6px 8px;
+          }
           .r-signatures {
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 14px;
+          }
+          .r-qr-container {
+            flex-direction: row;
+            gap: 8px;
+            padding: 6px 8px;
+          }
+          .r-qr-code-img {
+            width: 48px;
+            height: 48px;
           }
           .r-footer {
             flex-direction: column;
             text-align: center;
+            gap: 4px;
+            font-size: 6.5pt;
           }
         }
 

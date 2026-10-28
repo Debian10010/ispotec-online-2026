@@ -431,6 +431,89 @@ export default function GestaoPreInscricoes() {
           border-color: #0284c7;
           background: #f0f9ff;
         }
+
+        /* RESPONSIVIDADE (MOBILE E TABLET) */
+        @media screen and (max-width: 992px) {
+          .gestao-candidaturas-page {
+            padding: 1rem !important;
+          }
+          .gpi-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.75rem !important;
+            margin-bottom: 1.25rem !important;
+          }
+          .gpi-filter-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .gpi-modal-backdrop {
+            padding: 0.75rem !important;
+          }
+          .gpi-modal-card {
+            max-width: 100% !important;
+            max-height: 94vh !important;
+          }
+          .gpi-academic-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+
+        @media screen and (max-width: 680px) {
+          .gestao-candidaturas-page {
+            padding: 0.5rem 0.35rem !important;
+          }
+          .gpi-stat-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.6rem !important;
+          }
+          .gpi-filter-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .gpi-modal-backdrop {
+            padding: 0.25rem !important;
+          }
+          .gpi-modal-card {
+            max-height: 98vh !important;
+            border-radius: 8px !important;
+          }
+          .gpi-modal-header {
+            padding: 0.85rem 1rem !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.5rem !important;
+          }
+          .gpi-modal-body {
+            padding: 1rem 0.75rem !important;
+          }
+          .gpi-modal-footer {
+            padding: 0.75rem 1rem !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .gpi-modal-footer button, .gpi-modal-footer a {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+          .gpi-table-wrap {
+            -webkit-overflow-scrolling: touch;
+          }
+          .gpi-table th, .gpi-table td {
+            padding: 0.65rem 0.6rem !important;
+            font-size: 0.78rem !important;
+          }
+          .gpi-personal-row {
+            grid-template-columns: 1fr !important;
+            justify-items: center !important;
+            gap: 0.85rem !important;
+          }
+          .gpi-personal-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem !important;
+          }
+          .gpi-academic-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem !important;
+          }
+        }
       `}</style>
 
       {/* IMPRESSÃO A4 DO DOSSIÊ DO PROCESSO */}
@@ -870,7 +953,7 @@ export default function GestaoPreInscricoes() {
               </div>
 
               {/* DADOS PESSOAIS E FOTO */}
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
+              <div className="gpi-personal-row" style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
                 <div style={{
                   width: '120px',
                   height: '145px',
@@ -893,7 +976,7 @@ export default function GestaoPreInscricoes() {
                   )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem 1rem', fontSize: '0.85rem' }}>
+                <div className="gpi-personal-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem 1rem', fontSize: '0.85rem' }}>
                   <div><strong>Nome Completo:</strong> {candidaturaSelecionada.dadosPessoais?.nome}</div>
                   <div><strong>B.I. / Passaporte:</strong> {candidaturaSelecionada.dadosPessoais?.bi}</div>
                   <div><strong>Nascimento:</strong> {candidaturaSelecionada.dadosPessoais?.dataNascimento}</div>
@@ -916,7 +999,7 @@ export default function GestaoPreInscricoes() {
                 <h4 style={{ margin: '0 0 0.5rem 0', color: '#003366', fontSize: '0.92rem', fontWeight: 800 }}>
                   🎓 Dados Académicos do Ingresso
                 </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.65rem', fontSize: '0.85rem' }}>
+                <div className="gpi-academic-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.65rem', fontSize: '0.85rem' }}>
                   <div><strong>Curso:</strong> {candidaturaSelecionada.dadosAcademicos?.cursoNome}</div>
                   <div><strong>Grau Académico:</strong> {candidaturaSelecionada.dadosAcademicos?.grau}</div>
                   <div><strong>Regime:</strong> {candidaturaSelecionada.dadosAcademicos?.regime}</div>

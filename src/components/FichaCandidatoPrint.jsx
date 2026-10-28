@@ -337,6 +337,74 @@ export default function FichaCandidatoPrint({ candidatura, listaCandidaturas = n
           color: #64748b;
         }
 
+        /* RESPONSIVIDADE EM TELAS PEQUENAS (MOBILE / TABLET) */
+        @media screen and (max-width: 900px) {
+          .ficha-print-overlay {
+            padding: 0.5rem;
+          }
+          .ficha-print-sheet {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            padding: 1.25rem 1rem !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          }
+          .ficha-print-toolbar {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            top: 0;
+            padding: 0.5rem 0.75rem;
+          }
+          .ficha-print-toolbar .btn {
+            font-size: 0.8rem;
+            padding: 0.45rem 0.75rem;
+          }
+          .f-grid-2, .f-grid-3, .f-signatures {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+        }
+
+        @media screen and (max-width: 640px) {
+          .ficha-print-overlay {
+            padding: 0.25rem;
+          }
+          .ficha-print-sheet {
+            padding: 1rem 0.75rem !important;
+            font-size: 7.8pt;
+          }
+          .f-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 6px;
+          }
+          .f-logo-img {
+            width: 50px;
+            height: 50px;
+          }
+          .f-header-text h1 {
+            font-size: 10pt;
+          }
+          .f-banner {
+            flex-direction: column;
+            text-align: center;
+            gap: 4px;
+          }
+          .ficha-print-toolbar {
+            flex-direction: column;
+            width: 100%;
+          }
+          .ficha-print-toolbar .btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+
         /* PRINT STYLES - RIGID 1 PAGE A4 */
         @media print {
           html, body {
