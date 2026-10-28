@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { candidaturaService } from '../../services/candidaturaService';
 import FichaCandidatoPrint from '../../components/FichaCandidatoPrint';
+import ReciboPagamentoPrint from '../../components/ReciboPagamentoPrint';
 
 export default function ConsultarCandidatura() {
   const [searchParams] = useSearchParams();
@@ -12,6 +13,7 @@ export default function ConsultarCandidatura() {
   const [candidatura, setCandidatura] = useState(null);
   const [erro, setErro] = useState('');
   const [imprimirAberto, setImprimirAberto] = useState(false);
+  const [reciboAberto, setReciboAberto] = useState(false);
 
   useEffect(() => {
     if (codigoUrl) {
@@ -222,6 +224,14 @@ export default function ConsultarCandidatura() {
         />
       )}
 
+      {/* RECIBO OFICIAL DE PAGAMENTO MODAL */}
+      {reciboAberto && candidatura && (
+        <ReciboPagamentoPrint
+          candidatura={candidatura}
+          onClose={() => setReciboAberto(false)}
+        />
+      )}
+
       {/* SEARCH CARD */}
       <div className="cc-search-card">
         <h1 className="cc-search-title">🔍 Consulta de Candidatura — ISPOTEC 2027</h1>
@@ -339,6 +349,52 @@ export default function ConsultarCandidatura() {
             </div>
           </div>
 
+          {/* BANNER DE PRÉ-INSCRIÇÃO CONFIRMADA & RECIBO DISPONÍVEL */}
+          {(candidatura.estado === 'Aprovada' || candidatura.estadoPagamento === 'Validado') && (
+            <div style={{
+              background: '#f0fdf4',
+              border: '1.5px solid #86efac',
+              borderRadius: '10px',
+              padding: '1.25rem 1.5rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}>
+              <div>
+                <div style={{ fontSize: '1rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span>🎉</span> Pré-Inscrição Confirmada &amp; Pagamento Validado!
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#15803d', marginTop: '3px' }}>
+                  O seu Recibo Oficial de Pagamento e Pré-Inscrição 2027 encontra-se emitido e disponível para download.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.15rem' }}
+                  onClick={() => setReciboAberto(true)}
+                >
+                  📄 Baixar Recibo de Pagamento (PDF)
+                </button>
+
+                <a
+                  href={candidaturaService.gerarLinkWhatsApp(candidatura)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-outline-success"
+                  style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'white' }}
+                >
+                  💬 Partilhar no WhatsApp
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* OBSERVAÇÃO ADMINISTRATIVA SE HOUVER */}
           {candidatura.observacoesAdmin && (
             <div style={{
@@ -356,18 +412,31 @@ export default function ConsultarCandidatura() {
           )}
 
           {/* BOTÕES DE AÇÃO */}
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              onClick={() => setImprimirAberto(true)}
-            >
-              🖨️ Imprimir Ficha de Candidatura (A4)
-            </button>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                onClick={() => setImprimirAberto(true)}
+              >
+                🖨️ Imprimir Ficha do Processo (A4)
+              </button>
+
+              {(candidatura.estado === 'Aprovada' || candidatura.estadoPagamento === 'Validado') && (
+                <button
+                  type="button"
+                  className="btn btn-outline-success"
+                  style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  onClick={() => setReciboAberto(true)}
+                >
+                  📄 Recibo Oficial (PDF)
+                </button>
+              )}
+            </div>
 
             <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-              Dúvidas? Contacte a Secretaria Geral: <strong>878 787 442</strong>
+              Dúvidas? Contacte a Secretaria Geral: <strong>(+258) 878 787 442</strong>
             </div>
           </div>
         </div>
