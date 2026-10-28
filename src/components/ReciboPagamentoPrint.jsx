@@ -4,7 +4,7 @@ import LOGO_ISPOTEC_BASE64 from '../assets/logoIspotecBase64';
 
 /**
  * Componente Oficial para Impressão e Download em PDF:
- * Recibo Oficial de Pagamento e Confirmação de Pré-Inscrição 2027 (ISPOTEC)
+ * Recibo Provisório de Pagamento e Confirmação de Pré-Inscrição 2027 (ISPOTEC)
  * - Visualização 100% responsiva em telas móveis, tablets e computadores.
  * - Impressão estritamente contida em exatamente 1 única página A4.
  */
@@ -624,7 +624,7 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
         {/* BANNER DO RECIBO */}
         <div className="r-title-banner">
           <div>
-            <h3>Recibo Oficial de Pagamento &amp; Confirmação de Pré-Inscrição</h3>
+            <h3>Recibo Provisório de Pagamento &amp; Confirmação de Pré-Inscrição</h3>
             <div style={{ fontSize: '7.5pt', opacity: 0.95, marginTop: '2px' }}>
               Ano Lectivo de 2027 • Emitido em: <strong>{dataFormatada}</strong>
             </div>
