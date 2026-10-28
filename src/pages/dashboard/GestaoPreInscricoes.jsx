@@ -88,9 +88,10 @@ export default function GestaoPreInscricoes() {
     const conf = window.confirm(`Deseja validar o comprovativo de pagamento da taxa de pré-inscrição de ${cand.dadosPessoais?.nome}?`);
     if (!conf) return;
 
+    const targetId = cand._id || cand.id || cand.numeroCandidatura;
     try {
       await candidaturaService.atualizarEstadoPagamento(
-        cand.id,
+        targetId,
         'Validado',
         'Comprovativo bancário BCI conferido e validado pela Secretaria.',
         user?.nome || 'Administrador'
@@ -110,9 +111,10 @@ export default function GestaoPreInscricoes() {
     const conf = window.confirm(`Deseja aprovar a candidatura de ${cand.dadosPessoais?.nome} (${cand.numeroCandidatura})?`);
     if (!conf) return;
 
+    const targetId = cand._id || cand.id || cand.numeroCandidatura;
     try {
       await candidaturaService.atualizarEstadoCandidatura(
-        cand.id,
+        targetId,
         'Aprovada',
         'Candidatura aprovada pela Direcção Académica.',
         user?.nome || 'Administrador'
@@ -146,14 +148,15 @@ export default function GestaoPreInscricoes() {
     if (!candidaturaEmEdicao) return;
     setSalvandoEdicao(true);
 
+    const targetId = candidaturaEmEdicao._id || candidaturaEmEdicao.id || candidaturaEmEdicao.numeroCandidatura;
     try {
       const atualizado = await candidaturaService.atualizarDadosCompletos(
-        candidaturaEmEdicao.id,
+        targetId,
         candidaturaEmEdicao,
         'Administrador'
       );
       setCandidaturaEmEdicao(null);
-      if (candidaturaSelecionada && candidaturaSelecionada.id === atualizado.id) {
+      if (candidaturaSelecionada && (candidaturaSelecionada.id === atualizado.id || candidaturaSelecionada._id === atualizado._id)) {
         setCandidaturaSelecionada(atualizado);
       }
       await carregarDados();
@@ -172,14 +175,15 @@ export default function GestaoPreInscricoes() {
     );
     if (!confirmacao) return;
 
+    const targetId = cand._id || cand.id || cand.numeroCandidatura;
     try {
       const atualizado = await candidaturaService.confirmarPreInscricao(
-        cand.id,
+        targetId,
         'Pré-inscrição confirmada pelo Administrador.',
         'Administrador'
       );
       await carregarDados();
-      if (candidaturaSelecionada && candidaturaSelecionada.id === atualizado.id) {
+      if (candidaturaSelecionada && (candidaturaSelecionada.id === atualizado.id || candidaturaSelecionada._id === atualizado._id)) {
         setCandidaturaSelecionada(atualizado);
       }
       // Imediatamente abre o recibo para download
@@ -194,42 +198,43 @@ export default function GestaoPreInscricoes() {
     if (!candidaturaSelecionada || !modalAcao) return;
     setProcessandoAcao(true);
 
+    const targetId = candidaturaSelecionada._id || candidaturaSelecionada.id || candidaturaSelecionada.numeroCandidatura;
     try {
       let atualizado = null;
       if (modalAcao === 'aprovar') {
         atualizado = await candidaturaService.atualizarEstadoCandidatura(
-          candidaturaSelecionada.id,
+          targetId,
           'Aprovada',
           observacaoAcao || 'Candidatura aprovada pelos Serviços Académicos.'
         );
       } else if (modalAcao === 'confirmar-completo') {
         atualizado = await candidaturaService.confirmarPreInscricao(
-          candidaturaSelecionada.id,
+          targetId,
           observacaoAcao || 'Pré-inscrição confirmada e validada.',
           'Administrador'
         );
         setCandidaturaParaRecibo(atualizado);
       } else if (modalAcao === 'rejeitar') {
         atualizado = await candidaturaService.atualizarEstadoCandidatura(
-          candidaturaSelecionada.id,
+          targetId,
           'Rejeitada',
           observacaoAcao || 'Candidatura indeferida por não preencher os requisitos.'
         );
       } else if (modalAcao === 'solicitar-docs') {
         atualizado = await candidaturaService.atualizarEstadoCandidatura(
-          candidaturaSelecionada.id,
+          targetId,
           'A aguardar documentos',
           observacaoAcao || 'Por favor, regularize os documentos pendentes.'
         );
       } else if (modalAcao === 'validar-pagamento') {
         atualizado = await candidaturaService.atualizarEstadoPagamento(
-          candidaturaSelecionada.id,
+          targetId,
           'Validado',
           observacaoAcao || 'Comprovativo de pagamento verificado e creditado.'
         );
       } else if (modalAcao === 'rejeitar-pagamento') {
         atualizado = await candidaturaService.atualizarEstadoPagamento(
-          candidaturaSelecionada.id,
+          targetId,
           'Rejeitado',
           observacaoAcao || 'Comprovativo inválido ou valor não identificado em conta.'
         );

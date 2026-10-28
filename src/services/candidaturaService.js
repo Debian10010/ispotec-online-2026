@@ -800,10 +800,27 @@ export const candidaturaService = {
       const res = await api.get('/candidaturas', { params: filtros });
       if (res && res.dados) {
         const dadosArray = Array.isArray(res.dados) ? res.dados : [res.dados];
-        return dadosArray.map(c => ({
+        const normalizados = dadosArray.map(c => ({
           ...c,
           id: c.id || c._id || c.numeroCandidatura
         }));
+
+        // Sincronizar cache local com os dados vindos do servidor
+        try {
+          const listaLocal = getStoredCandidaturas();
+          const mapa = new Map();
+          listaLocal.forEach(c => {
+            const k = c.numeroCandidatura || c.id || c._id;
+            if (k) mapa.set(k, c);
+          });
+          normalizados.forEach(c => {
+            const k = c.numeroCandidatura || c.id || c._id;
+            if (k) mapa.set(k, c);
+          });
+          saveStoredCandidaturas(Array.from(mapa.values()));
+        } catch (_) {}
+
+        return normalizados;
       }
     } catch (_) {}
 
@@ -874,9 +891,42 @@ export const candidaturaService = {
 
   // Atualizar estado da candidatura (Aprovar, Rejeitar, etc.)
   async atualizarEstadoCandidatura(id, novoEstado, observacao = '', adminNome = 'Administrador') {
+    let itemServidor = null;
+    let apiError = null;
+
+    try {
+      const res = await api.patch(`/candidaturas/${id}/estado`, {
+        estado: novoEstado,
+        observacao,
+        adminNome
+      });
+      if (res && res.dados) {
+        itemServidor = {
+          ...res.dados,
+          id: res.dados.id || res.dados._id || res.dados.numeroCandidatura
+        };
+      }
+    } catch (err) {
+      apiError = err;
+      console.warn('[candidaturaService] Aviso na API ao atualizar estado:', err.message);
+    }
+
     const lista = getStoredCandidaturas();
     const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
-    if (index === -1) throw new Error('Candidatura não encontrada');
+
+    if (itemServidor) {
+      if (index >= 0) {
+        lista[index] = itemServidor;
+      } else {
+        lista.unshift(itemServidor);
+      }
+      saveStoredCandidaturas(lista);
+      return itemServidor;
+    }
+
+    if (index === -1) {
+      throw new Error(apiError?.message || 'Candidatura não encontrada');
+    }
 
     const item = { ...lista[index] };
     const estadoAnterior = item.estado;
@@ -896,23 +946,47 @@ export const candidaturaService = {
 
     lista[index] = item;
     saveStoredCandidaturas(lista);
-
-    try {
-      await api.patch(`/candidaturas/${id}/estado`, {
-        estado: novoEstado,
-        observacao,
-        adminNome
-      });
-    } catch (_) {}
-
     return item;
   },
 
   // Validar ou rejeitar comprovativo de pagamento
   async atualizarEstadoPagamento(id, novoEstadoPagamento, observacao = '', adminNome = 'Administrador') {
+    let itemServidor = null;
+    let apiError = null;
+
+    try {
+      const res = await api.patch(`/candidaturas/${id}/pagamento`, {
+        estadoPagamento: novoEstadoPagamento,
+        observacao,
+        adminNome
+      });
+      if (res && res.dados) {
+        itemServidor = {
+          ...res.dados,
+          id: res.dados.id || res.dados._id || res.dados.numeroCandidatura
+        };
+      }
+    } catch (err) {
+      apiError = err;
+      console.warn('[candidaturaService] Aviso na API ao atualizar pagamento:', err.message);
+    }
+
     const lista = getStoredCandidaturas();
     const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
-    if (index === -1) throw new Error('Candidatura não encontrada');
+
+    if (itemServidor) {
+      if (index >= 0) {
+        lista[index] = itemServidor;
+      } else {
+        lista.unshift(itemServidor);
+      }
+      saveStoredCandidaturas(lista);
+      return itemServidor;
+    }
+
+    if (index === -1) {
+      throw new Error(apiError?.message || 'Candidatura não encontrada');
+    }
 
     const item = { ...lista[index] };
     const estadoAnterior = item.estadoPagamento;
@@ -926,22 +1000,12 @@ export const candidaturaService = {
       observacao: observacao || `Pagamento atualizado para ${novoEstadoPagamento}.`
     });
 
-    // Se o pagamento for validado e a candidatura estiver aguardando validação de pagamento, atualizar
     if (novoEstadoPagamento === 'Validado' && item.estado === 'A aguardar validação de pagamento') {
       item.estado = 'Em análise';
     }
 
     lista[index] = item;
     saveStoredCandidaturas(lista);
-
-    try {
-      await api.patch(`/candidaturas/${id}/pagamento`, {
-        estadoPagamento: novoEstadoPagamento,
-        observacao,
-        adminNome
-      });
-    } catch (_) {}
-
     return item;
   },
 
@@ -962,9 +1026,38 @@ export const candidaturaService = {
 
   // Atualizar dados completos da candidatura (edição pelo Administrador)
   async atualizarDadosCompletos(id, novosDados, adminNome = 'Administrador') {
+    let itemServidor = null;
+    let apiError = null;
+
+    try {
+      const res = await api.put(`/candidaturas/${id}`, { ...novosDados, adminNome });
+      if (res && res.dados) {
+        itemServidor = {
+          ...res.dados,
+          id: res.dados.id || res.dados._id || res.dados.numeroCandidatura
+        };
+      }
+    } catch (err) {
+      apiError = err;
+      console.warn('[candidaturaService] Aviso na API ao atualizar dados:', err.message);
+    }
+
     const lista = getStoredCandidaturas();
     const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
-    if (index === -1) throw new Error('Candidatura não encontrada');
+
+    if (itemServidor) {
+      if (index >= 0) {
+        lista[index] = itemServidor;
+      } else {
+        lista.unshift(itemServidor);
+      }
+      saveStoredCandidaturas(lista);
+      return itemServidor;
+    }
+
+    if (index === -1) {
+      throw new Error(apiError?.message || 'Candidatura não encontrada');
+    }
 
     const item = { ...lista[index] };
 
@@ -1020,19 +1113,46 @@ export const candidaturaService = {
 
     lista[index] = item;
     saveStoredCandidaturas(lista);
-
-    try {
-      await api.put(`/candidaturas/${id}`, item);
-    } catch (_) {}
-
     return item;
   },
 
   // Confirmar pré-inscrição e gerar recibo oficial
   async confirmarPreInscricao(id, observacao = '', adminNome = 'Administrador') {
+    let itemServidor = null;
+    let apiError = null;
+
+    try {
+      const res = await api.post(`/candidaturas/${id}/confirmar`, {
+        observacao,
+        adminNome
+      });
+      if (res && res.dados) {
+        itemServidor = {
+          ...res.dados,
+          id: res.dados.id || res.dados._id || res.dados.numeroCandidatura
+        };
+      }
+    } catch (err) {
+      apiError = err;
+      console.warn('[candidaturaService] Aviso na API ao confirmar pré-inscrição:', err.message);
+    }
+
     const lista = getStoredCandidaturas();
     const index = lista.findIndex(c => c.id === id || c._id === id || c.numeroCandidatura === id);
-    if (index === -1) throw new Error('Candidatura não encontrada');
+
+    if (itemServidor) {
+      if (index >= 0) {
+        lista[index] = itemServidor;
+      } else {
+        lista.unshift(itemServidor);
+      }
+      saveStoredCandidaturas(lista);
+      return itemServidor;
+    }
+
+    if (index === -1) {
+      throw new Error(apiError?.message || 'Candidatura não encontrada');
+    }
 
     const item = { ...lista[index] };
     item.estado = 'Aprovada';
@@ -1060,15 +1180,6 @@ export const candidaturaService = {
 
     lista[index] = item;
     saveStoredCandidaturas(lista);
-
-    try {
-      await api.post(`/candidaturas/${id}/confirmar`, {
-        recibo: item.recibo,
-        observacao,
-        adminNome
-      });
-    } catch (_) {}
-
     return item;
   },
 
