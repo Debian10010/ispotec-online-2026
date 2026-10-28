@@ -450,7 +450,7 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
               <td>
                 <strong>Taxa Oficial de Pré-Inscrição &amp; Processamento de Candidatura</strong>
                 <div style={{ fontSize: '7.5pt', color: '#64748b', marginTop: '2px' }}>
-                  Comprovativo bancário validado e verificado pelos Serviços Financeiros do ISPOTEC.
+                  Liquidado no BCI / ISPOTEC (Sujeito a IVA de 5%) • ${da.grau === 'Licenciatura' ? 'Conta: 22076375610001 (NIB: 0008 0000 20763756101 13)' : 'Conta: 22076375610002 (NIB: 0008 0000 20763756102 10)'} • Comprovativo validado pelos Serviços Financeiros.
                 </div>
               </td>
               <td>2027</td>
@@ -488,7 +488,7 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
             Código de Confirmação: <strong>{codigoAutenticacao}</strong> • Processo: <strong>{candidatura.numeroCandidatura}</strong>
           </div>
           <div style={{ marginTop: '2px', fontSize: '7pt', color: '#64748b' }}>
-            A autenticidade deste recibo pode ser verificada a qualquer momento acedendo a ispotec-online.vercel.app/consultar-candidatura
+            O Director Geral: Prof. Dr. Jacob Massuanganhe (Pós-Doutor em Direito) • Verificação em ispotec-online.vercel.app/consultar-candidatura
           </div>
         </div>
 

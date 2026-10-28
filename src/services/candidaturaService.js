@@ -38,6 +38,60 @@ export const PROVINCIAS_MOCAMBIQUE = [
   'Niassa'
 ];
 
+export const DADOS_BANCARIOS_ISPOTEC = {
+  instituicao: 'INSTITUTO SUPERIOR POLITÉCNICO E DE TECNOLOGIAS',
+  sigla: 'ISPOTEC',
+  edital: 'EDITAL 2027',
+  banco: 'BCI (Banco Comercial e de Investimentos)',
+  titular: 'ISPOTEC',
+  iva: 'Sujeito a IVA de 5%',
+  licenciatura: {
+    conta: '22076375610001',
+    nib: '0008 0000 20763756101 13',
+    descricao: 'Para Cursos de Licenciatura',
+    matricula: 4000
+  },
+  posGraduacaoEMestrado: {
+    conta: '22076375610002',
+    nib: '0008 0000 20763756102 10',
+    descricao: 'Para Mestrado, Pós-graduação e Especialização',
+    taxas: {
+      mestrado: { matricula: 10000, propina: 10000 },
+      posGraduacao: { matricula: 5000, propina: 5000 },
+      especializacao: { matricula: 4000, propina: 4500 }
+    }
+  },
+  contactos: {
+    endereco: 'Rua da Mozal, 5354 | Matola-Rio | Maputo',
+    telefones: ['878787442', '879 6666', '873045610'],
+    email: 'ispotec.politecnica@gmail.com',
+    site: 'www.ispotec.ac.mz',
+    diretorGeral: 'Prof. Dr. Jacob Massuanganhe (Pós-Doutor em Direito)'
+  }
+};
+
+export function obterDadosBancarios(grau = '') {
+  const g = (grau || '').toLowerCase();
+  if (g.includes('licenciatura')) {
+    return {
+      banco: 'BCI / ISPOTEC',
+      tipo: 'Licenciatura',
+      conta: '22076375610001',
+      nib: '0008 0000 20763756101 13',
+      iva: 'Sujeito a IVA de 5%',
+      titular: 'ISPOTEC'
+    };
+  }
+  return {
+    banco: 'BCI / ISPOTEC',
+    tipo: 'Mestrado, Pós-graduação e Especialização',
+    conta: '22076375610002',
+    nib: '0008 0000 20763756102 10',
+    iva: 'Sujeito a IVA de 5%',
+    titular: 'ISPOTEC'
+  };
+}
+
 export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
   // 1. Mestrado
   {
@@ -46,7 +100,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     nome: 'Mestrado em Saúde Pública',
     duracao: '2 anos, com estágios',
     propinaMensal: 10000,
-    matricula: 5000,
+    matricula: 10000,
     regimes: ['Laboral', 'Pós-laboral'],
     modalidades: ['Semi-presencial', 'Distância (Online)'],
     requisitos: 'Licenciatura em Ciências da Saúde, Ciências Biológicas ou áreas afins',
@@ -149,7 +203,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Ciências da Saúde e Clínicas',
     nome: 'Pós-Graduação em Enfermagem Médica e Práticas Clínicas',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -164,7 +218,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Ciências da Saúde e Clínicas',
     nome: 'Pós-Graduação em Saúde Integrativa e Terapia Biopsicossocial',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -179,7 +233,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Ciências da Saúde e Clínicas',
     nome: 'Pós-Graduação em Enfermagem Obstétrica e Pediátrica',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -194,7 +248,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Ciências da Saúde e Clínicas',
     nome: 'Pós-Graduação em Ciências da Saúde e Doenças Tropicais',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -209,7 +263,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Ciências da Saúde e Clínicas',
     nome: 'Pós-Graduação em Saúde Integrativa e Doenças Crónicas',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -226,7 +280,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Administração e Ciências Jurídicas',
     nome: 'Pós-Graduação em Direito do Trabalho e Processo Laboral',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -241,7 +295,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Administração e Ciências Jurídicas',
     nome: 'Pós-Graduação em Direito Civil e Processual Civil',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -256,7 +310,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Administração e Ciências Jurídicas',
     nome: 'Pós-Graduação em Direito Penal e Processual Penal',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -271,7 +325,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Administração e Ciências Jurídicas',
     nome: 'Pós-Graduação em Direito Administrativo e Fiscal',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -286,7 +340,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Administração e Ciências Jurídicas',
     nome: 'Pós-Graduação em Mediação e Arbitragem',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -301,7 +355,7 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     area: 'Administração e Ciências Jurídicas',
     nome: 'Pós-Graduação em Administração e Inteligência Estratégica',
     duracao: '8 meses',
-    propinaMensal: 7000,
+    propinaMensal: 5000,
     matricula: 5000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)'],
@@ -317,8 +371,8 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     grau: 'Especialização',
     nome: 'Especialização em Pedagogia, Didática e Ensino a Distância',
     duracao: '6 meses',
-    propinaMensal: 5000,
-    matricula: 3000,
+    propinaMensal: 4500,
+    matricula: 4000,
     regimes: ['Pós-laboral', 'Laboral'],
     modalidades: ['Distância (Online)', 'Semi-presencial'],
     requisitos: 'Docentes e profissionais do ensino ou formação técnica',
@@ -331,8 +385,8 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     grau: 'Especialização',
     nome: 'Especialização em Planificação e Supervisão Pedagógica',
     duracao: '6 meses',
-    propinaMensal: 5000,
-    matricula: 3000,
+    propinaMensal: 4500,
+    matricula: 4000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)', 'Semi-presencial'],
     requisitos: 'Licenciatura ou Formação em Educação / Gestão Escolar',
@@ -345,8 +399,8 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     grau: 'Especialização',
     nome: 'Especialização em Psicoterapia e Saúde Ocupacional',
     duracao: '6 meses',
-    propinaMensal: 5000,
-    matricula: 3000,
+    propinaMensal: 4500,
+    matricula: 4000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)', 'Semi-presencial'],
     requisitos: 'Profissionais de Saúde, Psicologia e Segurança no Trabalho',
@@ -359,8 +413,8 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     grau: 'Especialização',
     nome: 'Especialização em Enfermagem Diabética e Nutricional',
     duracao: '6 meses',
-    propinaMensal: 5000,
-    matricula: 3000,
+    propinaMensal: 4500,
+    matricula: 4000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)', 'Semi-presencial'],
     requisitos: 'Profissionais de Enfermagem e Nutrição',
@@ -373,8 +427,8 @@ export const OFERTA_FORMATIVA_ISPOTEC_2027 = [
     grau: 'Especialização',
     nome: 'Especialização em Enfermagem de Cuidados Domiciliários e Reabilitação',
     duracao: '6 meses',
-    propinaMensal: 5000,
-    matricula: 3000,
+    propinaMensal: 4500,
+    matricula: 4000,
     regimes: ['Pós-laboral'],
     modalidades: ['Distância (Online)', 'Semi-presencial'],
     requisitos: 'Profissionais de Enfermagem, Fisioterapia ou Cuidadores',
@@ -635,7 +689,7 @@ function getStoredCandidaturas() {
         grau: 'Pós-graduação',
         regime: 'Pós-laboral',
         modalidade: 'Distância (Online)',
-        propinaMensal: 7000,
+        propinaMensal: 5000,
         matricula: 5000
       },
       documentos: {
@@ -1307,6 +1361,7 @@ export const candidaturaService = {
       `🎓 *Curso:* ${curso}\n` +
       `🏛️ *Grau:* ${grau} | *Regime:* ${regime} | *Modalidade:* ${modalidade}\n` +
       `💰 *Taxa de Inscrição:* ${Number(valor).toLocaleString('pt-MZ')} MT — *PAGO E VALIDADO* ✅\n` +
+      `🏦 *Banco BCI:* ${grau.includes('Licenciatura') ? 'Conta: 22076375610001 | NIB: 0008 0000 20763756101 13' : 'Conta: 22076375610002 | NIB: 0008 0000 20763756102 10'} (Sujeito a IVA de 5%)\n` +
       `📅 *Data de Emissão:* ${dataConf}\n\n` +
       `Consulte o seu processo e descarregue o seu Recibo Oficial em PDF através do portal oficial:\n` +
       `👉 https://ispotec-online.vercel.app/consultar-candidatura?codigo=${encodeURIComponent(num)}\n\n` +

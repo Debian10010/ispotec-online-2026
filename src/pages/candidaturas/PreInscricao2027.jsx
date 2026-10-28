@@ -990,24 +990,129 @@ export default function PreInscricao2027() {
             Anexe os documentos necessários (JPG, PNG ou PDF, até 8MB por ficheiro).
           </p>
 
-          {/* INSTRUÇÕES BANCÁRIAS DO ISPOTEC */}
+          {/* INSTRUÇÕES BANCÁRIAS DO ISPOTEC - EDITAL 2027 */}
           <div style={{
-            background: '#f0fdf4',
-            border: '1.5px solid #86efac',
-            borderRadius: '10px',
-            padding: '1.25rem',
-            marginBottom: '1.75rem'
+            background: '#f8fafc',
+            border: '2px solid #003366',
+            borderRadius: '12px',
+            padding: '1.25rem 1.5rem',
+            marginBottom: '1.75rem',
+            boxShadow: '0 4px 14px rgba(0, 51, 102, 0.08)'
           }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: '#166534', fontSize: '0.95rem', fontWeight: 800 }}>
-              🏦 Dados para Pagamento da Taxa de Pré-Inscrição ({cursoAtivo?.matricula.toLocaleString('pt-MZ')} MT)
-            </h4>
-            <div style={{ fontSize: '0.84rem', color: '#166534', lineHeight: 1.5 }}>
-              Efectue o depósito ou transferência bancária e anexe a foto ou ficheiro PDF do recibo emitido pelo banco:
-              <ul style={{ margin: '0.4rem 0 0 1.2rem', padding: 0 }}>
-                <li><strong>Millennium BIM:</strong> Conta n.º <code>0000000000</code> • NIB: <code>000100000000000000000</code></li>
-                <li><strong>BCI / M-Pesa / E-Mola:</strong> Consulte a Secretaria Geral pelos telefones (+258) 878 787 442 / 877 906 666</li>
-                <li><strong>Beneficiário:</strong> ISPOTEC — Instituto Superior Politécnico e de Tecnologias</li>
-              </ul>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem', borderBottom: '1.5px solid #e2e8f0', paddingBottom: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ fontSize: '1.6rem' }}>🏦</span>
+                <div>
+                  <h4 style={{ margin: 0, color: '#003366', fontSize: '1rem', fontWeight: 800 }}>
+                    Contas Oficiais para Pagamento — BCI / ISPOTEC
+                  </h4>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                    Instituto Superior Politécnico e de Tecnologias • Sujeito a IVA de 5%
+                  </span>
+                </div>
+              </div>
+              <div style={{ background: '#dbeafe', color: '#1e40af', padding: '0.35rem 0.85rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800 }}>
+                Taxa a Pagar: {cursoAtivo?.matricula ? Number(cursoAtivo.matricula).toLocaleString('pt-MZ') : '4.000'} MT
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.82rem', color: '#334155', margin: '0 0 1rem 0', lineHeight: 1.5 }}>
+              Efectue o depósito ou transferência bancária no <strong>BCI (Banco Comercial e de Investimentos)</strong> para a conta correspondente ao seu nível de formação e anexe o comprovativo abaixo:
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              {/* CONTA 1: LICENCIATURAS */}
+              <div style={{
+                background: cursoAtivo?.grau === 'Licenciatura' ? '#f0fdf4' : '#ffffff',
+                border: cursoAtivo?.grau === 'Licenciatura' ? '2px solid #16a34a' : '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '0.9rem 1rem',
+                position: 'relative'
+              }}>
+                {cursoAtivo?.grau === 'Licenciatura' && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '12px',
+                    background: '#16a34a',
+                    color: 'white',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    textTransform: 'uppercase'
+                  }}>
+                    ✓ Sua Opção (Licenciatura)
+                  </span>
+                )}
+                <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#003366', marginBottom: '4px' }}>
+                  Para Cursos de Licenciatura
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px' }}>
+                  Banco: <strong>BCI</strong> • Titular: <strong>ISPOTEC</strong>
+                </div>
+                <div style={{ fontSize: '0.85rem', marginBottom: '4px' }}>
+                  <span style={{ color: '#475569', fontWeight: 600 }}>N.º da Conta: </span>
+                  <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                    22076375610001
+                  </code>
+                </div>
+                <div style={{ fontSize: '0.85rem' }}>
+                  <span style={{ color: '#475569', fontWeight: 600 }}>NIB: </span>
+                  <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.84rem' }}>
+                    0008 0000 20763756101 13
+                  </code>
+                </div>
+              </div>
+
+              {/* CONTA 2: MESTRADO, PÓS-GRADUAÇÃO E ESPECIALIZAÇÃO */}
+              <div style={{
+                background: (cursoAtivo?.grau === 'Mestrado' || cursoAtivo?.grau === 'Pós-graduação' || cursoAtivo?.grau === 'Especialização') ? '#f0fdf4' : '#ffffff',
+                border: (cursoAtivo?.grau === 'Mestrado' || cursoAtivo?.grau === 'Pós-graduação' || cursoAtivo?.grau === 'Especialização') ? '2px solid #16a34a' : '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '0.9rem 1rem',
+                position: 'relative'
+              }}>
+                {(cursoAtivo?.grau === 'Mestrado' || cursoAtivo?.grau === 'Pós-graduação' || cursoAtivo?.grau === 'Especialização') && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '12px',
+                    background: '#16a34a',
+                    color: 'white',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    textTransform: 'uppercase'
+                  }}>
+                    ✓ Sua Opção ({cursoAtivo?.grau})
+                  </span>
+                )}
+                <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#003366', marginBottom: '4px' }}>
+                  Para Mestrado, Pós-graduação e Especialização
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px' }}>
+                  Banco: <strong>BCI</strong> • Titular: <strong>ISPOTEC</strong>
+                </div>
+                <div style={{ fontSize: '0.85rem', marginBottom: '4px' }}>
+                  <span style={{ color: '#475569', fontWeight: 600 }}>N.º da Conta: </span>
+                  <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                    22076375610002
+                  </code>
+                </div>
+                <div style={{ fontSize: '0.85rem' }}>
+                  <span style={{ color: '#475569', fontWeight: 600 }}>NIB: </span>
+                  <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.84rem' }}>
+                    0008 0000 20763756102 10
+                  </code>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '0.9rem', fontSize: '0.76rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.6rem' }}>
+              <span>📍 Rua da Mozal, 5354, Matola-Rio • Telefones: 878787442 / 879 6666 / 873045610</span>
+              <span>Diretor Geral: Prof. Dr. Jacob Massuanganhe</span>
             </div>
           </div>
 

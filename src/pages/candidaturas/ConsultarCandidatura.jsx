@@ -349,6 +349,43 @@ export default function ConsultarCandidatura() {
             </div>
           </div>
 
+          {/* SE O PAGAMENTO ESTIVER PENDENTE: MOSTRAR CONTAS BANCÁRIAS DO EDITAL 2027 */}
+          {candidatura.estadoPagamento === 'Pendente de verificação' && (
+            <div style={{
+              background: '#f8fafc',
+              border: '2px solid #003366',
+              borderRadius: '10px',
+              padding: '1.25rem',
+              marginBottom: '1.5rem',
+              boxShadow: '0 2px 8px rgba(0, 51, 102, 0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '1.3rem' }}>🏦</span>
+                <div style={{ fontWeight: 800, color: '#003366', fontSize: '0.95rem' }}>
+                  Contas BCI / ISPOTEC para Liquidação da Taxa ({Number(candidatura.dadosAcademicos?.matricula || 4000).toLocaleString('pt-MZ')} MT)
+                </div>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#475569', margin: '0 0 0.75rem 0' }}>
+                Caso ainda não tenha regularizado ou necessite reenviar o comprovativo:
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem', fontSize: '0.82rem' }}>
+                <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '0.75rem' }}>
+                  <div style={{ fontWeight: 700, color: '#003366' }}>Licenciaturas</div>
+                  <div>Conta: <code>22076375610001</code></div>
+                  <div>NIB: <code>0008 0000 20763756101 13</code></div>
+                </div>
+                <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '0.75rem' }}>
+                  <div style={{ fontWeight: 700, color: '#003366' }}>Mestrado, Pós-graduação e Especialização</div>
+                  <div>N.º Conta: <code>22076375610002</code></div>
+                  <div>NIB: <code>0008 0000 20763756102 10</code></div>
+                </div>
+              </div>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: '#64748b' }}>
+                Banco: BCI • Titular: ISPOTEC (Sujeito a IVA de 5%) • Telefones: 878787442 / 879 6666 / 873045610
+              </div>
+            </div>
+          )}
+
           {/* BANNER DE PRÉ-INSCRIÇÃO CONFIRMADA & RECIBO DISPONÍVEL */}
           {(candidatura.estado === 'Aprovada' || candidatura.estadoPagamento === 'Validado') && (
             <div style={{

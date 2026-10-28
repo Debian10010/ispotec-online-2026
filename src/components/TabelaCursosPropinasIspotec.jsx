@@ -27,6 +27,8 @@ export const DADOS_ISPOTEC_2027 = {
     ]
   },
   posGraduacoes: {
+    propinaMensal: '5.000 Mt/mês',
+    inscricaoMatricula: '5.000 Mt',
     titulo: 'Pós-Graduações (8 meses, Online, Pós-laboral)',
     duracao: '8 meses',
     modalidade: 'Online',
@@ -58,6 +60,8 @@ export const DADOS_ISPOTEC_2027 = {
     ]
   },
   especializacoes: {
+    propinaMensal: '4.500 Mt/mês',
+    inscricaoMatricula: '4.000 Mt',
     titulo: 'Cursos de Especialização',
     icone: '⭐',
     cursos: [
@@ -598,6 +602,90 @@ export default function TabelaCursosPropinasIspotec() {
           )}
         </div>
       )}
+
+      {/* SEÇÃO OFICIAL DE DADOS BANCÁRIOS - EDITAL 2027 */}
+      <div style={{
+        background: '#f8fafc',
+        border: '2px solid #003366',
+        borderRadius: 'var(--isp-radius-md)',
+        padding: '1.25rem 1.5rem',
+        marginBottom: '1.5rem',
+        boxShadow: '0 4px 12px rgba(0, 51, 102, 0.06)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem', borderBottom: '1.5px solid #e2e8f0', paddingBottom: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🏦</span>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003366' }}>
+                Contas Bancárias Oficiais para Pagamento de Propinas &amp; Taxas — BCI / ISPOTEC
+              </h3>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                Instituto Superior Politécnico e de Tecnologias • Sujeito a IVA de 5%
+              </span>
+            </div>
+          </div>
+          <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #86efac', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+            Ano Lectivo 2027
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+          {/* CONTA LICENCIATURA */}
+          <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '8px', padding: '0.85rem 1rem' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#003366', marginBottom: '4px' }}>
+              🎓 Para Cursos de Licenciatura
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px' }}>
+              Banco: <strong>BCI</strong> • Titular: <strong>ISPOTEC</strong>
+            </div>
+            <div style={{ fontSize: '0.85rem', marginBottom: '4px' }}>
+              <span style={{ color: '#475569', fontWeight: 600 }}>N.º da Conta: </span>
+              <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                22076375610001
+              </code>
+            </div>
+            <div style={{ fontSize: '0.85rem' }}>
+              <span style={{ color: '#475569', fontWeight: 600 }}>NIB: </span>
+              <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.85rem' }}>
+                0008 0000 20763756101 13
+              </code>
+            </div>
+            <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#059669', fontWeight: 700 }}>
+              Inscrição &amp; Matrícula: 4.000 MT para todos os cursos
+            </div>
+          </div>
+
+          {/* CONTA MESTRADO, PÓS-GRADUAÇÃO E ESPECIALIZAÇÃO */}
+          <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '8px', padding: '0.85rem 1rem' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#003366', marginBottom: '4px' }}>
+              🔬 Para Mestrado, Pós-graduação e Especialização
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px' }}>
+              Banco: <strong>BCI</strong> • Titular: <strong>ISPOTEC</strong>
+            </div>
+            <div style={{ fontSize: '0.85rem', marginBottom: '4px' }}>
+              <span style={{ color: '#475569', fontWeight: 600 }}>N.º da Conta: </span>
+              <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>
+                22076375610002
+              </code>
+            </div>
+            <div style={{ fontSize: '0.85rem' }}>
+              <span style={{ color: '#475569', fontWeight: 600 }}>NIB: </span>
+              <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, color: '#0f172a', fontSize: '0.85rem' }}>
+                0008 0000 20763756102 10
+              </code>
+            </div>
+            <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#0284c7', fontWeight: 700 }}>
+              Mestrado: 10.000 MT | Pós-Grad.: 5.000 MT | Espec.: 4.000 MT
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '0.85rem', fontSize: '0.74rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.5rem' }}>
+          <span>Diretor Geral: Prof. Dr. Jacob Massuanganhe (Pós-Doutor em Direito)</span>
+          <span>Email: ispotec.politecnica@gmail.com • Web: www.ispotec.ac.mz</span>
+        </div>
+      </div>
 
       {/* Bottom Bar: Official Contacts */}
       <div className="icp-contact-bar">
