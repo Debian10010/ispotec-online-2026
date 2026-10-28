@@ -745,10 +745,10 @@ export default function GestaoPreInscricoes() {
                                 <button
                                   type="button"
                                   className="btn btn-sm btn-success"
-                                  title="Baixar Recibo de Pagamento (PDF)"
+                                  title="🖨️ Descarregar Recibo em PDF / Imprimir"
                                   onClick={() => setCandidaturaParaRecibo(c)}
                                 >
-                                  🧾 Recibo
+                                  🖨️ Recibo
                                 </button>
                                 <a
                                   href={candidaturaService.gerarLinkWhatsApp(c)}
@@ -1020,8 +1020,9 @@ export default function GestaoPreInscricoes() {
                       className="btn btn-sm btn-success"
                       style={{ fontWeight: 800 }}
                       onClick={() => setCandidaturaParaRecibo(candidaturaSelecionada)}
+                      title="🖨️ Descarregar Recibo em PDF / Imprimir"
                     >
-                      🧾 Descarregar Recibo (PDF)
+                      🖨️ Descarregar Recibo em PDF / Imprimir
                     </button>
                     <a
                       href={candidaturaService.gerarLinkWhatsApp(candidaturaSelecionada)}
