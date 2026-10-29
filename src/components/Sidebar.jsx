@@ -300,6 +300,18 @@ export default function Sidebar({
             <span className="sidebar-item-label">Consultor Inteligente do ISPOTEC ↗</span>
           </a>
 
+          <a
+            href="https://cdn.botpress.cloud/webchat/v3.5/shareable.html?configUrl=https://files.bpcontent.cloud/2026/01/25/21/20260125215138-GUF14096.json"
+            target="_blank"
+            rel="noreferrer"
+            className="sidebar-nav-item"
+            style={{ color: '#0ea5e9' }}
+            data-tooltip="Chatbot ISPOTEC (Botpress)"
+          >
+            <span className="sidebar-item-icon">💬</span>
+            <span className="sidebar-item-label">Chatbot ISPOTEC ↗</span>
+          </a>
+
           <button
             type="button"
             className="sidebar-nav-item"
