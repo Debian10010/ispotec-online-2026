@@ -308,10 +308,10 @@ export default function Sidebar({
             rel="noreferrer"
             className="sidebar-nav-item"
             style={{ color: '#0ea5e9' }}
-            data-tooltip="Chatbot ISPOTEC (Botpress)"
+            data-tooltip={isIfoptec ? "Chatbot (Botpress)" : "Chatbot ISPOTEC (Botpress)"}
           >
             <span className="sidebar-item-icon">💬</span>
-            <span className="sidebar-item-label">Chatbot ISPOTEC ↗</span>
+            <span className="sidebar-item-label">{isIfoptec ? 'Chatbot ↗' : 'Chatbot ISPOTEC ↗'}</span>
           </a>
 
           <button
