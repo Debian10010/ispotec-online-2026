@@ -288,19 +288,19 @@ export default function Sidebar({
             <span className="sidebar-item-label">Assistente Pedagógico</span>
           </Link>
 
-          {!isIfoptec && (
-            <a
-              href="https://asistente-ispotec.vercel.app/"
-              target="_blank"
-              rel="noreferrer"
-              className="sidebar-nav-item"
-              style={{ color: '#4f46e5' }}
-              data-tooltip="Consultor Inteligente do ISPOTEC (Web Externa)"
-            >
-              <span className="sidebar-item-icon">🌐</span>
-              <span className="sidebar-item-label">Consultor Inteligente do ISPOTEC ↗</span>
-            </a>
-          )}
+          <a
+            href="https://asistente-ispotec.vercel.app/"
+            target="_blank"
+            rel="noreferrer"
+            className="sidebar-nav-item"
+            style={{ color: '#4f46e5' }}
+            data-tooltip={isIfoptec ? 'Consultor Inteligente' : 'Consultor Inteligente do ISPOTEC (Web Externa)'}
+          >
+            <span className="sidebar-item-icon">🌐</span>
+            <span className="sidebar-item-label">
+              {isIfoptec ? 'Consultor Inteligente ↗' : 'Consultor Inteligente do ISPOTEC ↗'}
+            </span>
+          </a>
 
           <a
             href="https://cdn.botpress.cloud/webchat/v3.5/shareable.html?configUrl=https://files.bpcontent.cloud/2026/01/25/21/20260125215138-GUF14096.json"
