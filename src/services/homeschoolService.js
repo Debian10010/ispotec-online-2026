@@ -305,6 +305,11 @@ export const POLOS_IFOPTEC = [
     nome: 'Polo Matola-Rio',
     endereco: 'Rua da Mozal',
     telefones: ['840726974', '870726974', '869700700']
+  },
+  {
+    nome: 'Polo Marracuene',
+    endereco: 'Rua da Facim — Edifício Tanga | Ricatla',
+    telefones: ['869700700']
   }
 ];
 

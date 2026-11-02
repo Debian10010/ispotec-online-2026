@@ -891,10 +891,10 @@ export default function IfoptecHome() {
             </div>
           </div>
 
-          {/* Polo Matola-Rio Box */}
+          {/* Polos IFOPTEC Box */}
           <div className="info-box">
             <h3 className="info-box-title">
-              <span>📍</span> Polo Oficial IFOPTEC (Matola-Rio)
+              <span>📍</span> Polos Oficiais IFOPTEC
             </h3>
             <p style={{ fontSize: '0.86rem', color: '#64748b', marginBottom: '1.25rem' }}>
               Infraestrutura pedagógica equipada com salas práticas e gabinetes de enfermagem:

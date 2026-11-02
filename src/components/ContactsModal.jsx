@@ -149,7 +149,10 @@ export default function ContactsModal({ isOpen, onClose }) {
                   <div className="contact-tile-info">
                     <div className="contact-tile-label">Polo de Atendimento &amp; Práticas</div>
                     <div className="contact-tile-value" style={{ fontSize: '0.85rem' }}>
-                      Polo Matola-Rio: Rua da Mozal
+                      <strong>Polo Matola-Rio:</strong> Rua da Mozal
+                    </div>
+                    <div className="contact-tile-value" style={{ fontSize: '0.85rem', marginTop: '0.3rem' }}>
+                      <strong>Polo Marracuene:</strong> Rua da Facim — Edifício Tanga | Ricatla
                     </div>
                   </div>
                 </div>
