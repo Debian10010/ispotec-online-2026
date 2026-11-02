@@ -33,6 +33,16 @@ export const CURSOS_IFOPTEC = [
   'Técnico de Saúde Preventiva - Agente Polivalente de Saúde'
 ];
 
+// Cursos Técnicos Médios Oficiais IFOPTEC
+export const CURSOS_TECNICOS_MEDIOS_IFOPTEC = [
+  'Técnico de Medicina Geral',
+  'Técnico de Enfermagem Geral',
+  'Enfermagem de Saúde Materno e Infantil',
+  'Técnico de Farmácia',
+  'Gestão e Administração Hospitalar',
+  'Técnico de Saúde Preventiva - Agente Polivalente de Saúde'
+];
+
 export const CURSOS_IFOPTEC_CATALOGO = [
   {
     id: 'medicina-geral',
@@ -668,6 +678,284 @@ export const homeSchoolService = {
       console.warn('[homeSchoolService.getSalas backend fallback]', e.message);
     }
 
+    // Salas padrão para os Cursos Técnicos Médios do IFOPTEC
+    const salasDefaultIfoptec = [
+      {
+        id: 'sala-ifop-med-geral-2026',
+        nome: 'Semiologia Médica & Propedêutica Clínica — Turma 1',
+        curso: 'Técnico de Medicina Geral',
+        modulo: 'Semiologia e Propedêutica Médica',
+        disciplina: 'Semiologia e Propedêutica Médica',
+        docente: 'Dr. Alberto Machava',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'IFOP-TMG-2026',
+        instituicao: 'ifoptec',
+        nivel: 'Técnico Médio',
+        descricao: 'Ambiente virtual para discussão de casos clínicos, anamnese, propedêutica médica e condutas clínicas integradas em saúde.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-ifop-1'],
+        total_membros: 32,
+        ...defaultSalaConteudo,
+        planoAnalitico: {
+          unidadeCurricular: 'Semiologia e Propedêutica Médica',
+          cargaHoraria: '80 Horas (40h Teóricas + 40h Práticas Hospitalares)',
+          cronograma: 'Fevereiro a Junho de 2026',
+          objectivos: 'Capacitar os técnicos médios na realização de anamnese rigorosa, exame físico sistemático, reconhecimento de sinais patognomónicos e orientação de exames complementares.',
+          conteudos: [
+            'Unidade 1: Princípios de Anamnese, Relação Técnico-Paciente e Deontologia Médica',
+            'Unidade 2: Exame Físico Geral (Sinais Vitais, Estado Nutricional, Fácies e Postura)',
+            'Unidade 3: Propedêutica do Aparelho Respiratório e Cardiovascular',
+            'Unidade 4: Propedêutica do Abdómen, Aparelho Digestivo e Geniturinário',
+            'Unidade 5: Semiologia Neurológica Básica, Musculoesquelética e Raciocínio Clínico'
+          ],
+          competencias: [
+            'Conduzir anamnese completa e orientada para a queixa principal.',
+            'Executar com destreza inspeção, palpação, percussão e auscultação.',
+            'Formular hipóteses diagnósticas e plano de cuidados para centros de saúde.'
+          ],
+          metodologias: 'Aulas teóricas dialogadas, simulações de casos clínicos no AVA, resolução de vinhetas clínicas e estágio prático tutelado.',
+          avaliacao: '• 2 Testes Escritos de Semiologia (40%)\n• 4 Avaliações de Competências Clínicas Práticas (OSCE) (30%)\n• 1 Estudo de Caso Clínico Integrador (30%)',
+          bibliografia: '1. Porto, Celmo Celeno. Semiologia Médica. Guanabara Koogan.\n2. Bickley, Lynn S. Bates — Propedêutica Médica.\n3. Protocolos Nacionais Clínicos do Ministério da Saúde de Moçambique (MISAU).'
+        },
+        manuais: [
+          {
+            id: 'man-tmg-1',
+            titulo: 'Manual de Semiologia Clínica do Técnico Médio — IFOPTEC 2026',
+            descricao: 'Roteiro prático para exame físico por aparelhos e sistemas orgânicos.',
+            autor: 'Departamento de Ciências da Saúde — IFOPTEC',
+            data: '2026-02-15',
+            versao: 'v2.1',
+            ficheiro_nome: 'Manual_Semiologia_IFOPTEC_2026.pdf',
+            ficheiro_url: '#',
+            estado: 'Publicado',
+            tipo: 'PDF Oficial'
+          }
+        ]
+      },
+      {
+        id: 'sala-ifop-enf-geral-2026',
+        nome: 'Fundamentos de Enfermagem & Cuidados Clínicos',
+        curso: 'Técnico de Enfermagem Geral',
+        modulo: 'Fundamentos de Enfermagem',
+        disciplina: 'Fundamentos de Enfermagem',
+        docente: 'Enf.ª Ana Paula Tembe',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'IFOP-TEG-2026',
+        instituicao: 'ifoptec',
+        nivel: 'Técnico Médio',
+        descricao: 'Sala virtual para procedimentos de enfermagem, biossegurança, administração medicamentosa e cuidados integrais ao doente internado.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-ifop-2'],
+        total_membros: 30,
+        ...defaultSalaConteudo,
+        planoAnalitico: {
+          unidadeCurricular: 'Fundamentos de Enfermagem',
+          cargaHoraria: '75 Horas (35h Teóricas + 40h Práticas em Sala de Demonstração)',
+          cronograma: 'Fevereiro a Junho de 2026',
+          objectivos: 'Desenvolver competências técnicas e éticas para a prestação de cuidados de enfermagem básicos e especializados nos serviços de internamento e urgência.',
+          conteudos: [
+            'Unidade 1: Conceitos Fundamentais de Enfermagem, Humanização e Princípios Éticos',
+            'Unidade 2: Biossegurança, Controlo de Infeções Hospitalares e Lavagem das Mãos',
+            'Unidade 3: Vias de Administração de Medicamentos e Cálculo de Dosagens',
+            'Unidade 4: Tratamento de Feridas, Técnicas Assépticas de Pensos e Drenagens',
+            'Unidade 5: Cuidados Pré e Pós-Operatórios e Registos Clínicos de Enfermagem'
+          ],
+          competencias: [
+            'Executar técnicas assépticas e administração segura de medicação.',
+            'Monitorizar parâmetros vitais e reconhecer sinais de agravamento clínico.',
+            'Prestar assistência qualificada a doentes em regime de internamento.'
+          ],
+          metodologias: 'Aulas teóricas expositivas dialogadas, oficinas práticas de simulação em manequins e estágios clínicos.',
+          avaliacao: '• 2 Testes Teóricos de Fundamentos (40%)\n• 4 Demonstrações Práticas de Procedimentos (30%)\n• 1 Avaliação de Desempenho Clínico no Laboratório (30%)',
+          bibliografia: '1. Potter & Perry. Fundamentos de Enfermagem. Elsevier.\n2. Brunner & Suddarth. Tratado de Enfermagem Médico-Cirúrgica.\n3. Manual de Boas Práticas de Enfermagem — IFOPTEC.'
+        },
+        manuais: [
+          {
+            id: 'man-teg-1',
+            titulo: 'Guia de Procedimentos Práticos de Enfermagem — IFOPTEC 2026',
+            descricao: 'Técnicas assépticas, punção venosa, algaliação, sondagem nasogástrica e pensos estéreis.',
+            autor: 'Coordenação de Enfermagem — IFOPTEC',
+            data: '2026-02-15',
+            versao: 'v3.0',
+            ficheiro_nome: 'Guia_Procedimentos_Enfermagem_IFOPTEC.pdf',
+            ficheiro_url: '#',
+            estado: 'Publicado',
+            tipo: 'PDF Oficial'
+          }
+        ]
+      },
+      {
+        id: 'sala-ifop-smi-2026',
+        nome: 'Obstetrícia, Parto & Vigilância Pré-Natal',
+        curso: 'Enfermagem de Saúde Materno e Infantil',
+        modulo: 'Obstetrícia e Vigilância Pré-Natal',
+        disciplina: 'Obstetrícia e Vigilância Pré-Natal',
+        docente: 'Dra. Esperança Mondlane',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'IFOP-SMI-2026',
+        instituicao: 'ifoptec',
+        nivel: 'Técnico Médio',
+        descricao: 'Acompanhamento integral da gravidez, vigilância do bem-estar fetal, partograma, assistência humanizada ao parto e cuidados imediatos ao recém-nascido.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-ifop-3'],
+        total_membros: 28,
+        ...defaultSalaConteudo,
+        planoAnalitico: {
+          unidadeCurricular: 'Obstetrícia e Vigilância Pré-Natal',
+          cargaHoraria: '80 Horas (40h Teóricas + 40h Práticas em Maternidade)',
+          cronograma: 'Fevereiro a Junho de 2026',
+          objectivos: 'Capacitar as técnicas médias de SMI para vigilância pré-natal de qualidade, identificação precoce de riscos obstétricos e condução segura do parto normal.',
+          conteudos: [
+            'Unidade 1: Fisiologia da Reprodução, Fecundação e Desenvolvimento Fetal',
+            'Unidade 2: Consulta Pré-Natal Focada e Rastreio de Fatores de Risco',
+            'Unidade 3: Trabalho de Parto, Mecanismos do Parto e Utilização do Partograma',
+            'Unidade 4: Assistência Imediata ao Recém-Nascido e Reanimação Neonatal Básica',
+            'Unidade 5: Cuidados no Puerpério, Amamentação Exclusiva e Planeamento Familiar'
+          ],
+          competencias: [
+            'Realizar consultas pré-natais completas com interpretação de exames laboratoriais.',
+            'Preencher e interpretar o partograma para prevenção de trabalho de parto obstruído.',
+            'Garantir assistência humanizada ao binómio mãe-filho e promoção do aleitamento materno.'
+          ],
+          metodologias: 'Aulas teóricas, estudos de casos de morbimortalidade materna, práticas em simulador de parto e estágios em maternidade.',
+          avaliacao: '• 2 Testes Teóricos de Obstetrícia (40%)\n• 3 Avaliações Práticas de Partograma e Manejo de Parto (30%)\n• 1 Relatório de Estágio de Bloco de Parto (30%)',
+          bibliografia: '1. Manual de Cuidados Obstétricos Essenciais — MISAU / OMS.\n2. Rezende, Jorge de. Obstetrícia Fundamental.\n3. Protocolo de Prevenção da Transmissão Vertical (PTV) — Moçambique.'
+        }
+      },
+      {
+        id: 'sala-ifop-farmacia-2026',
+        nome: 'Farmacotécnica, Farmacologia & Dispensação',
+        curso: 'Técnico de Farmácia',
+        modulo: 'Farmacotécnica e Formas Farmacêuticas',
+        disciplina: 'Farmacotécnica e Formas Farmacêuticas',
+        docente: 'Dr. Farm. João Chissano',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'IFOP-TF-2026',
+        instituicao: 'ifoptec',
+        nivel: 'Técnico Médio',
+        descricao: 'Sala virtual para cálculo posológico, conservação de fármacos, cadeia de frio, manipulação e atendimento ao utente em farmácia.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-ifop-4'],
+        total_membros: 26,
+        ...defaultSalaConteudo,
+        planoAnalitico: {
+          unidadeCurricular: 'Farmacotécnica e Formas Farmacêuticas',
+          cargaHoraria: '70 Horas (35h Teóricas + 35h Práticas em Laboratório)',
+          cronograma: 'Fevereiro a Junho de 2026',
+          objectivos: 'Formar técnicos aptos a preparar formulações medicamentosas simples, gerir stocks e dispensar medicamentos com aconselhamento farmacoterapêutico correto.',
+          conteudos: [
+            'Unidade 1: Classificação das Formas Farmacêuticas (Sólidas, Líquidas e Semissólidas)',
+            'Unidade 2: Operações Farmacêuticas Básicas e Boas Práticas de Manipulação',
+            'Unidade 3: Cadeia de Frio, Armazenamento e Gestão de Prazos de Validade',
+            'Unidade 4: Interpretação de Receituário e Interações Medicamentosas Mais Frequentes',
+            'Unidade 5: Legislação Farmacêutica Nacional e Deontologia Profissional'
+          ],
+          competencias: [
+            'Preparar formulações farmacêuticas oficiais seguindo normas de biossegurança.',
+            'Dispensar fármacos garantindo a compreensão posológica por parte do paciente.',
+            'Gerir inventários e requisições de medicamentos essenciais pelo SIGLUS/MEDEX.'
+          ],
+          metodologias: 'Aulas expositivas dialogadas, resolução de problemas de cálculo de doses, práticas em bancada e gestão de farmácia simulada.',
+          avaliacao: '• 2 Testes Teóricos de Farmacotécnica (40%)\n• 4 Relatórios de Prática Laboratorial (30%)\n• 1 Simulação de Dispensação e Gestão de Stocks (30%)',
+          bibliografia: '1. Formulário Nacional de Medicamentos de Moçambique.\n2. Allen, Loyd V. Ansel: Formas Farmacêuticas e Sistemas de Liberação de Fármacos.\n3. Manual de Gestão Logística de Medicamentos — MISAU.'
+        }
+      },
+      {
+        id: 'sala-ifop-gestao-hosp-2026',
+        nome: 'Sistemas de Informação em Saúde (SIS) & Gestão Hospitalar',
+        curso: 'Gestão e Administração Hospitalar',
+        modulo: 'Sistemas de Informação em Saúde (SIS)',
+        disciplina: 'Sistemas de Informação em Saúde (SIS)',
+        docente: 'Msc. Carlos Mucavele',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'IFOP-GAH-2026',
+        instituicao: 'ifoptec',
+        nivel: 'Técnico Médio',
+        descricao: 'Administração hospitalar: gestão de admissões, arquivo clínico, faturamento médico, registos do SISMA e logística de insumos.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-ifop-5'],
+        total_membros: 22,
+        ...defaultSalaConteudo,
+        planoAnalitico: {
+          unidadeCurricular: 'Sistemas de Informação em Saúde (SIS)',
+          cargaHoraria: '64 Horas (32h Teóricas + 32h Práticas em Software)',
+          cronograma: 'Fevereiro a Junho de 2026',
+          objectivos: 'Capacitar os técnicos na utilização de ferramentas digitais de gestão em saúde, registo estatístico de dados clínicos e coordenação de serviços de apoio hospitalar.',
+          conteudos: [
+            'Unidade 1: Organização e Estrutura Funcional dos Hospitais e Centros de Saúde',
+            'Unidade 2: Módulos do SISMA (Sistema de Informação em Saúde para Monitoria e Avaliação)',
+            'Unidade 3: Gestão de Arquivos Clínicos, Confidencialidade e Processo do Paciente',
+            'Unidade 4: Faturação de Serviços Médicos, Seguros e Cobrança Hospitalar',
+            'Unidade 5: Cadeia de Aprovisionamento, Logística Hospitalar e Manutenção de Equipamentos'
+          ],
+          competencias: [
+            'Operar sistemas de registo e estatística hospitalar com acurácia.',
+            'Otimizar fluxos de atendimento de consultas, urgências e internamentos.',
+            'Elaborar relatórios gerenciais e indicadores de desempenho hospitalar.'
+          ],
+          metodologias: 'Estudo de casos administrativos, simulação de fluxos hospitalares em computador e elaboração de planos de melhoria da qualidade.',
+          avaliacao: '• 2 Testes Teóricos de Gestão Hospitalar (40%)\n• 4 Trabalhos Práticos de Análise de Indicadores de Saúde (30%)\n• 1 Plano de Gestão de Unidade Hospitalar (30%)',
+          bibliografia: '1. Manual de Procedimentos Administrativos Hospitalares — MISAU.\n2. Guia de Utilização do SISMA Moçambique.\n3. Vecina Neto, Gonzalo. Gestão em Saúde. Manole.'
+        }
+      },
+      {
+        id: 'sala-ifop-saude-prev-2026',
+        nome: 'Saúde Comunitária, Vigilância & Epidemiologia de Campo',
+        curso: 'Técnico de Saúde Preventiva - Agente Polivalente de Saúde',
+        modulo: 'Vigilância Epidemiológica',
+        disciplina: 'Vigilância Epidemiológica',
+        docente: 'Dr. Mateus Nhaca',
+        ano: '2026',
+        semestre: '1º Semestre',
+        codigo: 'IFOP-TSP-2026',
+        instituicao: 'ifoptec',
+        nivel: 'Técnico Médio',
+        descricao: 'Ações de saúde preventiva no terreno: controlo vetorial, campanhas de imunização, água potável, saneamento e educação comunitária.',
+        estado: 'Ativo',
+        dataInicio: '2026-02-15',
+        dataTermino: '2026-06-30',
+        membros: ['user-ifop-6'],
+        total_membros: 25,
+        ...defaultSalaConteudo,
+        planoAnalitico: {
+          unidadeCurricular: 'Vigilância Epidemiológica e Saúde Preventiva',
+          cargaHoraria: '70 Horas (35h Teóricas + 35h Ações Comunitárias)',
+          cronograma: 'Fevereiro a Junho de 2026',
+          objectivos: 'Preparar agentes capacitados para investigar surtos, promover comportamentos saudáveis na comunidade e implementar medidas de saneamento básico do meio.',
+          conteudos: [
+            'Unidade 1: Conceitos de Epidemiologia Descritiva e Indicadores Básicos de Saúde',
+            'Unidade 2: Notificação Obrigatória de Doenças e Investigação de Casos',
+            'Unidade 3: Doenças Transmissíveis Prioritárias (Malária, Cólera, Tuberculose, HIV/SIDA)',
+            'Unidade 4: Qualidade da Água, Gestão de Resíduos e Saneamento Comunitário',
+            'Unidade 5: Estratégias de Informação, Educação e Comunicação (IEC) em Saúde'
+          ],
+          competencias: [
+            'Identificar precocemente sinais de surtos epidémicos e emitir alertas sanitários.',
+            'Mobilizar líderes locais e famílias para adoção de práticas de prevenção.',
+            'Supervisionar ações de saneamento do meio e desinfeção de poços e fontes de água.'
+          ],
+          metodologias: 'Aulas teóricas interativas, planeamento de intervenções sanitárias comunitárias, dramatização de sessões de educação em saúde e visitas ao terreno.',
+          avaliacao: '• 2 Testes Teóricos de Epidemiologia (40%)\n• 3 Planos de Intervenção Preventiva Comunitária (30%)\n• 1 Relatório de Investigação de Surto Simulado (30%)',
+          bibliografia: '1. Manual do Agente Polivalente de Saúde (APS) — MISAU Moçambique.\n2. Rouquayrol, Maria Zélia. Epidemiologia & Saúde. MedBook.\n3. Guias de Vigilância Epidemiológica de Doenças Notificáveis — OMS.'
+        }
+      }
+    ];
+
     // Carregar dados locais customizados caso existam
     let storedGroups = [];
     try {
@@ -676,11 +964,21 @@ export const homeSchoolService = {
     } catch (_) {}
 
     if (storedGroups && storedGroups.length > 0) {
+      // Garantir que as salas padrão do IFOPTEC estão presentes mesmo se o utilizador já tiver dados locais
+      const existingIds = new Set(storedGroups.map(s => s.id || s._id));
+      const missingIfoptecSalas = salasDefaultIfoptec.filter(s => !existingIds.has(s.id));
+      if (missingIfoptecSalas.length > 0) {
+        storedGroups = [...storedGroups, ...missingIfoptecSalas];
+        try {
+          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(storedGroups));
+        } catch (_) {}
+      }
       return storedGroups;
     }
 
     // Carregar salas padrão caso primeira utilização
     const salasDefault = [
+      ...salasDefaultIfoptec,
       {
         id: 'sala-ti-pw-2026a',
         nome: 'Programação Web — Grupo A',

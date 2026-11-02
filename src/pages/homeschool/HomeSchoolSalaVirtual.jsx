@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useInstitution } from '../../context/InstitutionContext';
 import { homeSchoolService } from '../../services/homeschoolService';
 import { planoSessaoService } from '../../services/planoSessaoService';
 import { tutoriaService } from '../../services/tutoriaService';
@@ -12,6 +13,7 @@ export default function HomeSchoolSalaVirtual() {
   const actualId = groupId || queryId;
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isIfoptec } = useInstitution();
 
   const isAdmin = user && (user.tipo === 'especialista' || user.tipo === 'admin');
   const isDocente = user && (user.tipo === 'docente');
@@ -1300,7 +1302,9 @@ export default function HomeSchoolSalaVirtual() {
             <span className="sala-tag sala-tag-active">● {sala.estado || 'Ativo'}</span>
           </div>
           <h1>{sala.nome}</h1>
-          <div className="sala-subtitle">Sala de Aula Virtual &amp; Aprendizagem Híbrida ISPOTEC</div>
+          <div className="sala-subtitle">
+            Sala de Aula Virtual &amp; Aprendizagem Híbrida {(isIfoptec || sala.instituicao === 'ifoptec' || String(sala.codigo || '').startsWith('IFOP')) ? 'IFOPTEC' : 'ISPOTEC'}
+          </div>
           <p className="sala-desc">{sala.descricao}</p>
           <div className="sala-docente-box">
             <span>👨‍🏫 <strong>Docente Responsável:</strong> {sala.docente}</span>

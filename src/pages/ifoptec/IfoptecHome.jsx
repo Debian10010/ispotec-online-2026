@@ -941,7 +941,7 @@ export default function IfoptecHome() {
         </div>
 
         <div className="modules-grid">
-          <Link to="/ensino" className="module-link-card">
+          <Link to="/ifoptec/ensino" className="module-link-card">
             <div className="module-link-icon" style={{ background: '#dbeafe', color: '#1e40af' }}>
               📚
             </div>
@@ -955,13 +955,13 @@ export default function IfoptecHome() {
             </div>
           </Link>
 
-          <Link to="/homeschool" className="module-link-card">
+          <Link to="/ifoptec/homeschool" className="module-link-card">
             <div className="module-link-icon" style={{ background: '#fef3c7', color: '#92400e' }}>
               🏫
             </div>
             <h4 className="module-link-title">Ambiente Virtual (AVA)</h4>
             <p className="module-link-desc">
-              Salas de aula digitais por turma, partilha de apontamentos, sumários docentes, tarefas avaliativas e tutoria técnica.
+              Salas de aula digitais por turma dos cursos técnicos médios, partilha de apontamentos, sumários docentes, tarefas avaliativas e tutoria técnica.
             </p>
             <div className="module-link-action">
               <span>Aceder ao AVA</span>
@@ -969,7 +969,7 @@ export default function IfoptecHome() {
             </div>
           </Link>
 
-          <Link to="/chatbot" className="module-link-card">
+          <Link to="/ifoptec/chatbot" className="module-link-card">
             <div className="module-link-icon" style={{ background: '#ede9fe', color: '#6d28d9' }}>
               🤖
             </div>
@@ -983,7 +983,7 @@ export default function IfoptecHome() {
             </div>
           </Link>
 
-          <Link to="/dashboard/feed" className="module-link-card">
+          <Link to="/ifoptec/feed" className="module-link-card">
             <div className="module-link-icon" style={{ background: '#d1fae5', color: '#065f46' }}>
               📢
             </div>

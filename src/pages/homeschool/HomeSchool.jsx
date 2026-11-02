@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { homeSchoolService, CURSOS_ISPOTEC, MODULOS_POR_CURSO } from '../../services/homeschoolService';
+import { useInstitution } from '../../context/InstitutionContext';
+import {
+  homeSchoolService,
+  CURSOS_ISPOTEC,
+  CURSOS_IFOPTEC,
+  CURSOS_TECNICOS_MEDIOS_IFOPTEC,
+  MODULOS_POR_CURSO
+} from '../../services/homeschoolService';
 import { planoSessaoService } from '../../services/planoSessaoService';
 import { tutoriaService } from '../../services/tutoriaService';
 
@@ -333,10 +340,12 @@ function estadoTutoriaBadge(e) {
 /* ────────────────────────────────────────────────────────────────────────────
    TAB A — Salas Virtuais (existente)
    ──────────────────────────────────────────────────────────────────────────── */
-function TabSalasVirtuais({ user }) {
+function TabSalasVirtuais({ user, isIfoptec }) {
   const isAdmin  = user && (user.tipo === 'especialista' || user.tipo === 'admin');
   const isDocente = user && user.tipo === 'docente';
   const canManage = isAdmin || isDocente;
+
+  const defaultCurso = isIfoptec ? CURSOS_TECNICOS_MEDIOS_IFOPTEC[0] : CURSOS_ISPOTEC[0];
 
   const [salas, setSalas]           = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -349,11 +358,12 @@ function TabSalasVirtuais({ user }) {
   const [feedback, setFeedback]     = useState({ msg:'', tipo:'' });
 
   const emptyForm = () => ({
-    nome:'', curso: CURSOS_ISPOTEC[0],
-    modulo: MODULOS_POR_CURSO[CURSOS_ISPOTEC[0]]?.[0] || '',
-    disciplina: MODULOS_POR_CURSO[CURSOS_ISPOTEC[0]]?.[0] || '',
+    nome:'', curso: defaultCurso,
+    modulo: MODULOS_POR_CURSO[defaultCurso]?.[0] || '',
+    disciplina: MODULOS_POR_CURSO[defaultCurso]?.[0] || '',
+    instituicao: isIfoptec ? 'ifoptec' : 'ispotec',
     docente: user?.nome || '', ano:'2026', semestre:'1º Semestre',
-    codigo:`HS-${Math.random().toString(36).substring(2,6).toUpperCase()}-2026`,
+    codigo:`${isIfoptec ? 'IFOP' : 'HS'}-${Math.random().toString(36).substring(2,6).toUpperCase()}-2026`,
     descricao:'', estado:'Ativo', dataInicio:'2026-02-15', dataTermino:'2026-06-30'
   });
   const [formData, setFormData] = useState(emptyForm);
@@ -370,11 +380,22 @@ function TabSalasVirtuais({ user }) {
   const openCreate = () => { setEditingSala(null); setFormData(emptyForm()); setShowModal(true); };
   const openEdit   = (s)  => {
     setEditingSala(s);
-    setFormData({ id:s.id||s._id, nome:s.nome||'', curso:s.curso||CURSOS_ISPOTEC[0],
-      modulo:s.modulo||s.disciplina||'', disciplina:s.disciplina||s.modulo||'',
-      docente:s.docente||'', ano:s.ano||'2026', semestre:s.semestre||'1º Semestre',
-      codigo:s.codigo||'', descricao:s.descricao||'', estado:s.estado||'Ativo',
-      dataInicio:s.dataInicio||'2026-02-15', dataTermino:s.dataTermino||'2026-06-30' });
+    setFormData({
+      id:s.id||s._id,
+      nome:s.nome||'',
+      curso:s.curso||defaultCurso,
+      modulo:s.modulo||s.disciplina||'',
+      disciplina:s.disciplina||s.modulo||'',
+      instituicao:s.instituicao||(isIfoptec ? 'ifoptec' : 'ispotec'),
+      docente:s.docente||'',
+      ano:s.ano||'2026',
+      semestre:s.semestre||'1º Semestre',
+      codigo:s.codigo||'',
+      descricao:s.descricao||'',
+      estado:s.estado||'Ativo',
+      dataInicio:s.dataInicio||'2026-02-15',
+      dataTermino:s.dataTermino||'2026-06-30'
+    });
     setShowModal(true);
   };
 
@@ -400,6 +421,14 @@ function TabSalasVirtuais({ user }) {
       && (selCurso==='Todos' || s.curso===selCurso)
       && (selSem==='Todos'   || s.semestre===selSem)
       && (selEst==='Todos'   || s.estado===selEst);
+  }).sort((a, b) => {
+    if (isIfoptec) {
+      const aIfop = a.instituicao === 'ifoptec' || CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(a.curso) || CURSOS_IFOPTEC.includes(a.curso);
+      const bIfop = b.instituicao === 'ifoptec' || CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(b.curso) || CURSOS_IFOPTEC.includes(b.curso);
+      if (aIfop && !bIfop) return -1;
+      if (!aIfop && bIfop) return 1;
+    }
+    return 0;
   });
 
   return (
@@ -431,7 +460,17 @@ function TabSalasVirtuais({ user }) {
           </div>
           <select className="ava-select" value={selCurso} onChange={e=>setSelCurso(e.target.value)}>
             <option value="Todos">Todos os Cursos</option>
-            {CURSOS_ISPOTEC.map(c=><option key={c} value={c}>{c}</option>)}
+            <optgroup label="🏥 Cursos Técnicos Médios IFOPTEC">
+              {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c=><option key={c} value={c}>{c}</option>)}
+            </optgroup>
+            <optgroup label="🎓 Cursos de Licenciatura ISPOTEC">
+              {CURSOS_ISPOTEC.map(c=><option key={c} value={c}>{c}</option>)}
+            </optgroup>
+            {CURSOS_IFOPTEC.filter(c=>!CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c)).length > 0 && (
+              <optgroup label="⚡ Curta Duração IFOPTEC">
+                {CURSOS_IFOPTEC.filter(c=>!CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c)).map(c=><option key={c} value={c}>{c}</option>)}
+              </optgroup>
+            )}
           </select>
           <select className="ava-select" value={selSem} onChange={e=>setSelSem(e.target.value)}>
             <option value="Todos">Todos os Semestres</option>
@@ -457,15 +496,26 @@ function TabSalasVirtuais({ user }) {
             </div>
           ) : filtered.map(sala => {
             const sid = sala.id || sala._id;
+            const isTecnicoMedio = CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(sala.curso) || sala.instituicao === 'ifoptec';
             return (
-              <div className="ava-card" key={sid}>
+              <div className="ava-card" key={sid} style={isTecnicoMedio ? { borderTop: '4px solid #0284c7' } : {}}>
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',fontSize:'.75rem',color:'#64748b',marginBottom:'.55rem'}}>
-                    <span style={{background:'#e0e7ff',color:'#3730a3',fontWeight:700,padding:'.2rem .55rem',borderRadius:'6px'}}>{sala.curso}</span>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem',fontSize:'.75rem',color:'#64748b',marginBottom:'.55rem'}}>
+                    <span style={{
+                      background: isTecnicoMedio ? '#e0f2fe' : '#e0e7ff',
+                      color: isTecnicoMedio ? '#0369a1' : '#3730a3',
+                      fontWeight: 700,
+                      padding: '.2rem .55rem',
+                      borderRadius: '6px'
+                    }}>
+                      {isTecnicoMedio ? `🏥 ${sala.curso}` : sala.curso}
+                    </span>
                     <span>🏷️ {sala.codigo||'HS-2026'}</span>
                   </div>
                   <h3 className="ava-card-title">{sala.nome}</h3>
-                  <div className="ava-card-sub">📘 {sala.modulo||sala.disciplina}</div>
+                  <div className="ava-card-sub" style={isTecnicoMedio ? { color: '#0284c7' } : {}}>
+                    📘 {sala.modulo||sala.disciplina}
+                  </div>
                   <p style={{fontSize:'.87rem',color:'#64748b',marginBottom:'1rem',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{sala.descricao}</p>
                   <div className="ava-card-meta">
                     <div>👨‍🏫 <strong>Docente:</strong> {sala.docente||'Docente Responsável'}</div>
@@ -474,7 +524,9 @@ function TabSalasVirtuais({ user }) {
                   </div>
                 </div>
                 <div className="ava-card-actions">
-                  <Link to={`/homeschool/sala/${sid}`} className="btn-ava-enter">🏫 Entrar →</Link>
+                  <Link to={`/homeschool/sala/${sid}`} className="btn-ava-enter" style={isTecnicoMedio ? { background: 'linear-gradient(135deg, #0284c7, #0369a1)' } : {}}>
+                    🏫 Entrar →
+                  </Link>
                   {canManage && (
                     <div style={{display:'flex',gap:'.35rem'}}>
                       <button className="btn-ava-sm" onClick={()=>openEdit(sala)}>✏️</button>
@@ -499,9 +551,37 @@ function TabSalasVirtuais({ user }) {
                   <label className="ava-label">Curso *</label>
                   <select className="ava-input" value={formData.curso} onChange={e=>{
                     const c=e.target.value; const mods=MODULOS_POR_CURSO[c]||[];
-                    setFormData({...formData,curso:c,modulo:mods[0]||formData.modulo});
+                    const isIfop = CURSOS_IFOPTEC.includes(c);
+                    setFormData({
+                      ...formData,
+                      curso:c,
+                      modulo:mods[0]||formData.modulo,
+                      disciplina:mods[0]||formData.modulo,
+                      instituicao: isIfop ? 'ifoptec' : 'ispotec'
+                    });
                   }}>
-                    {CURSOS_ISPOTEC.map(c=><option key={c} value={c}>{c}</option>)}
+                    {isIfoptec ? (
+                      <>
+                        <optgroup label="🏥 Cursos Técnicos Médios IFOPTEC">
+                          {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c=><option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                        <optgroup label="⚡ Curta Duração IFOPTEC">
+                          {CURSOS_IFOPTEC.filter(c=>!CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c)).map(c=><option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                        <optgroup label="🎓 Cursos de Licenciatura ISPOTEC">
+                          {CURSOS_ISPOTEC.map(c=><option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                      </>
+                    ) : (
+                      <>
+                        <optgroup label="🎓 Cursos de Licenciatura ISPOTEC">
+                          {CURSOS_ISPOTEC.map(c=><option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                        <optgroup label="🏥 Cursos Técnicos Médios IFOPTEC">
+                          {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c=><option key={c} value={c}>{c}</option>)}
+                        </optgroup>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div>
@@ -1195,6 +1275,7 @@ const TABS = [
 
 export default function HomeSchool() {
   const { user } = useAuth();
+  const { isIfoptec } = useInstitution();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'salas';
 
@@ -1205,12 +1286,15 @@ export default function HomeSchool() {
       <style>{CSS}</style>
       <div className="ava-wrap">
         {/* Hero */}
-        <div className="ava-hero">
-          <div className="ava-hero-badge">🏫 ISPOTEC — AMBIENTE VIRTUAL DE APRENDIZAGEM</div>
-          <h1>Ambiente Virtual de Aprendizagem</h1>
+        <div className="ava-hero" style={isIfoptec ? { background: 'linear-gradient(135deg, #09203f 0%, #02529c 45%, #002f5e 80%, #0369a1 100%)' } : {}}>
+          <div className="ava-hero-badge">
+            {isIfoptec ? '🏥 IFOPTEC — AMBIENTE VIRTUAL DE APRENDIZAGEM' : '🏫 ISPOTEC — AMBIENTE VIRTUAL DE APRENDIZAGEM'}
+          </div>
+          <h1>{isIfoptec ? 'Ambiente Virtual de Aprendizagem IFOPTEC' : 'Ambiente Virtual de Aprendizagem'}</h1>
           <p>
-            Espaço digital integrado de ensino, aprendizagem, comunicação e acompanhamento dos estudantes.
-            Planifique sessões, registe sumários, acompanhe estudantes e gerencie tutorias num único portal institucional.
+            {isIfoptec
+              ? 'Espaço digital de apoio ao ensino técnico médio profissionalizante e cursos de saúde. Aceda às salas virtuais por turma, programas curriculares, sumários de aulas e tutoria especializada.'
+              : 'Espaço digital integrado de ensino, aprendizagem, comunicação e acompanhamento dos estudantes. Planifique sessões, registe sumários, acompanhe estudantes e gerencie tutorias num único portal institucional.'}
           </p>
         </div>
 
@@ -1224,10 +1308,10 @@ export default function HomeSchool() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'salas'      && <TabSalasVirtuais user={user} />}
-        {activeTab === 'sessoes'    && <TabPlanoSessoes user={user} />}
-        {activeTab === 'tutoria'    && <TabTutoria user={user} />}
-        {activeTab === 'desempenho' && <TabDesempenho user={user} />}
+        {activeTab === 'salas'      && <TabSalasVirtuais user={user} isIfoptec={isIfoptec} />}
+        {activeTab === 'sessoes'    && <TabPlanoSessoes user={user} isIfoptec={isIfoptec} />}
+        {activeTab === 'tutoria'    && <TabTutoria user={user} isIfoptec={isIfoptec} />}
+        {activeTab === 'desempenho' && <TabDesempenho user={user} isIfoptec={isIfoptec} />}
       </div>
     </>
   );
