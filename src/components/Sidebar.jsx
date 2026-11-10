@@ -154,56 +154,62 @@ export default function Sidebar({
               </Link>
             </>
           ) : (
-            <Link
-              to="/"
-              className={`sidebar-nav-item ${isActive('/') && location.pathname !== '/ifoptec' && !location.pathname.startsWith('/ifoptec') ? 'active' : ''}`}
-              onClick={handleNavClick}
-              data-tooltip="Início ISPOTEC"
-            >
-              <span className="sidebar-item-icon">🏛️</span>
-              <span className="sidebar-item-label">Início ISPOTEC</span>
-            </Link>
+            <>
+              {isIfoptec ? (
+                <>
+                  <Link
+                    to="/ifoptec"
+                    className={`sidebar-nav-item ${location.pathname === '/ifoptec' ? 'active' : ''}`}
+                    onClick={handleNavClick}
+                    data-tooltip="Início IFOPTEC"
+                  >
+                    <span className="sidebar-item-icon">🏥</span>
+                    <span className="sidebar-item-label">Início IFOPTEC</span>
+                  </Link>
+
+                  <Link
+                    to="/ifoptec/cursos"
+                    className={`sidebar-nav-item ${location.pathname === '/ifoptec/cursos' ? 'active' : ''}`}
+                    onClick={handleNavClick}
+                    data-tooltip="Cursos IFOPTEC"
+                  >
+                    <span className="sidebar-item-icon">📋</span>
+                    <span className="sidebar-item-label">Cursos Médios &amp; Saúde</span>
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  to="/"
+                  className={`sidebar-nav-item ${isActive('/') && location.pathname !== '/ifoptec' && !location.pathname.startsWith('/ifoptec') ? 'active' : ''}`}
+                  onClick={handleNavClick}
+                  data-tooltip="Início ISPOTEC"
+                >
+                  <span className="sidebar-item-icon">🏛️</span>
+                  <span className="sidebar-item-label">Início ISPOTEC</span>
+                </Link>
+              )}
+
+              <Link
+                to="/pre-inscricao"
+                className={`sidebar-nav-item ${isActive('/pre-inscricao') ? 'active' : ''}`}
+                onClick={handleNavClick}
+                data-tooltip="Pré-Inscrição Online 2027"
+              >
+                <span className="sidebar-item-icon">📝</span>
+                <span className="sidebar-item-label">Pré-Inscrição 2027</span>
+              </Link>
+
+              <Link
+                to="/consultar-candidatura"
+                className={`sidebar-nav-item ${isActive('/consultar-candidatura') ? 'active' : ''}`}
+                onClick={handleNavClick}
+                data-tooltip="Consultar Candidatura"
+              >
+                <span className="sidebar-item-icon">🔍</span>
+                <span className="sidebar-item-label">Consultar Candidatura</span>
+              </Link>
+            </>
           )}
-
-          <Link
-            to="/ifoptec"
-            className={`sidebar-nav-item ${location.pathname === '/ifoptec' ? 'active' : ''}`}
-            onClick={handleNavClick}
-            data-tooltip="IFOPTEC Online"
-          >
-            <span className="sidebar-item-icon">🏥</span>
-            <span className="sidebar-item-label">IFOPTEC Online</span>
-          </Link>
-
-          <Link
-            to="/ifoptec/cursos"
-            className={`sidebar-nav-item ${location.pathname === '/ifoptec/cursos' ? 'active' : ''}`}
-            onClick={handleNavClick}
-            data-tooltip="Cursos IFOPTEC"
-          >
-            <span className="sidebar-item-icon">📋</span>
-            <span className="sidebar-item-label">Cursos Médios &amp; Saúde</span>
-          </Link>
-
-          <Link
-            to="/pre-inscricao"
-            className={`sidebar-nav-item ${isActive('/pre-inscricao') ? 'active' : ''}`}
-            onClick={handleNavClick}
-            data-tooltip="Pré-Inscrição Online 2027"
-          >
-            <span className="sidebar-item-icon">📝</span>
-            <span className="sidebar-item-label">Pré-Inscrição 2027</span>
-          </Link>
-
-          <Link
-            to="/consultar-candidatura"
-            className={`sidebar-nav-item ${isActive('/consultar-candidatura') ? 'active' : ''}`}
-            onClick={handleNavClick}
-            data-tooltip="Consultar Candidatura"
-          >
-            <span className="sidebar-item-icon">🔍</span>
-            <span className="sidebar-item-label">Consultar Candidatura</span>
-          </Link>
         </div>
 
         {/* ================= ACADEMIC (Ensino, Extensão, Investigação, Tecnologia e Inovação, Ambiente Virtual e Aprendizagem) ================= */}
