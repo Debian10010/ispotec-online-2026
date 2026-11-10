@@ -1317,7 +1317,8 @@ export default function HomeSchoolSalaVirtual() {
         <div className="sala-layout-grid">
           {/* Navigation Menu */}
           <aside className="sala-sidebar">
-            <h4 className="sala-sidebar-title">Menu da Sala Virtual</h4>
+            {/* ── A. Conteúdo Académico ─────────────────────────── */}
+            <h4 className="sala-sidebar-title" style={{ color: '#4338ca' }}>A. Conteúdo Académico</h4>
             <nav>
               <button
                 type="button"
@@ -1325,6 +1326,14 @@ export default function HomeSchoolSalaVirtual() {
                 onClick={() => setActiveTab('visao-geral')}
               >
                 <span>📌</span> Visão Geral
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'horario' ? 'active' : ''}`}
+                onClick={() => setActiveTab('horario')}
+              >
+                <span>🕐</span> Horário
               </button>
 
               <button
@@ -1345,20 +1354,36 @@ export default function HomeSchoolSalaVirtual() {
 
               <button
                 type="button"
-                className={`sala-nav-btn ${activeTab === 'aulas' ? 'active' : ''}`}
-                onClick={() => setActiveTab('aulas')}
+                className={`sala-nav-btn ${activeTab === 'matriz-sessoes' ? 'active' : ''}`}
+                onClick={() => setActiveTab('matriz-sessoes')}
               >
-                <span>📅</span> Plano de Sessões / Matriz das Aulas Práticas
-                <span className="sala-nav-badge">{sessoes.length || filterByState(conteudo.aulas).length}</span>
+                <span>📅</span> Matriz de Sessões (Teoria)
+                <span className="sala-nav-badge">{sessoes.length}</span>
               </button>
 
               <button
                 type="button"
-                className={`sala-nav-btn ${activeTab === 'manuais' ? 'active' : ''}`}
-                onClick={() => setActiveTab('manuais')}
+                className={`sala-nav-btn ${activeTab === 'matriz-praticas' ? 'active' : ''}`}
+                onClick={() => setActiveTab('matriz-praticas')}
               >
-                <span>📚</span> Manuais
-                <span className="sala-nav-badge">{filterByState(conteudo.manuais).length}</span>
+                <span>🧪</span> Matriz de Práticas
+                <span className="sala-nav-badge">{filterByState(conteudo.aulas?.filter(a => a.tipo === 'Prática' || a.tipo === 'Laboratório') || []).length}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'calendario-eventos' ? 'active' : ''}`}
+                onClick={() => setActiveTab('calendario-eventos')}
+              >
+                <span>📆</span> Calendário de Eventos
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'calendario-avaliacoes' ? 'active' : ''}`}
+                onClick={() => setActiveTab('calendario-avaliacoes')}
+              >
+                <span>📝</span> Calendário de Avaliações
               </button>
 
               <button
@@ -1366,17 +1391,48 @@ export default function HomeSchoolSalaVirtual() {
                 className={`sala-nav-btn ${activeTab === 'guias-estudo' ? 'active' : ''}`}
                 onClick={() => setActiveTab('guias-estudo')}
               >
-                <span>📖</span> Guias de Estudo
+                <span>📖</span> Guião de Estudo
                 <span className="sala-nav-badge">{filterByState(conteudo.guiasEstudo).length}</span>
               </button>
 
               <button
                 type="button"
-                className={`sala-nav-btn ${activeTab === 'plano-social' ? 'active' : ''}`}
-                onClick={() => setActiveTab('plano-social')}
+                className={`sala-nav-btn ${activeTab === 'avaliacoes' ? 'active' : ''}`}
+                onClick={() => setActiveTab('avaliacoes')}
               >
-                <span>🤝</span> Plano Social
+                <span>✅</span> Avaliações (1ª, 2ª e 3ª)
               </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'praticas-modulo' ? 'active' : ''}`}
+                onClick={() => setActiveTab('praticas-modulo')}
+              >
+                <span>🔧</span> Práticas dos Módulos
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'exames' ? 'active' : ''}`}
+                onClick={() => setActiveTab('exames')}
+              >
+                <span>📄</span> Exames (Normal e Recorrência)
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'manuais' ? 'active' : ''}`}
+                onClick={() => setActiveTab('manuais')}
+              >
+                <span>📚</span> Manual de Referência
+                <span className="sala-nav-badge">{filterByState(conteudo.manuais).length}</span>
+              </button>
+
+              {/* ── B. Recursos Digitais ──────────────────────────── */}
+              <div style={{ height: '1px', background: '#e2e8f0', margin: '0.6rem 0.5rem' }} />
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0.3rem 0.8rem' }}>
+                B. Recursos Digitais
+              </div>
 
               <button
                 type="button"
@@ -1404,9 +1460,10 @@ export default function HomeSchoolSalaVirtual() {
                 <span>🔬</span> Laboratório Digital
               </button>
 
+              {/* ── C. Tutoria e Interactividade ─────────────────── */}
               <div style={{ height: '1px', background: '#e2e8f0', margin: '0.6rem 0.5rem' }} />
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0.3rem 0.8rem' }}>
-                Tutoria &amp; Interatividade
+              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0.3rem 0.8rem' }}>
+                C. Tutoria e Interactividade
               </div>
 
               <button
@@ -1461,7 +1518,255 @@ export default function HomeSchoolSalaVirtual() {
 
           {/* Main Content Area */}
           <main className="sala-content-card">
-            {/* 1. VISÃO GERAL */}
+            {/* HORÁRIO */}
+            {activeTab === 'horario' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>🕐</span> Horário do Módulo</h2>
+                </div>
+                <div className="plan-section-block">
+                  <h4>📅 Horário Semanal — {sala.modulo || sala.nome}</h4>
+                  <p><strong>Semestre:</strong> {sala.semestre} · <strong>Ano:</strong> {sala.ano}</p>
+                  <p><strong>Docente:</strong> {sala.docente}</p>
+                  <p><strong>Data de Início:</strong> {sala.dataInicio} · <strong>Data de Término:</strong> {sala.dataTermino}</p>
+                </div>
+                <div className="plan-section-block">
+                  <h4>⏰ Turnos e Horários</h4>
+                  <p style={{ color: '#64748b', fontSize: '.9rem' }}>O horário detalhado deste módulo é disponibilizado pelo ADMIN. Consulte o secretariado académico ou o seu coordenador de curso para obter o horário actualizado.</p>
+                </div>
+              </div>
+            )}
+
+            {/* MATRIZ DE SESSÕES (TEORIA) */}
+            {activeTab === 'matriz-sessoes' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>📅</span> Matriz de Sessões (Teoria)</h2>
+                  {canManage && (
+                    <button type="button" className="btn-action-add" onClick={() => { setFormData({ tipo_sessao: 'Teórica', data: new Date().toISOString().substring(0,10), hora_inicio: '08:00', hora_fim: '10:00', duracao_prevista_minutos: 120, tema: '', objectivos: '', conteudos: '', actividades: '', materiais: '' }); setModalType('novasessao'); }}>
+                      + Nova Sessão Teórica
+                    </button>
+                  )}
+                </div>
+                {sessoes.filter(s => s.tipo_sessao === 'Teórica' || !s.tipo_sessao).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#94a3b8' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '.75rem' }}>📅</div>
+                    <p>Nenhuma sessão teórica planificada ainda.</p>
+                    {canManage && <button className="btn-action-add" style={{ marginTop: '.75rem' }} onClick={() => setModalType('novasessao')}>+ Planificar Sessão</button>}
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.87rem' }}>
+                      <thead><tr style={{ background: '#f8fafc' }}>
+                        <th style={{ padding: '.65rem .85rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#374151' }}>#</th>
+                        <th style={{ padding: '.65rem .85rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#374151' }}>Data</th>
+                        <th style={{ padding: '.65rem .85rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#374151' }}>Hora</th>
+                        <th style={{ padding: '.65rem .85rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#374151' }}>Tema</th>
+                        <th style={{ padding: '.65rem .85rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#374151' }}>Estado</th>
+                        <th style={{ padding: '.65rem .85rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontWeight: 700, color: '#374151' }}>Sumário</th>
+                      </tr></thead>
+                      <tbody>
+                        {sessoes.filter(s => s.tipo_sessao === 'Teórica' || !s.tipo_sessao).map(s => (
+                          <tr key={s._id || s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '.6rem .85rem', fontWeight: 700 }}>{s.sequencia_sessao || s.numero_sessao}</td>
+                            <td style={{ padding: '.6rem .85rem' }}>{s.data_sessao || s.data}</td>
+                            <td style={{ padding: '.6rem .85rem' }}>{s.hora_inicio}–{s.hora_fim}</td>
+                            <td style={{ padding: '.6rem .85rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.tema}</td>
+                            <td style={{ padding: '.6rem .85rem' }}><span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '.18rem .55rem', borderRadius: '5px', fontSize: '.72rem', fontWeight: 700 }}>{s.estado || 'Agendada'}</span></td>
+                            <td style={{ padding: '.6rem .85rem' }}>{s.sumario?.registado ? <span style={{ background: '#d1fae5', color: '#065f46', padding: '.18rem .55rem', borderRadius: '5px', fontSize: '.72rem', fontWeight: 700 }}>✓ Registado</span> : <span style={{ background: '#fef3c7', color: '#92400e', padding: '.18rem .55rem', borderRadius: '5px', fontSize: '.72rem', fontWeight: 700 }}>Pendente</span>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* MATRIZ DE PRÁTICAS */}
+            {activeTab === 'matriz-praticas' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>🧪</span> Matriz de Práticas</h2>
+                  {canManage && (
+                    <button type="button" className="btn-action-add" onClick={() => { setFormData({ tipo: 'Prática', data: new Date().toISOString().substring(0,10), descricao: '', conteudo: '', materiais: '', estado: 'Publicado' }); setModalType('aula'); }}>
+                      + Nova Aula Prática
+                    </button>
+                  )}
+                </div>
+                {filterByState(conteudo.aulas?.filter(a => a.tipo === 'Prática' || a.tipo === 'Laboratório') || []).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#94a3b8' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '.75rem' }}>🧪</div>
+                    <p>Nenhuma aula prática disponibilizada ainda.</p>
+                    {canManage && <button className="btn-action-add" style={{ marginTop: '.75rem' }} onClick={() => { setFormData({ tipo: 'Prática', data: new Date().toISOString().substring(0,10), descricao: '', conteudo: '', materiais: '', estado: 'Publicado' }); setModalType('aula'); }}>+ Adicionar Prática</button>}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {filterByState(conteudo.aulas?.filter(a => a.tipo === 'Prática' || a.tipo === 'Laboratório') || []).map(a => (
+                      <div key={a.id} className="item-box">
+                        <div className="item-header">
+                          <div>
+                            <h4 className="item-title">🧪 {a.titulo}</h4>
+                            <div className="item-meta"><span>📅 {a.data}</span><span>🔬 {a.tipo}</span></div>
+                          </div>
+                          <span className={`badge-estado badge-${(a.estado||'publicado').toLowerCase().replace(' ','-')}`}>{a.estado}</span>
+                        </div>
+                        {a.descricao && <p className="item-desc">{a.descricao}</p>}
+                        {a.materiais && <div style={{ fontSize: '.82rem', color: '#475569', marginTop: '.35rem' }}>📎 <strong>Materiais:</strong> {a.materiais}</div>}
+                        {canManage && <div style={{ marginTop: '.75rem', display: 'flex', gap: '.5rem' }}><button className="btn-action-add" style={{ background: '#dc2626' }} onClick={() => handleDeleteItem('aulas', a.id)}>🗑️ Remover</button></div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CALENDÁRIO DE EVENTOS */}
+            {activeTab === 'calendario-eventos' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>📆</span> Calendário de Eventos</h2>
+                </div>
+                <div className="plan-section-block">
+                  <h4>📆 Eventos do Módulo — {sala.modulo || sala.nome}</h4>
+                  <p style={{ color: '#64748b', fontSize: '.9rem' }}>O calendário de eventos inclui palestras, seminários, workshops, visitas de estudo e outras actividades extracurriculares relacionadas com o módulo.</p>
+                </div>
+                <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#94a3b8', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '.75rem' }}>📆</div>
+                  <p>Nenhum evento agendado ainda. Os eventos serão disponibilizados pelo ADMIN ou Docente.</p>
+                </div>
+              </div>
+            )}
+
+            {/* CALENDÁRIO DE AVALIAÇÕES */}
+            {activeTab === 'calendario-avaliacoes' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>📝</span> Calendário de Avaliações</h2>
+                </div>
+                <div className="plan-section-block">
+                  <h4>📝 Datas de Avaliação — {sala.modulo || sala.nome}</h4>
+                  <p style={{ color: '#64748b', fontSize: '.9rem' }}>O calendário de avaliações apresenta as datas das avaliações contínuas, exames e momentos de avaliação prática programados para o módulo.</p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: '1rem', marginTop: '1rem' }}>
+                  {[
+                    { label: '1ª Avaliação', icon: '📝', cor: '#dbeafe', borda: '#93c5fd', textColor: '#1d4ed8', desc: 'Data a confirmar pelo Docente' },
+                    { label: '2ª Avaliação', icon: '📝', cor: '#d1fae5', borda: '#6ee7b7', textColor: '#047857', desc: 'Data a confirmar pelo Docente' },
+                    { label: '3ª Avaliação', icon: '📝', cor: '#ede9fe', borda: '#c4b5fd', textColor: '#5b21b6', desc: 'Data a confirmar pelo Docente' },
+                    { label: 'Exame Normal', icon: '📄', cor: '#fef3c7', borda: '#fde68a', textColor: '#92400e', desc: 'Data a confirmar pelo Secretariado' },
+                    { label: 'Exame de Recorrência', icon: '🔄', cor: '#fee2e2', borda: '#fca5a5', textColor: '#991b1b', desc: 'Data a confirmar pelo Secretariado' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ background: item.cor, border: `1px solid ${item.borda}`, borderRadius: '10px', padding: '1rem' }}>
+                      <div style={{ fontSize: '1.4rem', marginBottom: '.35rem' }}>{item.icon}</div>
+                      <div style={{ fontWeight: 700, color: item.textColor, fontSize: '.92rem' }}>{item.label}</div>
+                      <div style={{ fontSize: '.8rem', color: '#475569', marginTop: '.25rem' }}>{item.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AVALIAÇÕES (1ª, 2ª e 3ª) */}
+            {activeTab === 'avaliacoes' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>✅</span> Avaliações (1ª, 2ª e 3ª)</h2>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                  {[
+                    { num: '1ª', icon: '✅', bg: '#eff6ff', borda: '#bfdbfe', cor: '#1d4ed8' },
+                    { num: '2ª', icon: '✅', bg: '#f0fdf4', borda: '#bbf7d0', cor: '#047857' },
+                    { num: '3ª', icon: '✅', bg: '#faf5ff', borda: '#e9d5ff', cor: '#7e22ce' },
+                  ].map((av, i) => (
+                    <div key={i} style={{ background: av.bg, border: `1px solid ${av.borda}`, borderRadius: '12px', padding: '1.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
+                        <h4 style={{ margin: 0, color: av.cor, fontWeight: 700, fontSize: '1rem' }}>{av.icon} {av.num} Avaliação — {sala.modulo || sala.nome}</h4>
+                        <span style={{ background: av.borda, color: av.cor, fontSize: '.72rem', fontWeight: 700, padding: '.18rem .55rem', borderRadius: '5px' }}>Pendente</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '.88rem', color: '#475569' }}>
+                        A {av.num.toLowerCase()} avaliação será realizada conforme o calendário académico. As fichas e critérios de avaliação serão disponibilizados pelo Docente responsável nesta secção.
+                      </p>
+                      {canManage && (
+                        <div style={{ marginTop: '.75rem' }}>
+                          <button className="btn-action-add" style={{ fontSize: '.82rem', padding: '.4rem .85rem' }}>📤 Publicar Ficha de Avaliação</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PRÁTICAS DOS MÓDULOS */}
+            {activeTab === 'praticas-modulo' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>🔧</span> Práticas dos Módulos</h2>
+                  {canManage && (
+                    <button type="button" className="btn-action-add" onClick={() => { setFormData({ tipo: 'Prática', data: new Date().toISOString().substring(0,10), descricao: '', conteudo: '', materiais: '', estado: 'Publicado' }); setModalType('aula'); }}>
+                      + Adicionar Prática
+                    </button>
+                  )}
+                </div>
+                <div className="plan-section-block">
+                  <h4>🔧 Actividades Práticas — {sala.modulo || sala.nome}</h4>
+                  <p style={{ color: '#64748b', fontSize: '.9rem' }}>Esta secção apresenta todas as actividades práticas, exercícios aplicados, casos de estudo e tarefas práticas do módulo.</p>
+                </div>
+                {filterByState(conteudo.aulas || []).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#94a3b8', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '.75rem' }}>🔧</div>
+                    <p>Nenhuma actividade prática disponibilizada ainda.</p>
+                    {canManage && <button className="btn-action-add" style={{ marginTop: '.75rem' }} onClick={() => { setFormData({ tipo: 'Prática', data: new Date().toISOString().substring(0,10), descricao: '', conteudo: '', materiais: '', estado: 'Publicado' }); setModalType('aula'); }}>+ Adicionar</button>}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {filterByState(conteudo.aulas || []).map(a => (
+                      <div key={a.id} className="item-box">
+                        <div className="item-header">
+                          <div>
+                            <h4 className="item-title">{a.tipo === 'Prática' ? '🧪' : '📘'} {a.titulo}</h4>
+                            <div className="item-meta"><span>📅 {a.data}</span><span>{a.tipo}</span></div>
+                          </div>
+                          <span className={`badge-estado badge-${(a.estado||'publicado').toLowerCase().replace(' ','-')}`}>{a.estado}</span>
+                        </div>
+                        {a.descricao && <p className="item-desc">{a.descricao}</p>}
+                        {canManage && <div style={{ marginTop: '.75rem', display: 'flex', gap: '.5rem' }}><button className="btn-action-add" style={{ background: '#dc2626', fontSize: '.8rem', padding: '.35rem .75rem' }} onClick={() => handleDeleteItem('aulas', a.id)}>🗑️ Remover</button></div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* EXAMES */}
+            {activeTab === 'exames' && (
+              <div>
+                <div className="content-header-bar">
+                  <h2 className="content-header-title"><span>📄</span> Exames (Normal e Recorrência)</h2>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                  {[
+                    { tipo: 'Exame Normal', icon: '📄', bg: '#fffbeb', borda: '#fde68a', cor: '#92400e', desc: 'O exame normal realiza-se no final do semestre, após a conclusão das avaliações contínuas. A pauta de admissão ao exame será publicada pelo Secretariado Académico.' },
+                    { tipo: 'Exame de Recorrência', icon: '🔄', bg: '#fff1f2', borda: '#fecdd3', cor: '#9f1239', desc: 'O exame de recorrência destina-se a estudantes que não obtiveram aprovação no exame normal. Data e condições de acesso são definidas pelos serviços académicos.' },
+                  ].map((ex, i) => (
+                    <div key={i} style={{ background: ex.bg, border: `1px solid ${ex.borda}`, borderRadius: '12px', padding: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
+                        <h4 style={{ margin: 0, color: ex.cor, fontWeight: 700, fontSize: '1.05rem' }}>{ex.icon} {ex.tipo}</h4>
+                        <span style={{ background: ex.borda, color: ex.cor, fontSize: '.72rem', fontWeight: 700, padding: '.18rem .55rem', borderRadius: '5px' }}>Data a confirmar</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '.9rem', color: '#475569', lineHeight: 1.6 }}>{ex.desc}</p>
+                      {canManage && (
+                        <div style={{ marginTop: '1rem' }}>
+                          <button className="btn-action-add" style={{ fontSize: '.82rem', padding: '.4rem .85rem' }}>📤 Publicar Enunciado</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* VISÃO GERAL */}
             {activeTab === 'visao-geral' && (
               <div>
                 <div className="content-header-bar">

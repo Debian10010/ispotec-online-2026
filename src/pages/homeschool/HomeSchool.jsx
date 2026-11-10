@@ -9,6 +9,7 @@ import {
   CURSOS_TECNICOS_MEDIOS_IFOPTEC,
   MODULOS_POR_CURSO
 } from '../../services/homeschoolService';
+import { getEstruturaCurricular, getInformacoesGeraisPadrao } from '../../services/curriculoService';
 import { planoSessaoService } from '../../services/planoSessaoService';
 import { tutoriaService } from '../../services/tutoriaService';
 
@@ -1264,22 +1265,472 @@ function TabDesempenho({ user }) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
+   TAB E — Meu Curso (Estudante) / Gestão de Cursos (Admin/Docente)
+   Navegação: Curso → Ano → Semestre → Módulos → Sala Virtual
+   9 Informações Gerais do Curso
+   ──────────────────────────────────────────────────────────────────────────── */
+
+const INFO_GERAIS_LABELS = [
+  { key: 'manualCurso',         icon: '📖', label: 'Manual do Curso' },
+  { key: 'matrizCompetencias',  icon: '🎯', label: 'Matriz de Competências' },
+  { key: 'horario',             icon: '🕐', label: 'Horário Trimestral/Semestral' },
+  { key: 'termosEstagio',       icon: '📋', label: 'Termos de Referência de Estágio' },
+  { key: 'inscricoes',          icon: '📝', label: 'Inscrição — Estágio, Avaliações, Exames' },
+  { key: 'exameCompetencias',   icon: '🏅', label: 'Exame de Competências' },
+  { key: 'relatorioAvaliacao',  icon: '📊', label: 'Relatório de Avaliação de Competências' },
+  { key: 'avaliacaoDocentes',   icon: '⭐', label: 'Avaliação dos Docentes' },
+  { key: 'avaliacaoCurso',      icon: '📈', label: 'Avaliação Semestral do Curso' },
+];
+
+function InfoGeralSection({ infoKey, icon, label, infoGerais }) {
+  const data = infoGerais?.[infoKey];
+  if (!data) return (
+    <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+      <div style={{ fontSize: '2rem', marginBottom: '.5rem' }}>📂</div>
+      <p>Documento ainda não disponibilizado pelo ADMIN.</p>
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '1.1rem 1.25rem', borderLeft: '4px solid #4338ca' }}>
+        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '.35rem' }}>
+          {icon} {data.titulo || label}
+        </div>
+        {data.subtitulo && <div style={{ color: '#64748b', fontSize: '.88rem', marginBottom: '.5rem' }}>{data.subtitulo}</div>}
+        {data.descricao && <p style={{ color: '#475569', fontSize: '.92rem', lineHeight: 1.6, margin: 0 }}>{data.descricao}</p>}
+        {data.codigoDocumento && <div style={{ marginTop: '.5rem', fontSize: '.8rem', color: '#94a3b8' }}>Código: {data.codigoDocumento} · Versão: {data.versao}</div>}
+      </div>
+
+      {/* Tópicos / Listas */}
+      {data.topicos && data.topicos.length > 0 && (
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '.9rem', color: '#334155', marginBottom: '.5rem' }}>Conteúdo do Documento</div>
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+            {data.topicos.map((t, i) => <li key={i} style={{ fontSize: '.88rem', color: '#475569', lineHeight: 1.5 }}>{t}</li>)}
+          </ul>
+        </div>
+      )}
+      {data.competenciasGerais && (
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '.9rem', color: '#334155', marginBottom: '.5rem' }}>Competências Gerais</div>
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+            {data.competenciasGerais.map((c, i) => <li key={i} style={{ fontSize: '.88rem', color: '#475569', lineHeight: 1.5 }}>{c}</li>)}
+          </ul>
+        </div>
+      )}
+      {data.competenciasEspecificas && (
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '.9rem', color: '#334155', marginBottom: '.5rem' }}>Competências Específicas da Área</div>
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+            {data.competenciasEspecificas.map((c, i) => <li key={i} style={{ fontSize: '.88rem', color: '#475569', lineHeight: 1.5 }}>{c}</li>)}
+          </ul>
+        </div>
+      )}
+      {data.turnos && (
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '.9rem', color: '#334155', marginBottom: '.5rem' }}>Turnos Lectivos</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: '.65rem' }}>
+            {data.turnos.map((t, i) => (
+              <div key={i} style={{ background: '#eff6ff', borderRadius: '8px', padding: '.75rem', border: '1px solid #bfdbfe' }}>
+                <div style={{ fontWeight: 700, fontSize: '.87rem', color: '#1d4ed8' }}>{t.nome}</div>
+                <div style={{ fontSize: '.82rem', color: '#475569', marginTop: '.2rem' }}>{t.horario}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {data.ficheiroNome && (
+        <div style={{ display: 'flex', gap: '.75rem', alignItems: 'center', paddingTop: '.75rem', borderTop: '1px solid #f1f5f9' }}>
+          <span style={{ fontSize: '.88rem', color: '#64748b' }}>📎 {data.ficheiroNome}</span>
+          <button className="btn-ava-sm" disabled style={{ opacity: .6 }}>⬇️ Download (disponível mediante autorização)</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TabMeuCurso({ user, isIfoptec }) {
+  const isAdmin   = user && (user.tipo === 'especialista' || user.tipo === 'admin');
+  const isDocente = user && user.tipo === 'docente';
+  const isEstudante = user && user.tipo === 'estudante';
+
+  // Curso do utilizador (estudante vê só o seu; admin/docente pode seleccionar)
+  const cursosDisponiveis = isIfoptec
+    ? [...CURSOS_TECNICOS_MEDIOS_IFOPTEC, ...CURSOS_IFOPTEC.filter(c => !CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c))]
+    : [...CURSOS_ISPOTEC, ...CURSOS_TECNICOS_MEDIOS_IFOPTEC];
+
+  const userCurso = user?.curso || user?.cursos_associados?.[0] || '';
+  const defaultCurso = isEstudante ? userCurso : (isIfoptec ? CURSOS_TECNICOS_MEDIOS_IFOPTEC[0] : CURSOS_ISPOTEC[0]);
+
+  const [cursoSel, setCursoSel]   = useState(defaultCurso || cursosDisponiveis[0] || '');
+  const [anoSel, setAnoSel]       = useState(1);
+  const [semSel, setSemSel]       = useState(1);
+  const [infoTab, setInfoTab]     = useState(null); // null = mostrar navegação; string = mostrar info geral
+  const [salas, setSalas]         = useState([]);
+  const [loadSalas, setLoadSalas] = useState(false);
+
+  // Associar estudante — apenas ADMIN
+  const [showAssocModal, setShowAssocModal] = useState(false);
+  const [assocEmail, setAssocEmail]         = useState('');
+  const [assocCurso, setAssocCurso]         = useState(cursosDisponiveis[0] || '');
+  const [assocFb, setAssocFb]               = useState({ msg: '', tipo: '' });
+  const [assocLoading, setAssocLoading]     = useState(false);
+
+  // Estrutura curricular e informações gerais
+  const estrutura   = cursoSel ? getEstruturaCurricular(cursoSel) : null;
+  const infoGerais  = cursoSel ? getInformacoesGeraisPadrao(cursoSel) : null;
+  const anosDisponiveis = estrutura?.anos || [];
+  const anoData     = anosDisponiveis.find(a => a.ano === anoSel) || anosDisponiveis[0];
+  const semData     = anoData?.semestres?.find(s => s.semestre === semSel) || anoData?.semestres?.[0];
+  const modulos     = semData?.modulos || [];
+
+  // Carregar salas virtuais do curso seleccionado (para link "Entrar")
+  useEffect(() => {
+    if (!cursoSel) return;
+    setLoadSalas(true);
+    homeSchoolService.getSalas(user)
+      .then(all => setSalas(all.filter(s => s.curso === cursoSel)))
+      .catch(() => setSalas([]))
+      .finally(() => setLoadSalas(false));
+  }, [cursoSel]);
+
+  const fb = (msg, tipo = 'sucesso') => { setAssocFb({ msg, tipo }); setTimeout(() => setAssocFb({ msg: '', tipo: '' }), 4000); };
+
+  const handleAssociar = async (e) => {
+    e.preventDefault();
+    if (!assocEmail.trim() || !assocCurso) { fb('Email e curso são obrigatórios.', 'erro'); return; }
+    setAssocLoading(true);
+    try {
+      // Salvar associação via localStorage (compatível com backend quando disponível)
+      const existing = JSON.parse(localStorage.getItem('ispotec_student_course_assignments') || '{}');
+      existing[assocEmail.trim().toLowerCase()] = { curso: assocCurso, data: new Date().toISOString() };
+      localStorage.setItem('ispotec_student_course_assignments', JSON.stringify(existing));
+      fb(`Estudante "${assocEmail}" associado ao curso "${assocCurso}" com sucesso!`);
+      setAssocEmail('');
+    } catch { fb('Erro ao associar estudante.', 'erro'); }
+    finally { setAssocLoading(false); }
+  };
+
+  // Se estudante sem curso, mostrar aviso
+  if (isEstudante && !userCurso) {
+    return (
+      <div className="ava-empty" style={{ marginTop: '1rem' }}>
+        <div className="ava-empty-icon">🎓</div>
+        <h3 style={{ color: '#1e293b' }}>Ainda não foi associado a um curso</h3>
+        <p style={{ maxWidth: '480px', margin: '.5rem auto 0' }}>
+          O seu registo foi recebido. Aguarde que o <strong>Administrador</strong> o associe ao seu curso.
+          Caso já tenha efectuado a matrícula, contacte os serviços académicos.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Painel ADMIN: Associar Estudantes */}
+      {isAdmin && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button className="btn-ava-primary" onClick={() => setShowAssocModal(true)}>
+              👥 Associar Estudante a Curso
+            </button>
+          </div>
+          {showAssocModal && (
+            <div className="ava-modal-bg" onClick={() => setShowAssocModal(false)}>
+              <div className="ava-modal" onClick={e => e.stopPropagation()}>
+                <h3>👥 Associar Estudante ao Curso</h3>
+                {assocFb.msg && <div className={assocFb.tipo === 'sucesso' ? 'ava-alert-ok' : 'ava-alert-err'} style={{ marginBottom: '1rem' }}>{assocFb.msg}</div>}
+                <form onSubmit={handleAssociar}>
+                  <div className="ava-form-full">
+                    <label className="ava-label">Email do Estudante *</label>
+                    <input className="ava-input" type="email" required placeholder="estudante@ispotec.ac.mz"
+                      value={assocEmail} onChange={e => setAssocEmail(e.target.value)} />
+                  </div>
+                  <div className="ava-form-full">
+                    <label className="ava-label">Curso a Associar *</label>
+                    <select className="ava-input" required value={assocCurso} onChange={e => setAssocCurso(e.target.value)}>
+                      {isIfoptec ? (
+                        <>
+                          <optgroup label="🏥 Técnicos Médios IFOPTEC">
+                            {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                          </optgroup>
+                          <optgroup label="⚡ Curta Duração IFOPTEC">
+                            {CURSOS_IFOPTEC.filter(c => !CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c)).map(c => <option key={c} value={c}>{c}</option>)}
+                          </optgroup>
+                        </>
+                      ) : (
+                        <>
+                          <optgroup label="🎓 Licenciaturas ISPOTEC">
+                            {CURSOS_ISPOTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                          </optgroup>
+                          <optgroup label="🏥 Técnicos Médios IFOPTEC">
+                            {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                          </optgroup>
+                        </>
+                      )}
+                    </select>
+                  </div>
+                  <div className="ava-modal-footer">
+                    <button type="button" className="btn-ava-cancel" onClick={() => setShowAssocModal(false)}>Cancelar</button>
+                    <button type="submit" className="btn-ava-primary" disabled={assocLoading}>{assocLoading ? 'A associar...' : '✅ Associar'}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Selector de Curso (Admin/Docente) */}
+      {!isEstudante && (
+        <div className="ava-filter-bar" style={{ marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
+            <span style={{ fontWeight: 700, color: '#334155', fontSize: '.9rem' }}>📚 Visualizar Curso:</span>
+            <select className="ava-select" style={{ flex: 1, minWidth: '260px' }} value={cursoSel} onChange={e => { setCursoSel(e.target.value); setAnoSel(1); setSemSel(1); setInfoTab(null); }}>
+              {isIfoptec ? (
+                <>
+                  <optgroup label="🏥 Técnicos Médios IFOPTEC">
+                    {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                  </optgroup>
+                  <optgroup label="⚡ Curta Duração IFOPTEC">
+                    {CURSOS_IFOPTEC.filter(c => !CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c)).map(c => <option key={c} value={c}>{c}</option>)}
+                  </optgroup>
+                  <optgroup label="🎓 Licenciaturas ISPOTEC">
+                    {CURSOS_ISPOTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                  </optgroup>
+                </>
+              ) : (
+                <>
+                  <optgroup label="🎓 Licenciaturas ISPOTEC">
+                    {CURSOS_ISPOTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                  </optgroup>
+                  <optgroup label="🏥 Técnicos Médios IFOPTEC">
+                    {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c => <option key={c} value={c}>{c}</option>)}
+                  </optgroup>
+                </>
+              )}
+            </select>
+          </div>
+        </div>
+      )}
+
+      {cursoSel && estrutura && (
+        <>
+          {/* Cabeçalho do Curso */}
+          <div style={{ background: 'linear-gradient(135deg,#1e1b4b,#312e81,#4338ca)', borderRadius: '14px', padding: '1.5rem 1.75rem', color: '#fff', marginBottom: '1.25rem', boxShadow: '0 8px 20px -5px rgba(49,46,129,.25)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', right: '15px', bottom: '-10px', fontSize: '6rem', opacity: .07, pointerEvents: 'none' }}>🎓</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: 'rgba(255,255,255,.18)', border: '1px solid rgba(255,255,255,.3)', padding: '.25rem .75rem', borderRadius: '20px', fontSize: '.75rem', fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', marginBottom: '.75rem' }}>
+              {CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(cursoSel) ? '🏥 IFOPTEC — TÉCNICO MÉDIO' : '🎓 ISPOTEC — LICENCIATURA'}
+            </div>
+            <h2 style={{ margin: '0 0 .3rem', fontSize: '1.4rem', fontWeight: 800, lineHeight: 1.2 }}>{cursoSel}</h2>
+            <div style={{ fontSize: '.88rem', color: 'rgba(255,255,255,.85)', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+              <span>⏱️ {estrutura.cargaHorariaTotal || `${(estrutura.duracaoAnos || 3) * 600}h Total`}</span>
+              <span>📅 {estrutura.duracaoAnos || 3} Anos Curriculares</span>
+              <span>🏅 {estrutura.nivel || (CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(cursoSel) ? 'Técnico Médio' : 'Licenciatura')}</span>
+              {isEstudante && <span style={{ background: 'rgba(16,185,129,.25)', borderRadius: '6px', padding: '.1rem .5rem', fontSize: '.78rem' }}>✓ O Seu Curso</span>}
+            </div>
+          </div>
+
+          {/* 9 Informações Gerais do Curso */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b', marginBottom: '.75rem', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+              📌 Informações Gerais do Curso
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(190px,1fr))', gap: '.5rem', marginBottom: '.75rem' }}>
+              {INFO_GERAIS_LABELS.map(item => (
+                <button key={item.key}
+                  onClick={() => setInfoTab(infoTab === item.key ? null : item.key)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '.5rem', padding: '.6rem .9rem',
+                    borderRadius: '8px', border: `1px solid ${infoTab === item.key ? '#4338ca' : '#e2e8f0'}`,
+                    background: infoTab === item.key ? 'linear-gradient(135deg,#4338ca,#3730a3)' : '#fff',
+                    color: infoTab === item.key ? '#fff' : '#334155',
+                    fontWeight: 600, fontSize: '.82rem', cursor: 'pointer', textAlign: 'left',
+                    transition: 'all .15s', boxShadow: infoTab === item.key ? '0 4px 10px rgba(67,56,202,.2)' : 'none'
+                  }}
+                >
+                  <span>{item.icon}</span> {item.label}
+                </button>
+              ))}
+            </div>
+            {infoTab && infoGerais && (
+              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,.04)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '.75rem', borderBottom: '1px solid #f1f5f9' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
+                    {INFO_GERAIS_LABELS.find(i => i.key === infoTab)?.icon} {INFO_GERAIS_LABELS.find(i => i.key === infoTab)?.label}
+                  </h3>
+                  <button onClick={() => setInfoTab(null)} style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '.25rem .6rem', cursor: 'pointer', color: '#475569', fontSize: '.82rem' }}>✕ Fechar</button>
+                </div>
+                <InfoGeralSection infoKey={infoTab} icon={INFO_GERAIS_LABELS.find(i => i.key === infoTab)?.icon} label={INFO_GERAIS_LABELS.find(i => i.key === infoTab)?.label} infoGerais={infoGerais} />
+              </div>
+            )}
+          </div>
+
+          {/* Divisor */}
+          <div style={{ height: '1px', background: '#e2e8f0', marginBottom: '1.5rem' }} />
+
+          {/* Navegação Hierárquica: Ano → Semestre → Módulos */}
+          <div style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+            🗂️ Estrutura Curricular — Seleccione Ano e Semestre
+          </div>
+
+          {/* Selector de Ano */}
+          <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            {anosDisponiveis.map(a => (
+              <button key={a.ano}
+                onClick={() => { setAnoSel(a.ano); setSemSel(1); setInfoTab(null); }}
+                style={{
+                  padding: '.6rem 1.2rem', borderRadius: '8px', fontWeight: 700, fontSize: '.9rem', cursor: 'pointer', border: '2px solid',
+                  borderColor: anoSel === a.ano ? '#4338ca' : '#e2e8f0',
+                  background: anoSel === a.ano ? 'linear-gradient(135deg,#4338ca,#3730a3)' : '#fff',
+                  color: anoSel === a.ano ? '#fff' : '#334155',
+                  boxShadow: anoSel === a.ano ? '0 4px 10px rgba(67,56,202,.2)' : 'none',
+                  transition: 'all .15s'
+                }}
+              >
+                📅 {a.titulo}
+              </button>
+            ))}
+          </div>
+
+          {/* Selector de Semestre */}
+          {anoData && (
+            <div style={{ display: 'flex', gap: '.6rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+              {anoData.semestres?.map(s => (
+                <button key={s.semestre}
+                  onClick={() => { setSemSel(s.semestre); setInfoTab(null); }}
+                  style={{
+                    padding: '.5rem 1.1rem', borderRadius: '8px', fontWeight: 600, fontSize: '.87rem', cursor: 'pointer', border: '2px solid',
+                    borderColor: semSel === s.semestre ? '#0284c7' : '#e2e8f0',
+                    background: semSel === s.semestre ? 'linear-gradient(135deg,#0284c7,#0369a1)' : '#fff',
+                    color: semSel === s.semestre ? '#fff' : '#334155',
+                    boxShadow: semSel === s.semestre ? '0 4px 10px rgba(2,132,199,.2)' : 'none',
+                    transition: 'all .15s'
+                  }}
+                >
+                  📗 {s.titulo}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Breadcrumb de navegação */}
+          {anoData && semData && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.82rem', color: '#64748b', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 600, color: '#334155' }}>{cursoSel}</span>
+              <span>›</span>
+              <span style={{ fontWeight: 600, color: '#4338ca' }}>{anoData.titulo}</span>
+              <span>›</span>
+              <span style={{ fontWeight: 600, color: '#0284c7' }}>{semData.titulo}</span>
+              <span style={{ background: '#dbeafe', color: '#1d4ed8', borderRadius: '6px', padding: '.15rem .55rem', fontWeight: 700, fontSize: '.75rem' }}>
+                {modulos.length} Módulo{modulos.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+
+          {/* Grid de Módulos */}
+          {modulos.length === 0 ? (
+            <div className="ava-empty">
+              <div className="ava-empty-icon">📚</div>
+              <h3 style={{ color: '#1e293b' }}>Nenhum módulo disponível</h3>
+              <p>Seleccione um ano e semestre para visualizar os módulos correspondentes.</p>
+            </div>
+          ) : (
+            <div className="ava-grid">
+              {modulos.map(mod => {
+                const isTecMed = CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(cursoSel);
+                // Tentar encontrar sala virtual correspondente ao módulo
+                const salaMatch = salas.find(s =>
+                  (s.modulo || s.disciplina || '').toLowerCase().includes((mod.nome || '').substring(0, 15).toLowerCase()) ||
+                  (s.nome || '').toLowerCase().includes((mod.codigo || '').toLowerCase())
+                );
+                const salaId = salaMatch ? (salaMatch.id || salaMatch._id) : null;
+                const estadoColor = mod.estado === 'Disponível' ? { bg: '#d1fae5', color: '#065f46' } :
+                  mod.estado === 'Em Breve' ? { bg: '#fef3c7', color: '#92400e' } :
+                  { bg: '#f1f5f9', color: '#475569' };
+
+                return (
+                  <div key={mod.id || mod.codigo} className="ava-card"
+                    style={{ borderTop: `4px solid ${isTecMed ? '#0284c7' : '#4338ca'}` }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '.5rem', marginBottom: '.6rem', flexWrap: 'wrap' }}>
+                        {mod.codigo && (
+                          <span style={{ background: isTecMed ? '#e0f2fe' : '#ede9fe', color: isTecMed ? '#0369a1' : '#5b21b6', fontSize: '.72rem', fontWeight: 700, padding: '.18rem .55rem', borderRadius: '5px' }}>
+                            🏷️ {mod.codigo}
+                          </span>
+                        )}
+                        <span className="ava-badge" style={{ background: estadoColor.bg, color: estadoColor.color, fontSize: '.7rem' }}>
+                          {mod.estado || 'Disponível'}
+                        </span>
+                      </div>
+                      <h3 className="ava-card-title" style={{ fontSize: '.97rem' }}>{mod.nome}</h3>
+                      <div className="ava-card-meta" style={{ marginTop: '.5rem' }}>
+                        {mod.docente && <div>👨‍🏫 <strong>Docente:</strong> {mod.docente}</div>}
+                        {mod.cargaHoraria && <div>⏱️ <strong>Carga Horária:</strong> {mod.cargaHoraria}</div>}
+                        <div>📅 <strong>Período:</strong> {anoData?.titulo} · {semData?.titulo}</div>
+                      </div>
+                    </div>
+                    <div className="ava-card-actions">
+                      {loadSalas ? (
+                        <span style={{ fontSize: '.82rem', color: '#94a3b8' }}>⏳ A carregar...</span>
+                      ) : salaId ? (
+                        <Link to={`/homeschool/sala/${salaId}`} className="btn-ava-enter"
+                          style={isTecMed ? { background: 'linear-gradient(135deg,#0284c7,#0369a1)' } : {}}>
+                          🏫 Entrar na Sala Virtual →
+                        </Link>
+                      ) : (
+                        <span style={{ fontSize: '.82rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                          🔒 Sala não atribuída ainda
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {!cursoSel && (
+        <div className="ava-empty">
+          <div className="ava-empty-icon">🎓</div>
+          <p>Seleccione um curso para visualizar a estrutura curricular.</p>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
    MAIN COMPONENT
    ──────────────────────────────────────────────────────────────────────────── */
 const TABS = [
-  { key:'salas',   label:'Sala de Aula Virtual', icon:'🏫' },
-  { key:'sessoes', label:'Plano de Sessões / Sumários', icon:'📋' },
-  { key:'tutoria', label:'Tutoria e Mentoria', icon:'🤝' },
-  { key:'desempenho', label:'Desempenho do Estudante', icon:'📊' },
+  { key:'curso',     label:'Meu Curso', icon:'🎓' },
+  { key:'salas',     label:'Salas Virtuais', icon:'🏫' },
+  { key:'sessoes',   label:'Plano de Sessões / Sumários', icon:'📋' },
+  { key:'tutoria',   label:'Tutoria e Mentoria', icon:'🤝' },
+  { key:'desempenho',label:'Desempenho do Estudante', icon:'📊' },
 ];
 
 export default function HomeSchool() {
   const { user } = useAuth();
   const { isIfoptec } = useInstitution();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'salas';
+  const isEstudante = user && user.tipo === 'estudante';
+  // Estudante começa sempre em "Meu Curso"; outros em "salas"
+  const defaultTab = isEstudante ? 'curso' : 'salas';
+  const activeTab = searchParams.get('tab') || defaultTab;
 
   const setTab = (key) => setSearchParams({ tab: key }, { replace: true });
+
+  // Tabs visíveis: estudante não vê "Plano de Sessões" nem botões de gestão
+  const visibleTabs = TABS.filter(t => {
+    if (isEstudante && t.key === 'sessoes') return false;
+    return true;
+  });
 
   return (
     <>
@@ -1293,14 +1744,14 @@ export default function HomeSchool() {
           <h1>{isIfoptec ? 'Ambiente Virtual de Aprendizagem IFOPTEC' : 'Ambiente Virtual de Aprendizagem'}</h1>
           <p>
             {isIfoptec
-              ? 'Espaço digital de apoio ao ensino técnico médio profissionalizante e cursos de saúde. Aceda às salas virtuais por turma, programas curriculares, sumários de aulas e tutoria especializada.'
-              : 'Espaço digital integrado de ensino, aprendizagem, comunicação e acompanhamento dos estudantes. Planifique sessões, registe sumários, acompanhe estudantes e gerencie tutorias num único portal institucional.'}
+              ? 'Espaço digital de apoio ao ensino técnico médio profissionalizante e cursos de saúde. Aceda ao seu curso, salas virtuais, sumários de aulas e tutoria especializada.'
+              : 'Espaço digital integrado de ensino, aprendizagem e acompanhamento académico. Aceda ao seu curso, salas virtuais, sumários, tutoria e desempenho académico.'}
           </p>
         </div>
 
         {/* Tab Navigation */}
         <div className="ava-tabs">
-          {TABS.map(t => (
+          {visibleTabs.map(t => (
             <button key={t.key} className={`ava-tab ${activeTab===t.key?'active':''}`} onClick={()=>setTab(t.key)}>
               <span>{t.icon}</span> {t.label}
             </button>
@@ -1308,6 +1759,7 @@ export default function HomeSchool() {
         </div>
 
         {/* Tab Content */}
+        {activeTab === 'curso'      && <TabMeuCurso user={user} isIfoptec={isIfoptec} />}
         {activeTab === 'salas'      && <TabSalasVirtuais user={user} isIfoptec={isIfoptec} />}
         {activeTab === 'sessoes'    && <TabPlanoSessoes user={user} isIfoptec={isIfoptec} />}
         {activeTab === 'tutoria'    && <TabTutoria user={user} isIfoptec={isIfoptec} />}

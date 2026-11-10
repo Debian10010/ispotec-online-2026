@@ -63,8 +63,16 @@ export const userService = {
   async updateUserProfileByAdmin(userId, data) {
     try {
       const res = await api.put(`/users/${userId}`, {
+        nome: data.nome,
         email: data.email,
         foto_perfil: data.foto_perfil,
+        curso: data.curso,
+        cursos_associados: data.cursos_associados,
+        ano_curricular: data.ano_curricular,
+        semestre_curricular: data.semestre_curricular,
+        nivel_academico: data.nivel_academico,
+        tipo: data.tipo,
+        status: data.status,
       });
       return {
         sucesso: true,
@@ -77,6 +85,20 @@ export const userService = {
         sucesso: false,
         mensagem: error.message || 'Erro ao atualizar perfil do utilizador.',
       };
+    }
+  },
+
+  async associarCurso(userId, data) {
+    try {
+      const res = await api.put(`/users/${userId}/curso`, data);
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Curso associado com sucesso.',
+        dados: res.dados,
+      };
+    } catch (error) {
+      console.warn('[userService.associarCurso fallback to update]', error.message);
+      return await this.updateUserProfileByAdmin(userId, data);
     }
   },
 
