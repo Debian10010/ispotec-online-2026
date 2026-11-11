@@ -12,6 +12,8 @@ import {
 import { getEstruturaCurricular, getInformacoesGeraisPadrao } from '../../services/curriculoService';
 import { planoSessaoService } from '../../services/planoSessaoService';
 import { tutoriaService } from '../../services/tutoriaService';
+import { userService } from '../../services/userService';
+import { auditLogService } from '../../services/auditLogService';
 
 /* ─── Shared styles ─────────────────────────────────────────────────────────── */
 const CSS = `
@@ -1372,10 +1374,29 @@ function TabMeuCurso({ user, isIfoptec }) {
 
   // Associar estudante — apenas ADMIN
   const [showAssocModal, setShowAssocModal] = useState(false);
-  const [assocEmail, setAssocEmail]         = useState('');
-  const [assocCurso, setAssocCurso]         = useState(cursosDisponiveis[0] || '');
+  const [searchEstudanteAdd, setSearchEstudanteAdd] = useState('');
+  const [searchInscritos, setSearchInscritos] = useState('');
+  const [allEstudantes, setAllEstudantes]   = useState([]);
+  const [loadEstudantes, setLoadEstudantes] = useState(false);
   const [assocFb, setAssocFb]               = useState({ msg: '', tipo: '' });
   const [assocLoading, setAssocLoading]     = useState(false);
+
+  const carregarEstudantes = async () => {
+    if (!isAdmin && !isDocente) return;
+    setLoadEstudantes(true);
+    try {
+      const res = await userService.getAllUsers({ tipo: 'estudante' });
+      setAllEstudantes(res || []);
+    } catch (err) {
+      console.warn('Erro ao carregar estudantes:', err);
+    } finally {
+      setLoadEstudantes(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarEstudantes();
+  }, [isAdmin, isDocente]);
 
   // Estrutura curricular e informações gerais
   const estrutura   = cursoSel ? getEstruturaCurricular(cursoSel) : null;
@@ -1384,6 +1405,34 @@ function TabMeuCurso({ user, isIfoptec }) {
   const anoData     = anosDisponiveis.find(a => a.ano === anoSel) || anosDisponiveis[0];
   const semData     = anoData?.semestres?.find(s => s.semestre === semSel) || anoData?.semestres?.[0];
   const modulos     = semData?.modulos || [];
+
+  // Estudantes inscritos no curso seleccionado
+  const estudantesInscritos = allEstudantes.filter(est => {
+    if (!est) return false;
+    if (est.curso === cursoSel) return true;
+    if (Array.isArray(est.cursos_associados) && est.cursos_associados.includes(cursoSel)) return true;
+    return false;
+  });
+
+  const estudantesFiltradosInscritos = estudantesInscritos.filter(est => {
+    if (!searchInscritos.trim()) return true;
+    const q = searchInscritos.toLowerCase();
+    return (
+      (est.nome || '').toLowerCase().includes(q) ||
+      (est.email || '').toLowerCase().includes(q) ||
+      (est.numero_estudante || '').toLowerCase().includes(q)
+    );
+  });
+
+  const candidatosInscricao = allEstudantes.filter(est => {
+    if (!searchEstudanteAdd.trim()) return true;
+    const q = searchEstudanteAdd.toLowerCase();
+    return (
+      (est.nome || '').toLowerCase().includes(q) ||
+      (est.email || '').toLowerCase().includes(q) ||
+      (est.numero_estudante || '').toLowerCase().includes(q)
+    );
+  });
 
   // Carregar salas virtuais do curso seleccionado (para link "Entrar")
   useEffect(() => {
@@ -1395,21 +1444,70 @@ function TabMeuCurso({ user, isIfoptec }) {
       .finally(() => setLoadSalas(false));
   }, [cursoSel]);
 
-  const fb = (msg, tipo = 'sucesso') => { setAssocFb({ msg, tipo }); setTimeout(() => setAssocFb({ msg: '', tipo: '' }), 4000); };
+  const fb = (msg, tipo = 'sucesso') => { setAssocFb({ msg, tipo }); setTimeout(() => setAssocFb({ msg: '', tipo: '' }), 5000); };
 
-  const handleAssociar = async (e) => {
-    e.preventDefault();
-    if (!assocEmail.trim() || !assocCurso) { fb('Email e curso são obrigatórios.', 'erro'); return; }
+  const handleInscreverEstudante = async (estudante) => {
+    if (!isAdmin) return;
+    const nome = estudante.nome || estudante.email;
+    if (!window.confirm(`Tem a certeza que deseja inscrever o estudante "${nome}" no curso "${cursoSel}"?`)) {
+      return;
+    }
     setAssocLoading(true);
     try {
-      // Salvar associação via localStorage (compatível com backend quando disponível)
-      const existing = JSON.parse(localStorage.getItem('ispotec_student_course_assignments') || '{}');
-      existing[assocEmail.trim().toLowerCase()] = { curso: assocCurso, data: new Date().toISOString() };
-      localStorage.setItem('ispotec_student_course_assignments', JSON.stringify(existing));
-      fb(`Estudante "${assocEmail}" associado ao curso "${assocCurso}" com sucesso!`);
-      setAssocEmail('');
-    } catch { fb('Erro ao associar estudante.', 'erro'); }
-    finally { setAssocLoading(false); }
+      const res = await userService.associarCurso(estudante.id || estudante._id, { curso: cursoSel });
+      if (res.sucesso) {
+        await auditLogService.addLog({
+          autor_id: user?.id || 'admin',
+          autor_nome: user?.nome || 'Administrador',
+          autor_email: user?.email || '',
+          acao: 'Inscrever Estudante em Curso (AVA)',
+          detalhes: `Inscreveu estudante "${nome}" no curso "${cursoSel}"`,
+          utilizador_afetado_id: estudante.id || estudante._id,
+          utilizador_afetado_nome: estudante.nome,
+          utilizador_afetado_email: estudante.email
+        });
+        fb(`Estudante "${nome}" inscrito no curso "${cursoSel}" com sucesso!`, 'sucesso');
+        await carregarEstudantes();
+      } else {
+        fb(res.mensagem || 'Erro ao inscrever estudante.', 'erro');
+      }
+    } catch (err) {
+      fb(err.message || 'Erro ao inscrever estudante.', 'erro');
+    } finally {
+      setAssocLoading(false);
+    }
+  };
+
+  const handleRemoverEstudante = async (estudante) => {
+    if (!isAdmin) return;
+    const nome = estudante.nome || estudante.email;
+    if (!window.confirm(`Tem a certeza que deseja remover o estudante "${nome}" do curso "${cursoSel}"?\n\nO estudante perderá imediatamente o acesso a este curso no AVA.`)) {
+      return;
+    }
+    setAssocLoading(true);
+    try {
+      const res = await userService.removerCurso(estudante.id || estudante._id, cursoSel);
+      if (res.sucesso) {
+        await auditLogService.addLog({
+          autor_id: user?.id || 'admin',
+          autor_nome: user?.nome || 'Administrador',
+          autor_email: user?.email || '',
+          acao: 'Remover Estudante do Curso (AVA)',
+          detalhes: `Removeu estudante "${nome}" do curso "${cursoSel}"`,
+          utilizador_afetado_id: estudante.id || estudante._id,
+          utilizador_afetado_nome: estudante.nome,
+          utilizador_afetado_email: estudante.email
+        });
+        fb(`Estudante "${nome}" removido do curso "${cursoSel}" com sucesso!`, 'sucesso');
+        await carregarEstudantes();
+      } else {
+        fb(res.mensagem || 'Erro ao remover estudante.', 'erro');
+      }
+    } catch (err) {
+      fb(err.message || 'Erro ao remover estudante.', 'erro');
+    } finally {
+      setAssocLoading(false);
+    }
   };
 
   // Se estudante sem curso, mostrar aviso
@@ -1428,66 +1526,163 @@ function TabMeuCurso({ user, isIfoptec }) {
 
   return (
     <>
-      {/* Painel ADMIN: Associar Estudantes */}
-      {isAdmin && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button className="btn-ava-primary" onClick={() => setShowAssocModal(true)}>
-              👥 Associar Estudante a Curso
-            </button>
-          </div>
-          {showAssocModal && (
-            <div className="ava-modal-bg" onClick={() => setShowAssocModal(false)}>
-              <div className="ava-modal" onClick={e => e.stopPropagation()}>
-                <h3>👥 Associar Estudante ao Curso</h3>
-                {assocFb.msg && <div className={assocFb.tipo === 'sucesso' ? 'ava-alert-ok' : 'ava-alert-err'} style={{ marginBottom: '1rem' }}>{assocFb.msg}</div>}
-                <form onSubmit={handleAssociar}>
-                  <div className="ava-form-full">
-                    <label className="ava-label">Email do Estudante *</label>
-                    <input className="ava-input" type="email" required placeholder="estudante@ispotec.ac.mz"
-                      value={assocEmail} onChange={e => setAssocEmail(e.target.value)} />
-                  </div>
-                  <div className="ava-form-full">
-                    <label className="ava-label">Curso a Associar *</label>
-                    <select className="ava-input" required value={assocCurso} onChange={e => setAssocCurso(e.target.value)}>
-                      {isIfoptec ? (
-                        <>
-                          <optgroup label="🏥 Técnicos Médios IFOPTEC">
-                            {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c => <option key={c} value={c}>{c}</option>)}
-                          </optgroup>
-                          <optgroup label="⚡ Curta Duração IFOPTEC">
-                            {CURSOS_IFOPTEC.filter(c => !CURSOS_TECNICOS_MEDIOS_IFOPTEC.includes(c)).map(c => <option key={c} value={c}>{c}</option>)}
-                          </optgroup>
-                        </>
-                      ) : (
-                        <>
-                          <optgroup label="🎓 Licenciaturas ISPOTEC">
-                            {CURSOS_ISPOTEC.map(c => <option key={c} value={c}>{c}</option>)}
-                          </optgroup>
-                          <optgroup label="🏥 Técnicos Médios IFOPTEC">
-                            {CURSOS_TECNICOS_MEDIOS_IFOPTEC.map(c => <option key={c} value={c}>{c}</option>)}
-                          </optgroup>
-                        </>
-                      )}
-                    </select>
-                  </div>
-                  <div className="ava-modal-footer">
-                    <button type="button" className="btn-ava-cancel" onClick={() => setShowAssocModal(false)}>Cancelar</button>
-                    <button type="submit" className="btn-ava-primary" disabled={assocLoading}>{assocLoading ? 'A associar...' : '✅ Associar'}</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
+      {/* Toast Feedback */}
+      {assocFb.msg && (
+        <div
+          className={assocFb.tipo === 'sucesso' ? 'ava-alert-ok' : 'ava-alert-err'}
+          style={{
+            marginBottom: '1rem',
+            padding: '0.85rem 1.25rem',
+            borderRadius: '10px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: assocFb.tipo === 'sucesso' ? '#ecfdf5' : '#fef2f2',
+            color: assocFb.tipo === 'sucesso' ? '#065f46' : '#991b1b',
+            border: `1px solid ${assocFb.tipo === 'sucesso' ? '#a7f3d0' : '#fecaca'}`
+          }}
+        >
+          <span>{assocFb.tipo === 'sucesso' ? '✅' : '⚠️'} {assocFb.msg}</span>
+          <button
+            onClick={() => setAssocFb({ msg: '', tipo: '' })}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'inherit' }}
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Selector de Curso (Admin/Docente) */}
+      {/* Modal ADMIN: Inscrever Estudante no Curso (RF04) */}
+      {isAdmin && showAssocModal && (
+        <div className="ava-modal-bg" onClick={() => setShowAssocModal(false)}>
+          <div className="ava-modal" style={{ maxWidth: '780px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a' }}>
+                ➕ Inscrever Estudante no Curso
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAssocModal(false)}
+                style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: '#64748b' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{
+              background: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '8px',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              fontSize: '0.86rem',
+              color: '#1e40af'
+            }}>
+              <strong>Curso Seleccionado:</strong> {cursoSel}
+              <div style={{ fontSize: '0.78rem', color: '#3b82f6', marginTop: '0.2rem' }}>
+                Pesquise por Nome, Nº de Estudante ou Email e clique em <strong>Inscrever</strong> para associar imediatamente.
+              </div>
+            </div>
+
+            <div className="ava-form-full" style={{ marginBottom: '1rem' }}>
+              <label className="ava-label">🔎 Pesquisar Estudante</label>
+              <input
+                className="ava-input"
+                type="text"
+                placeholder="Introduza o nome, número de estudante ou email..."
+                value={searchEstudanteAdd}
+                onChange={e => setSearchEstudanteAdd(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div style={{ maxHeight: '350px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+              {loadEstudantes ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                  ⏳ A carregar lista de estudantes...
+                </div>
+              ) : candidatosInscricao.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                  Nenhum estudante encontrado com o critério de pesquisa.
+                </div>
+              ) : (
+                <table className="ava-table" style={{ margin: 0 }}>
+                  <thead>
+                    <tr>
+                      <th>Nº</th>
+                      <th>Estudante</th>
+                      <th>Email</th>
+                      <th>Curso Actual</th>
+                      <th style={{ textAlign: 'center' }}>Acção</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {candidatosInscricao.slice(0, 50).map(est => {
+                      const isInscrito = est.curso === cursoSel ||
+                        (Array.isArray(est.cursos_associados) && est.cursos_associados.includes(cursoSel));
+
+                      return (
+                        <tr key={est.id || est._id}>
+                          <td style={{ fontWeight: 600, color: '#4338ca' }}>
+                            {est.numero_estudante || '—'}
+                          </td>
+                          <td>
+                            <strong>{est.nome}</strong>
+                          </td>
+                          <td style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            {est.email}
+                          </td>
+                          <td style={{ fontSize: '0.8rem' }}>
+                            {est.curso || '—'}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            {isInscrito ? (
+                              <span className="ava-badge badge-green">✓ Já Inscrito</span>
+                            ) : (
+                              <button
+                                type="button"
+                                className="btn-ava-primary"
+                                style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                                disabled={assocLoading}
+                                onClick={() => handleInscreverEstudante(est)}
+                              >
+                                {assocLoading ? '...' : '➕ Inscrever'}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="ava-modal-footer" style={{ marginTop: '1.25rem' }}>
+              <button
+                type="button"
+                className="btn-ava-cancel"
+                onClick={() => setShowAssocModal(false)}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selector de Curso e Controlo ADMIN/DOCENTE */}
       {!isEstudante && (
-        <div className="ava-filter-bar" style={{ marginBottom: '1.25rem' }}>
+        <div className="ava-filter-bar" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
             <span style={{ fontWeight: 700, color: '#334155', fontSize: '.9rem' }}>📚 Visualizar Curso:</span>
-            <select className="ava-select" style={{ flex: 1, minWidth: '260px' }} value={cursoSel} onChange={e => { setCursoSel(e.target.value); setAnoSel(1); setSemSel(1); setInfoTab(null); }}>
+            <select
+              className="ava-select"
+              style={{ flex: 1, minWidth: '260px' }}
+              value={cursoSel}
+              onChange={e => { setCursoSel(e.target.value); setAnoSel(1); setSemSel(1); setInfoTab(null); }}
+            >
               {isIfoptec ? (
                 <>
                   <optgroup label="🏥 Técnicos Médios IFOPTEC">
@@ -1512,6 +1707,18 @@ function TabMeuCurso({ user, isIfoptec }) {
               )}
             </select>
           </div>
+
+          {/* Botão ADMIN de Inscrição (RF04: Docente NÃO tem este botão) */}
+          {isAdmin && (
+            <button
+              type="button"
+              className="btn-ava-primary"
+              onClick={() => { setSearchEstudanteAdd(''); setShowAssocModal(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
+            >
+              ➕ Adicionar Estudante ao Curso
+            </button>
+          )}
         </div>
       )}
 
@@ -1689,6 +1896,129 @@ function TabMeuCurso({ user, isIfoptec }) {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Secção de Estudantes Inscritos (RF04: Apenas Admin e Docente visualizam; Admin gere) */}
+          {!isEstudante && (
+            <div style={{ marginTop: '2.5rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,.04)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    👥 Estudantes Inscritos neste Curso
+                    <span style={{
+                      background: '#e0e7ff', color: '#4338ca', fontSize: '0.78rem', padding: '0.15rem 0.6rem',
+                      borderRadius: '12px', fontWeight: 700
+                    }}>
+                      {estudantesInscritos.length}
+                    </span>
+                  </h3>
+                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                    {isAdmin
+                      ? 'Gestão de inscrições no curso: adicione ou remova estudantes com efeito imediato.'
+                      : 'Lista de estudantes inscritos na turma deste curso (visualização exclusiva de docente).'}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {isDocente && (
+                    <span className="ava-badge badge-blue">
+                      👁️ Docente (Apenas Leitura)
+                    </span>
+                  )}
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className="btn-ava-primary"
+                      onClick={() => { setSearchEstudanteAdd(''); setShowAssocModal(true); }}
+                      style={{ fontSize: '0.82rem', padding: '0.45rem 0.9rem' }}
+                    >
+                      ➕ Inscrever Estudante
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Barra de pesquisa de inscritos */}
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  className="ava-input"
+                  style={{ maxWidth: '400px' }}
+                  placeholder="🔎 Filtrar estudantes por Nome, Nº ou Email..."
+                  value={searchInscritos}
+                  onChange={e => setSearchInscritos(e.target.value)}
+                />
+              </div>
+
+              {/* Tabela de Estudantes Inscritos */}
+              {loadEstudantes ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                  ⏳ A carregar estudantes do curso...
+                </div>
+              ) : estudantesFiltradosInscritos.length === 0 ? (
+                <div style={{
+                  padding: '2rem', textAlign: 'center', color: '#64748b', background: '#f8fafc',
+                  border: '1px dashed #cbd5e1', borderRadius: '10px'
+                }}>
+                  {searchInscritos ? 'Nenhum estudante corresponde ao filtro.' : 'Nenhum estudante inscrito neste curso actualmente.'}
+                </div>
+              ) : (
+                <div className="ava-table-wrap" style={{ margin: 0 }}>
+                  <table className="ava-table">
+                    <thead>
+                      <tr>
+                        <th>Nº Estudante</th>
+                        <th>Nome Completo</th>
+                        <th>Email Institucional</th>
+                        <th>Contacto</th>
+                        {isAdmin && <th style={{ textAlign: 'center' }}>Acção</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {estudantesFiltradosInscritos.map(est => (
+                        <tr key={est.id || est._id}>
+                          <td style={{ fontWeight: 600, color: '#4338ca' }}>
+                            {est.numero_estudante || '—'}
+                          </td>
+                          <td>
+                            <strong>{est.nome}</strong>
+                          </td>
+                          <td style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                            {est.email}
+                          </td>
+                          <td style={{ fontSize: '0.82rem' }}>
+                            {est.telefone || '—'}
+                          </td>
+                          {isAdmin && (
+                            <td style={{ textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoverEstudante(est)}
+                                disabled={assocLoading}
+                                style={{
+                                  background: '#fee2e2',
+                                  color: '#991b1b',
+                                  border: '1px solid #fecaca',
+                                  padding: '0.3rem 0.65rem',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  transition: 'background 0.2s'
+                                }}
+                                title="Remover este estudante do curso"
+                              >
+                                ❌ Remover
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </>

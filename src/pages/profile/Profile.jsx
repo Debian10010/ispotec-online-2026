@@ -21,6 +21,21 @@ export default function Profile() {
   const [modalFotoUrl, setModalFotoUrl] = useState('');
   const [showModal, setShowModal] = useState(false);
 
+  // Alterar Senha (RF02)
+  const [pwdForm, setPwdForm] = useState({
+    senha_atual: '',
+    nova_senha: '',
+    confirmar_senha: ''
+  });
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdMensagem, setPwdMensagem] = useState('');
+  const [pwdErro, setPwdErro] = useState('');
+  const [showSenhas, setShowSenhas] = useState({
+    atual: false,
+    nova: false,
+    conf: false
+  });
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -63,6 +78,57 @@ export default function Profile() {
       setMensagem('Dados actualizados com sucesso!');
     } catch {
       setErro('Erro ao atualizar dados.');
+    }
+  };
+
+  const handleAlterarSenha = async (e) => {
+    e.preventDefault();
+    setPwdMensagem('');
+    setPwdErro('');
+
+    if (!pwdForm.senha_atual) {
+      setPwdErro('Deve introduzir a sua palavra-passe actual.');
+      return;
+    }
+
+    if (!pwdForm.nova_senha || pwdForm.nova_senha.length < 8) {
+      setPwdErro('A nova palavra-passe deve ter pelo menos 8 caracteres.');
+      return;
+    }
+
+    const hasNumber = /[0-9]/.test(pwdForm.nova_senha);
+    const hasUpper = /[A-Z]/.test(pwdForm.nova_senha);
+    if (!hasNumber || !hasUpper) {
+      setPwdErro('A nova palavra-passe deve conter pelo menos 1 número e 1 letra maiúscula.');
+      return;
+    }
+
+    if (pwdForm.nova_senha !== pwdForm.confirmar_senha) {
+      setPwdErro('A confirmação da palavra-passe não coincide com a nova palavra-passe.');
+      return;
+    }
+
+    if (!window.confirm('Tem a certeza que deseja alterar a sua palavra-passe?')) {
+      return;
+    }
+
+    setPwdLoading(true);
+    try {
+      const res = await userService.changeMyPassword(
+        pwdForm.senha_atual,
+        pwdForm.nova_senha,
+        pwdForm.confirmar_senha
+      );
+      if (res.sucesso) {
+        setPwdMensagem('Palavra-passe alterada com sucesso!');
+        setPwdForm({ senha_atual: '', nova_senha: '', confirmar_senha: '' });
+      } else {
+        setPwdErro(res.mensagem || 'Erro ao alterar a palavra-passe.');
+      }
+    } catch (err) {
+      setPwdErro(err.message || 'Erro ao alterar a palavra-passe.');
+    } finally {
+      setPwdLoading(false);
     }
   };
 
@@ -372,6 +438,145 @@ export default function Profile() {
 
                 <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                   Salvar Alterações
+                </button>
+              </form>
+            </div>
+
+            {/* Alterar Palavra-passe (RF02) */}
+            <div className="card">
+              <h3 style={{
+                marginTop: 0,
+                color: 'var(--primary-blue)',
+                borderBottom: '2px solid var(--light-gray)',
+                paddingBottom: '10px',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                🔐 Alterar Palavra-passe
+              </h3>
+
+              {pwdMensagem && <div className="alert alert-success" style={{ marginBottom: '1rem' }}>{pwdMensagem}</div>}
+              {pwdErro && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{pwdErro}</div>}
+
+              <form onSubmit={handleAlterarSenha}>
+                <div className="form-group">
+                  <label htmlFor="senha_atual">Palavra-passe Actual *</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showSenhas.atual ? 'text' : 'password'}
+                      id="senha_atual"
+                      name="senha_atual"
+                      required
+                      value={pwdForm.senha_atual}
+                      onChange={e => setPwdForm({ ...pwdForm, senha_atual: e.target.value })}
+                      placeholder="Introduza a sua palavra-passe actual"
+                      style={{ paddingRight: '42px', width: '100%', boxSizing: 'border-box' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSenhas(p => ({ ...p, atual: !p.atual }))}
+                      style={{
+                        position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#64748b'
+                      }}
+                      title={showSenhas.atual ? 'Ocultar' : 'Mostrar'}
+                    >
+                      {showSenhas.atual ? '🙈' : '👁️'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="profile-form-grid-2col">
+                  <div className="form-group">
+                    <label htmlFor="nova_senha">Nova Palavra-passe *</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showSenhas.nova ? 'text' : 'password'}
+                        id="nova_senha"
+                        name="nova_senha"
+                        required
+                        value={pwdForm.nova_senha}
+                        onChange={e => setPwdForm({ ...pwdForm, nova_senha: e.target.value })}
+                        placeholder="Mínimo 8 caracteres"
+                        style={{ paddingRight: '42px', width: '100%', boxSizing: 'border-box' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSenhas(p => ({ ...p, nova: !p.nova }))}
+                        style={{
+                          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                          background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#64748b'
+                        }}
+                        title={showSenhas.nova ? 'Ocultar' : 'Mostrar'}
+                      >
+                        {showSenhas.nova ? '🙈' : '👁️'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="confirmar_senha">Confirmar Nova Palavra-passe *</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showSenhas.conf ? 'text' : 'password'}
+                        id="confirmar_senha"
+                        name="confirmar_senha"
+                        required
+                        value={pwdForm.confirmar_senha}
+                        onChange={e => setPwdForm({ ...pwdForm, confirmar_senha: e.target.value })}
+                        placeholder="Repita a nova palavra-passe"
+                        style={{ paddingRight: '42px', width: '100%', boxSizing: 'border-box' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSenhas(p => ({ ...p, conf: !p.conf }))}
+                        style={{
+                          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                          background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#64748b'
+                        }}
+                        title={showSenhas.conf ? 'Ocultar' : 'Mostrar'}
+                      >
+                        {showSenhas.conf ? '🙈' : '👁️'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  fontSize: '0.8rem',
+                  color: '#475569',
+                  marginBottom: '1rem'
+                }}>
+                  <strong style={{ color: '#1e293b' }}>Regras de Segurança:</strong>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.35rem', marginTop: '0.4rem' }}>
+                    <span style={{ color: pwdForm.nova_senha.length >= 8 ? '#16a34a' : '#94a3b8' }}>
+                      {pwdForm.nova_senha.length >= 8 ? '✓' : '○'} Mínimo 8 caracteres
+                    </span>
+                    <span style={{ color: /[0-9]/.test(pwdForm.nova_senha) ? '#16a34a' : '#94a3b8' }}>
+                      {/[0-9]/.test(pwdForm.nova_senha) ? '✓' : '○'} Pelo menos 1 número
+                    </span>
+                    <span style={{ color: /[A-Z]/.test(pwdForm.nova_senha) ? '#16a34a' : '#94a3b8' }}>
+                      {/[A-Z]/.test(pwdForm.nova_senha) ? '✓' : '○'} Pelo menos 1 letra maiúscula
+                    </span>
+                    <span style={{ color: pwdForm.nova_senha && pwdForm.nova_senha === pwdForm.confirmar_senha ? '#16a34a' : '#94a3b8' }}>
+                      {pwdForm.nova_senha && pwdForm.nova_senha === pwdForm.confirmar_senha ? '✓' : '○'} Palavras-passe coincidem
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={pwdLoading}
+                  style={{ width: '100%' }}
+                >
+                  {pwdLoading ? 'A actualizar palavra-passe...' : '🔒 Actualizar Palavra-passe'}
                 </button>
               </form>
             </div>

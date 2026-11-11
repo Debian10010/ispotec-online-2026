@@ -303,6 +303,30 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/gestao-utilizadores" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <UsersList />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/gestao-utilizadores.php" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <UsersList />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/users-list" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <UsersList />
+            </ProtectedRoute>
+          } 
+        />
 
         <Route 
           path="/dashboard/users-pending" 

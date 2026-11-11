@@ -7,6 +7,7 @@ export const userService = {
       if (filters.tipo) params.append('tipo', filters.tipo);
       if (filters.status) params.append('status', filters.status);
       if (filters.search) params.append('search', filters.search);
+      if (filters.curso) params.append('curso', filters.curso);
 
       const queryStr = params.toString() ? `?${params.toString()}` : '';
       const res = await api.get(`/users${queryStr}`);
@@ -72,6 +73,8 @@ export const userService = {
         semestre_curricular: data.semestre_curricular,
         nivel_academico: data.nivel_academico,
         tipo: data.tipo,
+        telefone: data.telefone,
+        numero_estudante: data.numero_estudante,
         status: data.status,
       });
       return {
@@ -102,10 +105,33 @@ export const userService = {
     }
   },
 
-  async resetPasswordByAdmin(userId, newPassword) {
+  async removerCurso(userId, curso) {
+    try {
+      const res = await api.delete(`/users/${userId}/curso`, { data: { curso } });
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Estudante removido do curso com sucesso.',
+        dados: res.dados,
+      };
+    } catch (error) {
+      console.warn('[userService.removerCurso fallback]', error.message);
+      const user = await this.getUserById(userId);
+      if (user) {
+        const remaining = (user.cursos_associados || []).filter(c => c !== curso);
+        return await this.updateUserProfileByAdmin(userId, {
+          cursos_associados: remaining,
+          curso: user.curso === curso ? (remaining[0] || '') : user.curso,
+        });
+      }
+      return { sucesso: false, mensagem: error.message };
+    }
+  },
+
+  async resetPasswordByAdmin(userId, newPassword, mustChange = true) {
     try {
       const res = await api.patch(`/users/${userId}/password`, {
         password: newPassword,
+        must_change_password: mustChange,
       });
       return {
         sucesso: true,
@@ -113,6 +139,27 @@ export const userService = {
       };
     } catch (error) {
       console.error('[userService.resetPasswordByAdmin error]', error.message);
+      return {
+        sucesso: false,
+        mensagem: error.message || 'Erro ao alterar palavra-passe.',
+      };
+    }
+  },
+
+  // RF02 — Alterar própria palavra-passe
+  async changeMyPassword(currentPassword, newPassword, confirmPassword) {
+    try {
+      const res = await api.put('/profile/me/password', {
+        senha_atual: currentPassword,
+        nova_senha: newPassword,
+        confirmar_senha: confirmPassword,
+      });
+      return {
+        sucesso: true,
+        mensagem: res.mensagem || 'Palavra-passe alterada com sucesso.',
+      };
+    } catch (error) {
+      console.error('[userService.changeMyPassword error]', error.message);
       return {
         sucesso: false,
         mensagem: error.message || 'Erro ao alterar palavra-passe.',
