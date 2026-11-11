@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-micro" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#450a0a" />
+      <stop offset="50%" stop-color="#991b1b" />
+      <stop offset="100%" stop-color="#dc2626" />
+    </linearGradient>
+    <radialGradient id="petri-agar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="70%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-micro)" />
+
+  <!-- Grid pattern & clean bench -->
+  <path d="M0 330 L800 330 M0 370 L800 370 M0 410 L800 410" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+  <rect x="0" y="320" width="800" height="130" fill="rgba(15, 23, 42, 0.7)" />
+
+  <!-- Biosafety Cabinet Hood Graphic (Center background) -->
+  <rect x="80" y="50" width="640" height="250" rx="12" fill="rgba(255,255,255,0.08)" stroke="#fca5a5" stroke-width="2" />
+  <rect x="100" y="70" width="600" height="180" rx="8" fill="rgba(15, 23, 42, 0.4)" />
+  <text x="120" y="95" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#f87171" letter-spacing="2">CÂMARA DE FLUXO LAMINAR · NÍVEL DE BIOSSEGURANÇA 2 (BSL-2)</text>
+
+  <!-- Large Petri Dish with bacterial colonies (Center Left) -->
+  <g transform="translate(180, 180)">
+    <!-- Base Plate -->
+    <ellipse cx="80" cy="70" rx="80" ry="40" fill="#e2e8f0" stroke="#fca5a5" stroke-width="3"/>
+    <ellipse cx="80" cy="68" rx="72" ry="34" fill="url(#petri-agar)"/>
+    <!-- Bacterial colonies -->
+    <circle cx="50" cy="60" r="5" fill="#ef4444"/>
+    <circle cx="58" cy="64" r="3" fill="#dc2626"/>
+    <circle cx="95" cy="55" r="6" fill="#ef4444"/>
+    <circle cx="110" cy="68" r="4" fill="#b91c1c"/>
+    <circle cx="75" cy="75" r="7" fill="#ef4444"/>
+    <circle cx="68" cy="82" r="3.5" fill="#f87171"/>
+    <circle cx="120" cy="60" r="4.5" fill="#dc2626"/>
+    <!-- Inoculation streaks -->
+    <path d="M40 70 Q70 50 100 70 Q120 75 140 65" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="3,3" fill="none" opacity="0.6"/>
+  </g>
+
+  <!-- High-Res Pathology Microscope (Center Right) -->
+  <g transform="translate(420, 130)">
+    <!-- Base -->
+    <path d="M40 170 L160 170 L150 155 L50 155 Z" fill="#1e293b" />
+    <path d="M120 155 C150 120 145 50 85 50 L75 50 L75 70 L85 70 C115 70 125 110 105 155 Z" fill="#f8fafc" />
+    <!-- Light source -->
+    <rect x="85" y="145" width="25" height="10" rx="3" fill="#67e8f9" opacity="0.9"/>
+    <!-- Stage -->
+    <rect x="55" y="110" width="75" height="8" rx="2" fill="#0f172a" />
+    <!-- Glass Slide -->
+    <rect x="75" y="106" width="35" height="4" rx="1" fill="#bae6fd" opacity="0.9"/>
+    <circle cx="92" cy="108" r="3" fill="#dc2626"/>
+    <!-- Objectives -->
+    <circle cx="92" cy="75" r="14" fill="#475569" />
+    <rect x="87" y="85" width="10" height="20" fill="#e2e8f0" />
+    <!-- Dual Eyepieces for Binocular -->
+    <rect x="60" y="18" width="10" height="30" transform="rotate(-25 60 18)" fill="#334155" />
+    <rect x="75" y="18" width="10" height="30" transform="rotate(-10 75 18)" fill="#334155" />
+    <rect x="48" y="8" width="15" height="12" rx="3" transform="rotate(-25 48 8)" fill="#0f172a" />
+    <rect x="68" y="8" width="15" height="12" rx="3" transform="rotate(-10 68 8)" fill="#0f172a" />
+  </g>
+
+  <!-- Histopathology Slide / Tissue Graphic -->
+  <g transform="translate(630, 200)">
+    <rect x="0" y="0" width="110" height="80" rx="6" fill="#1e293b" stroke="#f87171" stroke-width="1.5"/>
+    <rect x="10" y="10" width="90" height="60" rx="4" fill="#450a0a"/>
+    <!-- Cell structures / tissue staining -->
+    <ellipse cx="35" cy="40" rx="16" ry="12" fill="#fda4af" opacity="0.7"/>
+    <circle cx="35" cy="40" r="5" fill="#881337"/>
+    <ellipse cx="65" cy="30" rx="14" ry="10" fill="#fda4af" opacity="0.7"/>
+    <circle cx="65" cy="30" r="4" fill="#881337"/>
+    <ellipse cx="70" cy="55" rx="15" ry="11" fill="#fda4af" opacity="0.7"/>
+    <circle cx="70" cy="55" r="4.5" fill="#881337"/>
+  </g>
+
+  <!-- Microbe Stylized Icons Overlay -->
+  <g transform="translate(80, 110)" opacity="0.25">
+    <circle cx="40" cy="40" r="25" fill="#fca5a5" />
+    <line x1="10" y1="40" x2="0" y2="40" stroke="#fca5a5" stroke-width="4" stroke-linecap="round"/>
+    <line x1="70" y1="40" x2="80" y2="40" stroke="#fca5a5" stroke-width="4" stroke-linecap="round"/>
+    <line x1="40" y1="10" x2="40" y2="0" stroke="#fca5a5" stroke-width="4" stroke-linecap="round"/>
+    <line x1="40" y1="70" x2="40" y2="80" stroke="#fca5a5" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Header Badge -->
+  <rect x="40" y="30" width="410" height="50" rx="25" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.2)"/>
+  <text x="65" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#fca5a5">🦠 MICROBIOLOGIA E ANATOMIA PATOLÓGICA</text>
+
+  <!-- Bottom Info Bar -->
+  <rect x="40" y="375" width="720" height="50" rx="10" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255,255,255,0.15)"/>
+  <text x="60" y="405" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#ffffff">
+    ISPOTEC · Bacteriologia · Histopatologia · Micologia · Virologia · Placas de Petri · Microscopia Óptica
+  </text>
+</svg>

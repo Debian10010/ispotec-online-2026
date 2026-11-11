@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#083344" />
+      <stop offset="50%" stop-color="#0e7490" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="chair" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bg)" />
+  
+  <!-- Architectural grid & clinical tiles -->
+  <path d="M0 340 L800 340 M0 380 L800 380 M0 420 L800 420" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+  <path d="M100 320 L100 450 M250 320 L250 450 M400 320 L400 450 M550 320 L550 450 M700 320 L700 450" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+
+  <!-- Back Wall Accent Panel -->
+  <rect x="50" y="40" width="700" height="260" rx="16" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+
+  <!-- Dental Chair Graphic (Stylized high-tech) -->
+  <g transform="translate(180, 140)" filter="url(#shadow)">
+    <!-- Base -->
+    <rect x="80" y="150" width="100" height="20" rx="6" fill="#cbd5e1" />
+    <path d="M110 150 L110 90 L150 90 L150 150 Z" fill="#94a3b8" />
+    <!-- Seat -->
+    <path d="M70 100 Q130 90 200 110 L220 140 L70 130 Z" fill="url(#chair)" rx="8" />
+    <!-- Backrest -->
+    <path d="M50 110 L20 40 Q40 25 70 35 L90 105 Z" fill="url(#chair)" />
+    <!-- Headrest -->
+    <ellipse cx="25" cy="22" rx="16" ry="12" fill="#0284c7" />
+    <!-- Leg rest -->
+    <path d="M190 115 L260 145 L250 165 L185 135 Z" fill="#38bdf8" />
+    <!-- Dental Light Arm -->
+    <path d="M130 90 L130 -10 L70 -30" stroke="#f1f5f9" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="65" cy="-35" rx="22" ry="12" fill="#fef08a" opacity="0.9"/>
+    <ellipse cx="65" cy="-35" rx="14" ry="6" fill="#ffffff"/>
+  </g>
+
+  <!-- Digital Imaging Monitor Station -->
+  <g transform="translate(480, 80)" filter="url(#shadow)">
+    <rect x="0" y="0" width="220" height="140" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+    <rect x="10" y="10" width="200" height="120" rx="6" fill="#1e293b" />
+    <!-- Dental X-Ray & Teeth Arch Visualisation -->
+    <path d="M30 70 Q110 30 190 70 Q110 90 30 70" stroke="#38bdf8" stroke-width="3" fill="none" opacity="0.8"/>
+    <circle cx="50" cy="65" r="7" fill="#67e8f9"/>
+    <circle cx="75" cy="55" r="7" fill="#67e8f9"/>
+    <circle cx="110" cy="50" r="8" fill="#e0f2fe"/>
+    <circle cx="145" cy="55" r="7" fill="#67e8f9"/>
+    <circle cx="170" cy="65" r="7" fill="#67e8f9"/>
+    <!-- ECG / Diagnostics graph -->
+    <path d="M20 110 L50 110 L60 95 L70 120 L80 105 L90 110 L190 110" stroke="#4ade80" stroke-width="2" fill="none"/>
+    <!-- Stand -->
+    <rect x="100" y="140" width="20" height="40" fill="#64748b" />
+    <rect x="70" y="180" width="80" height="10" rx="4" fill="#94a3b8" />
+  </g>
+
+  <!-- Large Tooth Icon Watermark / Emblem -->
+  <g transform="translate(620, 240)" opacity="0.25">
+    <path d="M60 20 C90 20 100 45 90 75 C80 105 75 140 60 140 C45 140 45 110 35 110 C25 110 25 140 10 140 C-5 140 -10 105 -20 75 C-30 45 -20 20 10 20 C25 20 35 30 35 30 C35 30 45 20 60 20 Z" fill="#ffffff" />
+  </g>
+
+  <!-- Header Badge Overlay -->
+  <rect x="40" y="30" width="360" height="50" rx="25" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.2)"/>
+  <text x="65" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#67e8f9">🦷 ESTOMATOLOGIA E MEDICINA DENTÁRIA</text>
+
+  <!-- Bottom Info Bar -->
+  <rect x="40" y="375" width="720" height="50" rx="10" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255,255,255,0.15)"/>
+  <text x="60" y="405" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#ffffff">
+    ISPOTEC · Investigação Clínica Oral · Cadeiras Ergonómicas · Imagiologia Digital 3D · Simulação
+  </text>
+</svg>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-tech" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" />
+      <stop offset="50%" stop-color="#b45309" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <linearGradient id="screen-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-tech)" />
+
+  <!-- Circuit lines & high-tech medical grid -->
+  <path d="M50 330 L750 330 M50 370 L750 370 M50 410 L750 410" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+  <rect x="0" y="320" width="800" height="130" fill="rgba(15, 23, 42, 0.7)" />
+
+  <!-- Medical Vital Signs Monitor (Center Left) -->
+  <g transform="translate(80, 85)">
+    <!-- Monitor Bezel -->
+    <rect x="0" y="0" width="340" height="225" rx="14" fill="#0f172a" stroke="#fcd34d" stroke-width="2.5"/>
+    <rect x="12" y="12" width="316" height="201" rx="8" fill="url(#screen-grad)"/>
+
+    <!-- Screen Header -->
+    <text x="24" y="32" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#94a3b8">ISPOTEC VITAL MONITOR 4.0 · PACIENTE ADULTO</text>
+    
+    <!-- Waveform 1: ECG (Green) -->
+    <path d="M25 65 L60 65 L65 50 L70 85 L75 40 L80 90 L85 65 L140 65 L145 50 L150 85 L155 40 L160 90 L165 65 L220 65" stroke="#22c55e" stroke-width="2.5" fill="none"/>
+    <text x="235" y="62" font-family="system-ui, sans-serif" font-size="22" font-weight="800" fill="#22c55e">75</text>
+    <text x="235" y="76" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#86efac">BPM (FC)</text>
+
+    <!-- Waveform 2: Plethysmogram / SpO2 (Cyan) -->
+    <path d="M25 115 Q40 100 55 115 Q70 130 85 115 Q100 100 115 115 Q130 130 145 115 Q160 100 175 115 Q190 130 205 115 Q220 100 230 115" stroke="#06b6d4" stroke-width="2.5" fill="none"/>
+    <text x="235" y="118" font-family="system-ui, sans-serif" font-size="22" font-weight="800" fill="#06b6d4">99%</text>
+    <text x="235" y="132" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#67e8f9">SpO2</text>
+
+    <!-- Waveform 3: Respiration (Yellow) -->
+    <path d="M25 170 Q55 150 85 170 Q115 190 145 170 Q175 150 205 170 Q215 178 225 170" stroke="#facc15" stroke-width="2.5" fill="none"/>
+    <text x="235" y="172" font-family="system-ui, sans-serif" font-size="22" font-weight="800" fill="#facc15">16</text>
+    <text x="235" y="186" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#fef08a">RPM</text>
+
+    <!-- Pressure Box (NIBP) -->
+    <g transform="translate(24, 185)">
+      <text x="0" y="15" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#f87171">PA: 120 / 80 mmHg</text>
+    </g>
+  </g>
+
+  <!-- Ultrasound & Diagnostic Console (Right side) -->
+  <g transform="translate(460, 95)">
+    <!-- Ultrasound Display -->
+    <rect x="0" y="0" width="280" height="170" rx="12" fill="#0f172a" stroke="#fcd34d" stroke-width="2"/>
+    <rect x="12" y="12" width="256" height="146" rx="8" fill="#1e293b"/>
+    <text x="25" y="32" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#fef3c7">ECOGRAFIA E IMAGIOLOGIA CLÍNICA</text>
+    <!-- Ultrasonic beam arc -->
+    <path d="M70 135 L140 45 L210 135 Z" fill="rgba(245, 158, 11, 0.15)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,4"/>
+    <circle cx="140" cy="45" r="5" fill="#f59e0b"/>
+    <!-- Organ scan representation -->
+    <ellipse cx="140" cy="95" rx="30" ry="18" fill="none" stroke="#fde68a" stroke-width="2"/>
+    <circle cx="140" cy="95" r="8" fill="#f59e0b" opacity="0.8"/>
+
+    <!-- Ultrasound Transducer Probe -->
+    <g transform="translate(200, 150)">
+      <rect x="0" y="0" width="50" height="20" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+      <path d="M50 10 Q70 10 80 40" stroke="#94a3b8" stroke-width="4" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Header Badge -->
+  <rect x="40" y="30" width="440" height="50" rx="25" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.2)"/>
+  <text x="65" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#fde68a">🏥 TECNOLOGIA EM SAÚDE E EXAMES MÉDICOS</text>
+
+  <!-- Bottom Info Bar -->
+  <rect x="40" y="375" width="720" height="50" rx="10" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255,255,255,0.15)"/>
+  <text x="60" y="405" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#ffffff">
+    ISPOTEC · Monitorização Multiparamétrica · Ecografia · ECG Digital · Telemedicina · Dispositivos Médicos
+  </text>
+</svg>

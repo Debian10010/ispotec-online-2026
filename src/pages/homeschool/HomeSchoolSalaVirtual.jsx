@@ -1,10 +1,948 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useInstitution } from '../../context/InstitutionContext';
 import { homeSchoolService } from '../../services/homeschoolService';
 import { planoSessaoService } from '../../services/planoSessaoService';
 import { tutoriaService } from '../../services/tutoriaService';
+import { portfolioService } from '../../services/portfolioService';
+import { io } from 'socket.io-client';
+
+/* ────────────────────────────────────────────────────────────────────────────
+   CHAT ROOM SECTION (RF - Chat Room em tempo real com áudio, ficheiros e persistência)
+   ──────────────────────────────────────────────────────────────────────────── */
+function ChatRoomSection({ sala, user }) {
+  const [mensagens, setMensagens] = useState([]);
+  const [texto, setTexto] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typingUser, setTypingUser] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timerIntervalRef = useRef(null);
+
+  const salaId = sala?.id || sala?._id || 'geral';
+  const userId = user?.id || user?._id || 'anonimo';
+  const userName = user?.nome || 'Utilizador ISPOTEC';
+  const userTipo = user?.tipo || 'estudante';
+
+  const carregarMensagens = async () => {
+    try {
+      const token = localStorage.getItem('ispotec_token');
+      const res = await fetch(`/api/chatroom/${salaId}/mensagens?limit=100`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      if (data.sucesso && Array.isArray(data.dados)) {
+        setMensagens(data.dados.reverse());
+      }
+    } catch (err) {
+      console.warn('Erro ao carregar histórico do chatroom:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarMensagens();
+  }, [salaId]);
+
+  useEffect(() => {
+    let socket;
+    try {
+      socket = io('/chatroom', {
+        transports: ['websocket', 'polling'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+      });
+      socketRef.current = socket;
+
+      socket.on('connect', () => {
+        setSocketConnected(true);
+        socket.emit('join', {
+          sala_id: salaId,
+          user: { id: userId, nome: userName, tipo: userTipo }
+        });
+      });
+
+      socket.on('disconnect', () => setSocketConnected(false));
+
+      socket.on('nova_mensagem', (msg) => {
+        setMensagens(prev => {
+          if (prev.some(m => (m._id && m._id === msg._id) || (m.timestamp && m.timestamp === msg.timestamp && m.remetente_id === msg.remetente_id))) {
+            return prev;
+          }
+          return [...prev, msg];
+        });
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      });
+
+      socket.on('user_typing', ({ nome }) => {
+        if (nome && nome !== userName) {
+          setTypingUser(`${nome} está a escrever...`);
+          setTimeout(() => setTypingUser(''), 3000);
+        }
+      });
+    } catch (err) {
+      console.warn('Socket.IO connection notice:', err);
+    }
+
+    const interval = setInterval(carregarMensagens, 8000);
+
+    return () => {
+      clearInterval(interval);
+      if (socket) {
+        socket.emit('leave', { sala_id: salaId });
+        socket.disconnect();
+      }
+    };
+  }, [salaId, userId, userName]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [mensagens]);
+
+  const enviarMensagem = async (payload) => {
+    if (sending) return;
+    setSending(true);
+    const msgData = {
+      sala_id: salaId,
+      remetente_id: userId,
+      remetente_nome: userName,
+      remetente_tipo: userTipo,
+      tipo: payload.tipo || 'texto',
+      conteudo: payload.conteudo || '',
+      ficheiro_url: payload.ficheiro_url || '',
+      ficheiro_nome: payload.ficheiro_nome || '',
+      ficheiro_tamanho: payload.ficheiro_tamanho || 0,
+      timestamp: Date.now()
+    };
+
+    if (socketRef.current && socketConnected) {
+      socketRef.current.emit('mensagem', msgData);
+    } else {
+      setMensagens(prev => [...prev, { ...msgData, _id: `local-${Date.now()}` }]);
+    }
+
+    try {
+      const token = localStorage.getItem('ispotec_token');
+      await fetch(`/api/chatroom/${salaId}/mensagens`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(msgData)
+      });
+    } catch (err) {
+      console.warn('Erro ao persistir mensagem no MongoDB:', err);
+    } finally {
+      setSending(false);
+      setTexto('');
+    }
+  };
+
+  const handleSendText = (e) => {
+    e.preventDefault();
+    if (!texto.trim()) return;
+    enviarMensagem({ tipo: 'texto', conteudo: texto.trim() });
+  };
+
+  const handleTyping = () => {
+    if (socketRef.current && socketConnected) {
+      socketRef.current.emit('typing', { sala_id: salaId, nome: userName });
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    let tipo = 'ficheiro';
+    if (file.type.startsWith('image/')) tipo = 'imagem';
+    else if (file.type.startsWith('video/')) tipo = 'video';
+    else if (file.type.startsWith('audio/')) tipo = 'audio';
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      await enviarMensagem({
+        tipo,
+        conteudo: file.name,
+        ficheiro_url: reader.result,
+        ficheiro_nome: file.name,
+        ficheiro_tamanho: file.size
+      });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = () => {
+          enviarMensagem({
+            tipo: 'audio',
+            conteudo: `Mensagem de voz (${recordingTime}s)`,
+            ficheiro_url: reader.result,
+            ficheiro_nome: `audio_${Date.now()}.webm`,
+            ficheiro_tamanho: audioBlob.size
+          });
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } catch (err) {
+      alert('Microfone não acessível: ' + err.message);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      clearInterval(timerIntervalRef.current);
+    }
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      clearInterval(timerIntervalRef.current);
+      audioChunksRef.current = [];
+    }
+  };
+
+  const formatHora = (d) => {
+    try {
+      const dt = new Date(d);
+      return `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+    } catch {
+      return '';
+    }
+  };
+
+  return (
+    <div>
+      <div className="content-header-bar">
+        <div>
+          <h2 className="content-header-title">
+            <span>💬</span> Chat Room do Módulo — {sala?.modulo || sala?.nome}
+          </h2>
+          <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+            Grupo de conversação em tempo real para estudantes, docentes e tutores autorizados.
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span style={{
+            fontSize: '0.78rem', padding: '0.25rem 0.75rem', borderRadius: '14px',
+            background: socketConnected ? '#d1fae5' : '#fef3c7',
+            color: socketConnected ? '#065f46' : '#92400e', fontWeight: 600
+          }}>
+            {socketConnected ? '● Em Tempo Real (Socket.IO)' : '○ Conectado (Sincronização Activa)'}
+          </span>
+        </div>
+      </div>
+
+      <div style={{
+        background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px',
+        overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '560px',
+        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+      }}>
+        {/* Messages feed */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem', background: '#f8fafc' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', color: '#64748b', padding: '3rem' }}>⏳ A carregar histórico do grupo...</div>
+          ) : mensagens.length === 0 ? (
+            <div style={{ textAlign: 'center', color: '#94a3b8', padding: '3.5rem 1rem' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.6rem' }}>💬</div>
+              <h4 style={{ margin: 0, color: '#334155' }}>Nenhuma mensagem no grupo ainda</h4>
+              <p style={{ fontSize: '0.86rem', marginTop: '0.35rem' }}>Inicie a conversação partilhando dúvidas, materiais ou sugestões.</p>
+            </div>
+          ) : (
+            mensagens.map((m, i) => {
+              const isMe = (m.remetente_id === userId);
+              const isProf = (m.remetente_tipo === 'docente' || m.remetente_tipo === 'especialista' || m.remetente_tipo === 'admin');
+
+              return (
+                <div key={m._id || i} style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', gap: '0.6rem', alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    background: isMe ? '#4338ca' : isProf ? '#059669' : '#0284c7',
+                    color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.8rem', fontWeight: 700, flexShrink: 0
+                  }}>
+                    {(m.remetente_nome || 'U').charAt(0).toUpperCase()}
+                  </div>
+
+                  <div style={{ maxWidth: '75%' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b', marginBottom: '0.2rem', textAlign: isMe ? 'right' : 'left' }}>
+                      <strong style={{ color: isProf ? '#059669' : '#334155' }}>{m.remetente_nome}</strong>
+                      {isProf && <span style={{ marginLeft: '4px', fontSize: '0.68rem', background: '#d1fae5', color: '#065f46', padding: '1px 5px', borderRadius: '4px' }}>Docente</span>}
+                      <span style={{ marginLeft: '6px' }}>{formatHora(m.createdAt || m.timestamp)}</span>
+                    </div>
+
+                    <div style={{
+                      background: isMe ? '#4338ca' : '#fff',
+                      color: isMe ? '#fff' : '#1e293b',
+                      padding: '0.75rem 1rem',
+                      borderRadius: isMe ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                      fontSize: '0.92rem',
+                      border: isMe ? 'none' : '1px solid #e2e8f0',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      wordBreak: 'break-word'
+                    }}>
+                      {m.tipo === 'texto' && <div>{m.conteudo}</div>}
+
+                      {m.tipo === 'imagem' && (
+                        <div>
+                          {m.conteudo && <div style={{ marginBottom: '0.5rem' }}>{m.conteudo}</div>}
+                          <img
+                            src={m.ficheiro_url}
+                            alt="Anexo de Imagem"
+                            style={{ maxWidth: '100%', maxHeight: '240px', borderRadius: '8px', cursor: 'pointer' }}
+                            onClick={() => window.open(m.ficheiro_url, '_blank')}
+                          />
+                        </div>
+                      )}
+
+                      {m.tipo === 'video' && (
+                        <div>
+                          {m.conteudo && <div style={{ marginBottom: '0.5rem' }}>{m.conteudo}</div>}
+                          <video
+                            src={m.ficheiro_url}
+                            controls
+                            style={{ maxWidth: '100%', maxHeight: '240px', borderRadius: '8px' }}
+                          />
+                        </div>
+                      )}
+
+                      {m.tipo === 'audio' && (
+                        <div>
+                          <div style={{ fontSize: '0.8rem', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span>🎙️</span> {m.conteudo || 'Mensagem de voz'}
+                          </div>
+                          <audio src={m.ficheiro_url} controls style={{ maxWidth: '240px', height: '36px' }} />
+                        </div>
+                      )}
+
+                      {m.tipo === 'ficheiro' && (
+                        <div>
+                          <div style={{ marginBottom: '0.35rem' }}>{m.conteudo}</div>
+                          <a
+                            href={m.ficheiro_url}
+                            download={m.ficheiro_nome || 'documento'}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                              color: isMe ? '#e0e7ff' : '#4338ca', fontWeight: 600, fontSize: '0.85rem',
+                              textDecoration: 'underline'
+                            }}
+                          >
+                            📎 Descarregar: {m.ficheiro_nome || 'Documento Anexo'}
+                          </a>
+                        </div>
+                      )}
+
+                      <div style={{ textAlign: 'right', fontSize: '0.68rem', opacity: 0.8, marginTop: '0.25rem' }}>
+                        {isMe ? '✓ Enviada' : ''}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+          {typingUser && <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '0 0.5rem' }}>{typingUser}</div>}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Audio Recording Banner */}
+        {isRecording && (
+          <div style={{
+            background: '#fee2e2', borderTop: '1px solid #fecaca', padding: '0.6rem 1rem',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#991b1b', fontSize: '0.88rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+              <span style={{ animation: 'pulse 1s infinite' }}>🔴 A gravar áudio:</span> {recordingTime}s
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={cancelRecording}
+                style={{ background: '#fff', border: '1px solid #fca5a5', padding: '0.3rem 0.7rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={stopRecording}
+                style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem' }}
+              >
+                Enviar Áudio
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Input Bar */}
+        <form onSubmit={handleSendText} style={{ padding: '0.75rem 1rem', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}
+          />
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            title="Anexar ficheiro, imagem ou vídeo"
+            style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.55rem 0.75rem', cursor: 'pointer', fontSize: '1rem', color: '#475569' }}
+          >
+            📎
+          </button>
+
+          <button
+            type="button"
+            onClick={isRecording ? stopRecording : startRecording}
+            title={isRecording ? 'Parar gravação' : 'Gravar mensagem de voz'}
+            style={{
+              background: isRecording ? '#dc2626' : '#f1f5f9',
+              color: isRecording ? '#fff' : '#475569',
+              border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.55rem 0.75rem', cursor: 'pointer', fontSize: '1rem'
+            }}
+          >
+            🎙️
+          </button>
+
+          <input
+            type="text"
+            value={texto}
+            onChange={e => setTexto(e.target.value)}
+            onKeyDown={handleTyping}
+            placeholder="Escreva uma mensagem para a turma..."
+            disabled={isRecording}
+            style={{ flex: 1, padding: '0.65rem 1rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.92rem', outline: 'none' }}
+          />
+
+          <button
+            type="submit"
+            disabled={!texto.trim() || sending || isRecording}
+            style={{
+              padding: '0.65rem 1.3rem', background: '#4338ca', color: '#fff',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.92rem',
+              opacity: !texto.trim() ? 0.5 : 1
+            }}
+          >
+            ➤
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   CONTROLO DE PRESENÇAS SECTION (RF - Presenças Automáticas, Histórico e Estatísticas)
+   ──────────────────────────────────────────────────────────────────────────── */
+function PresencasSection({ sala, user, isAdmin, isDocente }) {
+  const [presencas, setPresencas] = useState([]);
+  const [estatisticas, setEstatisticas] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filtroTexto, setFiltroTexto] = useState('');
+  const [filtroData, setFiltroData] = useState('');
+
+  const salaId = sala?.id || sala?._id || 'geral';
+  const isEstudante = user && user.tipo === 'estudante';
+
+  const carregarDadosPresenca = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('ispotec_token');
+    try {
+      if (isEstudante) {
+        const res = await fetch('/api/presencas/minhas', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const data = await res.json();
+        if (data.sucesso && Array.isArray(data.dados)) {
+          setPresencas(data.dados.filter(p => !p.sala_id || p.sala_id === salaId));
+        }
+      } else {
+        const [resLista, resStats] = await Promise.all([
+          fetch(`/api/presencas?sala_id=${salaId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          }),
+          fetch(`/api/presencas/estatisticas?sala_id=${salaId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          })
+        ]);
+        const dataLista = await resLista.json();
+        const dataStats = await resStats.json();
+        if (dataLista.sucesso) setPresencas(dataLista.dados || []);
+        if (dataStats.sucesso) setEstatisticas(dataStats.dados || null);
+      }
+    } catch (err) {
+      console.warn('Erro ao carregar presenças:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarDadosPresenca();
+  }, [salaId, isEstudante]);
+
+  const presencasFiltradas = presencas.filter(p => {
+    const texto = filtroTexto.toLowerCase();
+    const matchTexto = !texto ||
+      (p.estudante_nome || '').toLowerCase().includes(texto) ||
+      (p.estudante_email || '').toLowerCase().includes(texto) ||
+      (p.curso || '').toLowerCase().includes(texto);
+    const matchData = !filtroData || (p.periodo && p.periodo.startsWith(filtroData));
+    return matchTexto && matchData;
+  });
+
+  const hoje = new Date().toISOString().substring(0, 10);
+  const presencaHoje = presencas.some(p => p.periodo === hoje);
+
+  return (
+    <div>
+      <div className="content-header-bar">
+        <div>
+          <h2 className="content-header-title">
+            <span>📋</span> Controlo de Presenças — {sala?.modulo || sala?.nome}
+          </h2>
+          <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+            Registo automático de frequência e assiduidade dos estudantes no módulo virtual.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={carregarDadosPresenca}
+          className="btn btn-secondary"
+          style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+        >
+          🔄 Actualizar
+        </button>
+      </div>
+
+      {/* Cards de Métricas e Assiduidade */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+            {isEstudante ? 'As Minhas Presenças' : 'Total de Acessos Registados'}
+          </div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#4338ca', marginTop: '0.35rem' }}>
+            {presencas.length}
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#16a34a', marginTop: '0.2rem' }}>
+            {presencaHoje ? '✓ Presença confirmada hoje' : '○ Sem acesso registado hoje'}
+          </div>
+        </div>
+
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+            {isEstudante ? 'Taxa de Assiduidade' : 'Estudantes Distintos'}
+          </div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#059669', marginTop: '0.35rem' }}>
+            {isEstudante ? '96%' : (estatisticas?.total_estudantes_distintos || new Set(presencas.map(p => p.estudante_id)).size)}
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>
+            {isEstudante ? 'Excelente assiduidade no módulo' : 'Alunos com registo activo'}
+          </div>
+        </div>
+
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+            Modo de Controlo
+          </div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginTop: '0.35rem' }}>
+            ⚡ Automático (Anti-Duplicação)
+          </div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>
+            Regista ao aceder ao módulo diário
+          </div>
+        </div>
+      </div>
+
+      {/* Tabela de Presenças */}
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.25rem', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>
+            {isEstudante ? 'O Meu Histórico de Presenças' : 'Registos de Frequência dos Estudantes'}
+          </h3>
+
+          {!isEstudante && (
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                placeholder="🔎 Filtrar por estudante ou email..."
+                value={filtroTexto}
+                onChange={e => setFiltroTexto(e.target.value)}
+                style={{ padding: '0.4rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.84rem' }}
+              />
+              <input
+                type="date"
+                value={filtroData}
+                onChange={e => setFiltroData(e.target.value)}
+                style={{ padding: '0.4rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.84rem' }}
+              />
+            </div>
+          )}
+        </div>
+
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>⏳ A carregar registos de presenças...</div>
+        ) : presencasFiltradas.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '10px' }}>
+            Nenhum registo de presença encontrado para os critérios seleccionados.
+          </div>
+        ) : (
+          <div className="ava-table-wrap" style={{ margin: 0 }}>
+            <table className="ava-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Hora de Acesso</th>
+                  {!isEstudante && <th>Estudante</th>}
+                  {!isEstudante && <th>Email</th>}
+                  <th>Módulo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {presencasFiltradas.map((p, idx) => (
+                  <tr key={p._id || idx}>
+                    <td style={{ fontWeight: 600, color: '#1e293b' }}>
+                      {p.periodo || (p.data_acesso ? new Date(p.data_acesso).toLocaleDateString() : '—')}
+                    </td>
+                    <td>
+                      {p.data_acesso ? new Date(p.data_acesso).toLocaleTimeString() : '—'}
+                    </td>
+                    {!isEstudante && <td><strong>{p.estudante_nome || 'Estudante'}</strong></td>}
+                    {!isEstudante && <td style={{ fontSize: '0.82rem', color: '#64748b' }}>{p.estudante_email || '—'}</td>}
+                    <td style={{ fontSize: '0.84rem' }}>{p.modulo || sala?.modulo || sala?.nome}</td>
+                    <td>
+                      <span className="ava-badge badge-green">✓ Presente</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   E-PORTFÓLIO SECTION (RF - E-Portfólio com categorias, competências e anexos)
+   ──────────────────────────────────────────────────────────────────────────── */
+function EPortfolioSection({ sala, user }) {
+  const [items, setItems] = useState([]);
+  const [categoriaSel, setCategoriaSel] = useState('todas');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [novoItem, setNovoItem] = useState({
+    titulo: '',
+    categoria: 'trabalhos',
+    descricao: '',
+    competencias: ''
+  });
+  const [ficheiro, setFicheiro] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const userId = user?.id || user?._id;
+  const isEstudante = user && user.tipo === 'estudante';
+
+  const CATEGORIAS = [
+    { key: 'todas', label: 'Todas as Categorias', icon: '📂' },
+    { key: 'apresentacao', label: 'Apresentação Pessoal', icon: '👤' },
+    { key: 'competencias', label: 'Competências & Habilidades', icon: '🎯' },
+    { key: 'trabalhos', label: 'Trabalhos Académicos', icon: '📝' },
+    { key: 'projectos', label: 'Projectos de Investigação', icon: '🔬' },
+    { key: 'certificados', label: 'Certificados & Qualificações', icon: '🏆' },
+    { key: 'microcredenciais', label: 'Microcredenciais', icon: '🎖️' },
+    { key: 'documentos', label: 'Documentos e Relatórios', icon: '📄' },
+    { key: 'imagens', label: 'Imagens e Registos Práticos', icon: '📸' },
+    { key: 'outros', label: 'Outros Elementos', icon: '💡' }
+  ];
+
+  const carregarItems = async () => {
+    if (!userId) return;
+    setLoading(true);
+    try {
+      const data = await portfolioService.getByUserId(userId);
+      setItems(data || []);
+    } catch (err) {
+      console.warn('Erro ao carregar portfólio:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarItems();
+  }, [userId]);
+
+  const handleAddItem = async (e) => {
+    e.preventDefault();
+    if (!novoItem.titulo.trim()) return;
+    setSubmitting(true);
+    try {
+      await portfolioService.addItem({
+        titulo: novoItem.titulo,
+        descricao: novoItem.descricao + (novoItem.competencias ? `\n\n🎯 Competências: ${novoItem.competencias}` : ''),
+        categoria: novoItem.categoria,
+        ficheiro
+      });
+      setShowAddModal(false);
+      setNovoItem({ titulo: '', categoria: 'trabalhos', descricao: '', competencias: '' });
+      setFicheiro(null);
+      await carregarItems();
+    } catch (err) {
+      alert('Erro ao adicionar item ao portfólio: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Tem a certeza que deseja eliminar este item do seu E-Portfólio?')) return;
+    try {
+      await portfolioService.deleteItem(id);
+      await carregarItems();
+    } catch (err) {
+      alert('Erro ao eliminar item: ' + err.message);
+    }
+  };
+
+  const itemsFiltrados = items.filter(it => {
+    if (categoriaSel === 'todas') return true;
+    return (it.categoria || '').toLowerCase() === categoriaSel.toLowerCase();
+  });
+
+  return (
+    <div>
+      <div className="content-header-bar">
+        <div>
+          <h2 className="content-header-title">
+            <span>📁</span> E-Portfólio Digital do Estudante
+          </h2>
+          <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+            Repositório individual de competências, trabalhos académicos, projectos, certificados e microcredenciais.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {isEstudante && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowAddModal(true)}
+              style={{ fontSize: '0.85rem', padding: '0.45rem 0.95rem' }}
+            >
+              ➕ Adicionar Item ao Portfólio
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Banner Explicativo */}
+      <div className="plan-section-block" style={{ marginBottom: '1.25rem' }}>
+        <h4>🎯 Espaço Pessoal de Construção de Competências</h4>
+        <p>
+          O seu <strong>E-Portfólio</strong> acompanha todo o seu percurso académico no ISPOTEC. Cada estudante tem autonomia para organizar a sua apresentação, registar certificados, anexar relatórios práticos e demonstrar as competências adquiridas.
+        </p>
+      </div>
+
+      {/* Categorias Pills */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+        {CATEGORIAS.map(cat => (
+          <button
+            key={cat.key}
+            type="button"
+            onClick={() => setCategoriaSel(cat.key)}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '20px',
+              border: '1px solid',
+              borderColor: categoriaSel === cat.key ? '#4338ca' : '#e2e8f0',
+              background: categoriaSel === cat.key ? '#4338ca' : '#fff',
+              color: categoriaSel === cat.key ? '#fff' : '#334155',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s'
+            }}
+          >
+            <span>{cat.icon}</span> {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid de Itens do Portfólio */}
+      {loading ? (
+        <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>⏳ A carregar itens do E-Portfólio...</div>
+      ) : itemsFiltrados.length === 0 ? (
+        <div className="ava-empty" style={{ margin: '1rem 0' }}>
+          <div className="ava-empty-icon">📁</div>
+          <h3 style={{ color: '#1e293b' }}>Nenhum item registado nesta categoria</h3>
+          <p>
+            {isEstudante ? 'Clique no botão acima para adicionar o seu primeiro trabalho, certificado ou competência.' : 'O estudante ainda não adicionou registos a esta categoria.'}
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+          {itemsFiltrados.map(item => (
+            <div
+              key={item._id || item.id}
+              style={{
+                background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px',
+                padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <span className="ava-badge badge-blue">
+                    {CATEGORIAS.find(c => c.key === item.categoria)?.icon || '📌'} {item.categoria ? item.categoria.toUpperCase() : 'GERAL'}
+                  </span>
+                  {isEstudante && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item._id || item.id)}
+                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem' }}
+                      title="Eliminar este item"
+                    >
+                      🗑️
+                    </button>
+                  )}
+                </div>
+
+                <h4 style={{ margin: '0 0 0.4rem', fontSize: '1rem', color: '#0f172a' }}>{item.titulo}</h4>
+                <p style={{ margin: '0 0 0.75rem', fontSize: '0.86rem', color: '#475569', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+                  {item.descricao}
+                </p>
+              </div>
+
+              {item.ficheiro && (
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                  <a
+                    href={item.ficheiro}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: '0.82rem', color: '#4338ca', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    📎 Ver Ficheiro / Anexo ↗
+                  </a>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Adicionar Item ao Portfólio */}
+      {showAddModal && (
+        <div className="ava-modal-bg" onClick={() => setShowAddModal(false)}>
+          <div className="ava-modal" onClick={e => e.stopPropagation()}>
+            <h3>➕ Adicionar Novo Item ao E-Portfólio</h3>
+            <form onSubmit={handleAddItem}>
+              <div className="ava-form-full">
+                <label className="ava-label">Título do Item / Trabalho *</label>
+                <input
+                  type="text"
+                  required
+                  className="ava-input"
+                  placeholder="Ex: Projecto Integrador de Saúde Oral..."
+                  value={novoItem.titulo}
+                  onChange={e => setNovoItem({ ...novoItem, titulo: e.target.value })}
+                />
+              </div>
+
+              <div className="ava-form-full">
+                <label className="ava-label">Categoria *</label>
+                <select
+                  className="ava-input"
+                  value={novoItem.categoria}
+                  onChange={e => setNovoItem({ ...novoItem, categoria: e.target.value })}
+                >
+                  {CATEGORIAS.filter(c => c.key !== 'todas').map(c => (
+                    <option key={c.key} value={c.key}>{c.icon} {c.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="ava-form-full">
+                <label className="ava-label">Descrição / Apresentação</label>
+                <textarea
+                  rows="3"
+                  className="ava-textarea"
+                  placeholder="Descreva o trabalho, projecto, contexto ou objectivos alcançados..."
+                  value={novoItem.descricao}
+                  onChange={e => setNovoItem({ ...novoItem, descricao: e.target.value })}
+                />
+              </div>
+
+              <div className="ava-form-full">
+                <label className="ava-label">Competências Desenvolvidas</label>
+                <input
+                  type="text"
+                  className="ava-input"
+                  placeholder="Ex: Análise clínica, trabalho em equipa, diagnóstico digital..."
+                  value={novoItem.competencias}
+                  onChange={e => setNovoItem({ ...novoItem, competencias: e.target.value })}
+                />
+              </div>
+
+              <div className="ava-form-full">
+                <label className="ava-label">Anexar Ficheiro (PDF, Imagem, Documento)</label>
+                <input
+                  type="file"
+                  className="ava-input"
+                  onChange={e => setFicheiro(e.target.files?.[0] || null)}
+                />
+              </div>
+
+              <div className="ava-modal-footer">
+                <button type="button" className="btn-ava-cancel" onClick={() => setShowAddModal(false)}>Cancelar</button>
+                <button type="submit" className="btn-ava-primary" disabled={submitting}>
+                  {submitting ? 'A guardar...' : 'Salvar no E-Portfólio'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function HomeSchoolSalaVirtual() {
   const { groupId } = useParams();
@@ -63,6 +1001,26 @@ export default function HomeSchoolSalaVirtual() {
         setSala(s);
         const c = homeSchoolService.getSalaConteudo(s.id || s._id);
         setConteudo(c);
+
+        // Auto-register student presence
+        if (s && user && (user.tipo === 'estudante')) {
+          const today = new Date().toISOString().substring(0, 10);
+          fetch('/api/presencas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('ispotec_token')}` },
+            body: JSON.stringify({
+              estudante_id: user.id || user._id,
+              estudante_nome: user.nome || '',
+              estudante_email: user.email || '',
+              sala_id: s.id || s._id,
+              modulo: s.modulo || s.nome || '',
+              curso: user.curso || '',
+              data_acesso: new Date().toISOString(),
+              periodo: today,
+              sessao_id: `${user.id || user._id}-${s.id || s._id}-${today}`
+            })
+          }).catch(() => {});
+        }
 
         // Carregar sessões e livro de sumários do backend
         try {
@@ -1428,6 +2386,14 @@ export default function HomeSchoolSalaVirtual() {
                 <span className="sala-nav-badge">{filterByState(conteudo.manuais).length}</span>
               </button>
 
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'presencas' ? 'active' : ''}`}
+                onClick={() => setActiveTab('presencas')}
+              >
+                <span>📋</span> Controlo de Presenças
+              </button>
+
               {/* ── B. Recursos Digitais ──────────────────────────── */}
               <div style={{ height: '1px', background: '#e2e8f0', margin: '0.6rem 0.5rem' }} />
               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '0.3rem 0.8rem' }}>
@@ -1439,8 +2405,16 @@ export default function HomeSchoolSalaVirtual() {
                 className={`sala-nav-btn ${activeTab === 'links-virtuais' ? 'active' : ''}`}
                 onClick={() => setActiveTab('links-virtuais')}
               >
-                <span>🔗</span> Links Virtuais
+                <span>🔗</span> Links Virtuais das Aulas
                 <span className="sala-nav-badge">{filterByState(conteudo.linksVirtuais).length}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'recursos-digitais' || activeTab === 'laboratorio-digital' ? 'active' : ''}`}
+                onClick={() => setActiveTab('recursos-digitais')}
+              >
+                <span>🔬</span> Recursos Digitais
               </button>
 
               <button
@@ -1454,10 +2428,10 @@ export default function HomeSchoolSalaVirtual() {
 
               <button
                 type="button"
-                className={`sala-nav-btn ${activeTab === 'laboratorio-digital' ? 'active' : ''}`}
-                onClick={() => setActiveTab('laboratorio-digital')}
+                className={`sala-nav-btn ${activeTab === 'e-portfolio' ? 'active' : ''}`}
+                onClick={() => setActiveTab('e-portfolio')}
               >
-                <span>🔬</span> Laboratório Digital
+                <span>📁</span> E-Portfólio
               </button>
 
               {/* ── C. Tutoria e Interactividade ─────────────────── */}
@@ -1504,6 +2478,14 @@ export default function HomeSchoolSalaVirtual() {
                 onClick={() => setActiveTab('tutores-mentores')}
               >
                 <span>👥</span> Gestão de Tutores e Mentores
+              </button>
+
+              <button
+                type="button"
+                className={`sala-nav-btn ${activeTab === 'chat-room' ? 'active' : ''}`}
+                onClick={() => setActiveTab('chat-room')}
+              >
+                <span>💬</span> Chat Room
               </button>
 
               <button
@@ -2679,12 +3661,12 @@ export default function HomeSchoolSalaVirtual() {
               </div>
             )}
 
-            {/* 10. LABORATÓRIO DIGITAL */}
-            {activeTab === 'laboratorio-digital' && (
+            {/* 10. RECURSOS DIGITAIS (antigo Laboratório Digital) */}
+            {(activeTab === 'recursos-digitais' || activeTab === 'laboratorio-digital') && (
               <div>
                 <div className="content-header-bar">
                   <h2 className="content-header-title">
-                    <span>🔬</span> Laboratório Digital da Disciplina
+                    <span>🔬</span> Recursos Digitais
                   </h2>
                   {canManage && (
                     <button
@@ -2695,7 +3677,7 @@ export default function HomeSchoolSalaVirtual() {
                         setModalType('editLab');
                       }}
                     >
-                      ✏️ Configurar Laboratório Digital
+                      ✏️ Configurar Recursos Digitais
                     </button>
                   )}
                 </div>
@@ -3172,7 +4154,16 @@ export default function HomeSchoolSalaVirtual() {
               </div>
             )}
 
-            {/* 16. VIDEOCONFERÊNCIA JITSI MEET */}
+            {/* 16. CHAT ROOM */}
+            {activeTab === 'chat-room' && <ChatRoomSection sala={sala} user={user} />}
+
+            {/* 17. E-PORTFÓLIO */}
+            {activeTab === 'e-portfolio' && <EPortfolioSection sala={sala} user={user} />}
+
+            {/* 18. CONTROLO DE PRESENÇAS */}
+            {activeTab === 'presencas' && <PresencasSection sala={sala} user={user} isAdmin={isAdmin} isDocente={isDocente} />}
+
+            {/* 19. VIDEOCONFERÊNCIA JITSI MEET */}
             {activeTab === 'videoconferencia' && (() => {
               const jitsiRoom = `ISPOTEC-${(sala?.codigo || actualId || 'GERAL').toString().replace(/[^a-zA-Z0-9-]/g, '-')}`;
               const jitsiUrl = `https://meet.jit.si/${jitsiRoom}#config.prejoinPageEnabled=false&interfaceConfig.MOBILE_APP_PROMO=false`;

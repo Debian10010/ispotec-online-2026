@@ -28,6 +28,65 @@ function AttachmentBadge({ url, nome }) {
   return <AttachmentDisplay url={url} nome={nome} primaryColor="#1d4ed8" />;
 }
 
+// ── Laboratórios institucionais IFOPTEC (mostrados quando BD está vazia) ──────
+const LABS_IFOPTEC = [
+  {
+    id: 'local-1', slug: 'estomatologia-medicina-dentaria',
+    nome: 'Laboratório de Estomatologia e Medicina Dentária', sigla: 'LEMD',
+    icon: '🦷', icone: '🦷', cor: '#0891b2', corBg: '#e0f2fe',
+    coordenador: 'Prof. Dr. António Silva',
+    localizacao: 'Bloco C, Piso 2 — ISPOTEC Campus Principal',
+    linhas: ['Saúde Oral e Prevenção Dentária', 'Diagnóstico de Patologias Orais', 'Prótese Dentária e Reabilitação', 'Epidemiologia Oral em Moçambique', 'Materiais Odontológicos'],
+    areas: ['Saúde Oral e Prevenção Dentária', 'Diagnóstico de Patologias Orais', 'Prótese Dentária e Reabilitação', 'Epidemiologia Oral em Moçambique', 'Materiais Odontológicos'],
+    descricao: 'Centro especializado em investigação e formação em estomatologia, medicina dentária e saúde oral, equipado com cadeiras odontológicas, equipamentos de diagnóstico por imagem e tecnologias de simulação clínica.',
+    imagem: '/assets/img/laboratorios/lab-estomatologia.svg',
+  },
+  {
+    id: 'local-2', slug: 'farmacologia-analises-clinicas',
+    nome: 'Laboratório de Farmacologia e Análises Clínicas', sigla: 'LFAC',
+    icon: '💊', icone: '💊', cor: '#7c3aed', corBg: '#ede9fe',
+    coordenador: 'Prof.ª Dr.ª Maria Nhantumbo',
+    localizacao: 'Bloco A, Piso 1 — ISPOTEC Campus Principal',
+    linhas: ['Farmacologia Clínica', 'Análises Bioquímicas', 'Controlo de Qualidade de Medicamentos', 'Fitoterapia e Medicina Tradicional', 'Farmacovigilância'],
+    areas: ['Farmacologia Clínica', 'Análises Bioquímicas', 'Controlo de Qualidade de Medicamentos', 'Fitoterapia e Medicina Tradicional', 'Farmacovigilância'],
+    descricao: 'Laboratório avançado para o estudo de medicamentos, suas interacções, eficácia e segurança, e realização de análises clínicas fundamentais para diagnóstico e monitorização de tratamentos.',
+    imagem: '/assets/img/laboratorios/lab-farmacologia.svg',
+  },
+  {
+    id: 'local-3', slug: 'microbiologia-anatomia-patologica',
+    nome: 'Laboratório de Microbiologia e Anatomia Patológica', sigla: 'LMAP',
+    icon: '🦠', icone: '🦠', cor: '#dc2626', corBg: '#fee2e2',
+    coordenador: 'Prof. Dr. Carlos Machava',
+    localizacao: 'Bloco B, Piso 3 — ISPOTEC Campus Principal',
+    linhas: ['Microbiologia Clínica', 'Histopatologia', 'Bacteriologia e Micologia', 'Virologia Clínica', 'Parasitologia Tropical'],
+    areas: ['Microbiologia Clínica', 'Histopatologia', 'Bacteriologia e Micologia', 'Virologia Clínica', 'Parasitologia Tropical'],
+    descricao: 'Centro de excelência para o estudo de microrganismos patogénicos e análise anatomo-patológica. Dispõe de zonas de biossegurança, microscópios de alta resolução e sistemas de processamento histológico.',
+    imagem: '/assets/img/laboratorios/lab-microbiologia.svg',
+  },
+  {
+    id: 'local-4', slug: 'epidemiologia-saude-integrativa',
+    nome: 'Laboratório de Epidemiologia e Saúde Integrativa', sigla: 'LESI',
+    icon: '📊', icone: '📊', cor: '#059669', corBg: '#d1fae5',
+    coordenador: 'Prof.ª Dr.ª Ana Guambe',
+    localizacao: 'Bloco D, Piso 1 — ISPOTEC Campus Principal',
+    linhas: ['Epidemiologia das Doenças Crónicas', 'Saúde Pública', 'Medicina Integrativa', 'Determinantes Sociais da Saúde', 'Vigilância Epidemiológica'],
+    areas: ['Epidemiologia das Doenças Crónicas', 'Saúde Pública', 'Medicina Integrativa', 'Determinantes Sociais da Saúde', 'Vigilância Epidemiológica'],
+    descricao: 'Laboratório para o estudo da distribuição e determinantes das doenças na população moçambicana, combinando epidemiologia clássica com perspectivas integradoras de saúde holística.',
+    imagem: '/assets/img/laboratorios/lab-epidemiologia.svg',
+  },
+  {
+    id: 'local-5', slug: 'tecnologia-saude-exames-medicos',
+    nome: 'Laboratório de Tecnologia em Saúde e Exames Médicos', sigla: 'LTSEM',
+    icon: '🏥', icone: '🏥', cor: '#d97706', corBg: '#fef3c7',
+    coordenador: 'Prof. Dr. Ernesto Mondlane',
+    localizacao: 'Bloco E, Piso 2 — ISPOTEC Campus Principal',
+    linhas: ['Imagiologia e Diagnóstico por Imagem', 'Monitorização Clínica', 'E-Saúde e Telemedicina', 'Instrumentação Biomédica', 'Inovação Digital na Saúde'],
+    areas: ['Imagiologia e Diagnóstico por Imagem', 'Monitorização Clínica', 'E-Saúde e Telemedicina', 'Instrumentação Biomédica', 'Inovação Digital na Saúde'],
+    descricao: 'Centro de inovação tecnológica dedicado ao desenvolvimento de tecnologias avançadas de diagnóstico, monitorização clínica e transformação digital nos serviços de saúde moçambicanos.',
+    imagem: '/assets/img/laboratorios/lab-tecnologia-saude.svg',
+  },
+];
+
 export default function Investigacao() {
   const { canAdd, canEdit, canDelete } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -96,7 +155,8 @@ export default function Investigacao() {
     loadData();
   }, [selectedLabId]);
 
-  const selectedLab = laboratorios.find(l => (l._id || l.id) === selectedLabId || l.sigla?.toLowerCase() === selectedLabId?.toLowerCase());
+  const labsToShow = laboratorios.length > 0 ? laboratorios : LABS_IFOPTEC;
+  const selectedLab = labsToShow.find(l => (l._id || l.id) === selectedLabId || l.sigla?.toLowerCase() === selectedLabId?.toLowerCase() || l.slug === selectedLabId);
 
   const selectLab = (labId) => {
     const params = new URLSearchParams();
@@ -799,7 +859,7 @@ export default function Investigacao() {
         {/* Stats Summary Bar */}
         <div className="inv-summary-bar">
           <div className="inv-stat-card">
-            <div className="inv-stat-num">{laboratorios.length}</div>
+            <div className="inv-stat-num">{labsToShow.length}</div>
             <div className="inv-stat-lbl">Laboratórios Especializados</div>
           </div>
           <div className="inv-stat-card">
@@ -874,7 +934,7 @@ export default function Investigacao() {
                 className="detail-icon-large"
                 style={{ background: selectedLab.corBg || '#dbeafe', color: selectedLab.cor || '#1d4ed8' }}
               >
-                {selectedLab.icone || '🔬'}
+                {selectedLab.icone || selectedLab.icon || '🔬'}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
@@ -882,6 +942,16 @@ export default function Investigacao() {
                   <span style={{ fontSize: '0.8rem', color: '#1d4ed8', fontWeight: 600 }}>ISPOTEC Investigação</span>
                 </div>
                 <h2 className="detail-title">{selectedLab.nome}</h2>
+                {selectedLab.imagem && (
+                  <div style={{ margin: '0.75rem 0', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', maxHeight: '240px' }}>
+                    <img
+                      src={selectedLab.imagem}
+                      alt={selectedLab.nome}
+                      style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  </div>
+                )}
                 <p style={{ margin: 0, color: '#475569', fontSize: '0.94rem', lineHeight: 1.6 }}>
                   {selectedLab.descricao}
                 </p>
@@ -1367,7 +1437,7 @@ export default function Investigacao() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>🏛️</span> Laboratórios Científicos ISPOTEC ({laboratorios.length})
+                <span>🏛️</span> Laboratórios Científicos ISPOTEC ({labsToShow.length})
               </h2>
               {canAdd && (
                 <button
@@ -1485,16 +1555,16 @@ export default function Investigacao() {
               </form>
             )}
 
-            {laboratorios.length === 0 ? (
+            {labsToShow.length === 0 ? (
               <EmptyState mensagem="Não existem registos disponíveis." canAdd={canAdd} onAdd={() => setShowAddLab(true)} btnText="+ Criar Primeiro Laboratório" />
             ) : (
               <div className="inv-grid">
-                {laboratorios.map(lab => (
+                {labsToShow.map(lab => (
                   <div
                     key={lab._id || lab.id}
                     className="inv-card"
                     style={{ '--lab-color': lab.cor || '#1d4ed8' }}
-                    onClick={() => selectLab(lab._id || lab.id)}
+                    onClick={() => selectLab(lab._id || lab.id || lab.slug)}
                   >
                     <div>
                       <div className="inv-card-header">
@@ -1502,7 +1572,7 @@ export default function Investigacao() {
                           className="inv-card-icon"
                           style={{ background: lab.corBg || '#dbeafe', color: lab.cor || '#1d4ed8' }}
                         >
-                          {lab.icone || '🔬'}
+                          {lab.icone || lab.icon || '🔬'}
                         </div>
                         <div>
                           <h3 className="inv-card-name">{lab.nome}</h3>
@@ -1510,20 +1580,31 @@ export default function Investigacao() {
                         </div>
                       </div>
 
+                      {lab.imagem && (
+                        <div style={{ margin: '0.6rem 0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                          <img
+                            src={lab.imagem}
+                            alt={lab.nome}
+                            style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }}
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+
                       <p className="inv-card-desc">{lab.descricao}</p>
 
                       <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.85rem' }}>
                         👤 <strong>Coordenação:</strong> {lab.coordenador || '—'}
                       </div>
 
-                      {Array.isArray(lab.areas) && lab.areas.length > 0 && (
+                      {Array.isArray(lab.areas || lab.linhas) && (lab.areas || lab.linhas).length > 0 && (
                         <div className="inv-areas-tags">
-                          {lab.areas.slice(0, 3).map((area, i) => (
+                          {(lab.areas || lab.linhas).slice(0, 3).map((area, i) => (
                             <span key={i} className="area-tag">{area}</span>
                           ))}
-                          {lab.areas.length > 3 && (
+                          {(lab.areas || lab.linhas).length > 3 && (
                             <span className="area-tag" style={{ background: '#e0e7ff', color: '#3730a3' }}>
-                              +{lab.areas.length - 3} mais
+                              +{(lab.areas || lab.linhas).length - 3} mais
                             </span>
                           )}
                         </div>
@@ -1540,7 +1621,7 @@ export default function Investigacao() {
                         className="inv-btn-detail"
                         onClick={(e) => {
                           e.stopPropagation();
-                          selectLab(lab._id || lab.id);
+                          selectLab(lab._id || lab.id || lab.slug);
                         }}
                       >
                         Ver Detalhes →

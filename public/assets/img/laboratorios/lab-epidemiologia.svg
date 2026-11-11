@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-epi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="50%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="graph-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-epi)" />
+
+  <!-- Data Grid & Clean Analytics Background -->
+  <path d="M50 80 L750 80 M50 140 L750 140 M50 200 L750 200 M50 260 L750 260 M50 320 L750 320" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+  <path d="M120 60 L120 340 M240 60 L240 340 M360 60 L360 340 M480 60 L480 340 M600 60 L600 340 M720 60 L720 340" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+
+  <!-- Main Analytics Display Console (Center Left) -->
+  <g transform="translate(60, 90)">
+    <rect x="0" y="0" width="380" height="230" rx="12" fill="#0f172a" stroke="#34d399" stroke-width="2"/>
+    <rect x="15" y="15" width="350" height="200" rx="8" fill="#1e293b"/>
+    <!-- Screen Header -->
+    <text x="30" y="40" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#a7f3d0">VIGILÂNCIA EPIDEMIOLÓGICA · INCIDÊNCIA POPULACIONAL</text>
+    <!-- Area Chart -->
+    <path d="M30 180 L70 150 L120 160 L170 110 L220 130 L270 85 L320 95 L340 70 L340 180 Z" fill="url(#graph-fill)"/>
+    <path d="M30 180 L70 150 L120 160 L170 110 L220 130 L270 85 L320 95 L340 70" stroke="#34d399" stroke-width="3" fill="none"/>
+    <!-- Data points -->
+    <circle cx="70" cy="150" r="4" fill="#6ee7b7"/>
+    <circle cx="120" cy="160" r="4" fill="#6ee7b7"/>
+    <circle cx="170" cy="110" r="4" fill="#6ee7b7"/>
+    <circle cx="220" cy="130" r="4" fill="#6ee7b7"/>
+    <circle cx="270" cy="85" r="5" fill="#facc15"/>
+    <circle cx="320" cy="95" r="4" fill="#6ee7b7"/>
+    <circle cx="340" cy="70" r="5" fill="#f43f5e"/>
+    <!-- Axis line -->
+    <line x1="30" y1="180" x2="345" y2="180" stroke="#64748b" stroke-width="2"/>
+  </g>
+
+  <!-- Secondary Metrics Panels (Right side) -->
+  <g transform="translate(470, 90)">
+    <!-- Metric 1: Geographic Prevalence Map Graphic -->
+    <rect x="0" y="0" width="270" height="105" rx="10" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+    <text x="18" y="28" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#6ee7b7">MAPA DE DISTRIBUIÇÃO REGIONAL</text>
+    <!-- Simplified Map nodes & connection network -->
+    <circle cx="50" cy="65" r="12" fill="#047857" stroke="#34d399" stroke-width="2"/>
+    <circle cx="120" cy="55" r="16" fill="#059669" stroke="#6ee7b7" stroke-width="2"/>
+    <circle cx="190" cy="70" r="10" fill="#047857" stroke="#34d399" stroke-width="2"/>
+    <circle cx="240" cy="50" r="8" fill="#065f46" stroke="#34d399" stroke-width="1.5"/>
+    <line x1="62" y1="65" x2="104" y2="57" stroke="#34d399" stroke-width="2" stroke-dasharray="3,3"/>
+    <line x1="136" y1="57" x2="180" y2="68" stroke="#34d399" stroke-width="2" stroke-dasharray="3,3"/>
+    <line x1="200" y1="68" x2="232" y2="52" stroke="#34d399" stroke-width="2" stroke-dasharray="3,3"/>
+
+    <!-- Metric 2: Integrative Health Indicator -->
+    <g transform="translate(0, 120)">
+      <rect x="0" y="0" width="270" height="105" rx="10" fill="#0f172a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      <text x="18" y="28" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#fef08a">SAÚDE INTEGRATIVA E PREVENÇÃO</text>
+      <!-- Circular Progress Donut -->
+      <circle cx="55" cy="65" r="25" stroke="#1e293b" stroke-width="8" fill="none"/>
+      <circle cx="55" cy="65" r="25" stroke="#facc15" stroke-width="8" stroke-dasharray="120 40" fill="none"/>
+      <text x="44" y="70" font-family="system-ui, sans-serif" font-size="12" font-weight="800" fill="#ffffff">82%</text>
+      <text x="100" y="60" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#ffffff">Prevenção Primária</text>
+      <text x="100" y="78" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">Impacto Comunitário</text>
+    </g>
+  </g>
+
+  <!-- Header Badge -->
+  <rect x="40" y="30" width="410" height="50" rx="25" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.2)"/>
+  <text x="65" y="62" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#6ee7b7">📊 EPIDEMIOLOGIA E SAÚDE INTEGRATIVA</text>
+
+  <!-- Bottom Info Bar -->
+  <rect x="40" y="375" width="720" height="50" rx="10" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255,255,255,0.15)"/>
+  <text x="60" y="405" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#ffffff">
+    ISPOTEC · Vigilância Epidemiológica · Indicadores de Saúde Pública · Prevenção Comunitária · Modelação
+  </text>
+</svg>
