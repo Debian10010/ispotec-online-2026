@@ -1,5 +1,6 @@
 import React, { useState, useId, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
   candidaturaService,
   OFERTA_FORMATIVA_ISPOTEC_2027,
@@ -9,7 +10,13 @@ import {
 import FichaCandidatoPrint from '../../components/FichaCandidatoPrint';
 
 export default function PreInscricao2027() {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Utilizadores autenticados (Estudante, Docente, Admin) não visualizam o formulário público de pré-inscrição
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   // Estado do formulário
   const [etapa, setEtapa] = useState(1); // 1: Curso, 2: Dados Pessoais, 3: Documentos, 4: Confirmação

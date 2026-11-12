@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { candidaturaService } from '../../services/candidaturaService';
 import FichaCandidatoPrint from '../../components/FichaCandidatoPrint';
 import ReciboPagamentoPrint from '../../components/ReciboPagamentoPrint';
 
 export default function ConsultarCandidatura() {
+  const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
+
+  // Utilizadores autenticados (Estudante, Docente, Admin) são encaminhados para o Dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const codigoUrl = searchParams.get('codigo') || '';
 
   const [busca, setBusca] = useState(codigoUrl);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export const DADOS_ISPOTEC_2027 = {
   mestrado: {
@@ -110,8 +111,15 @@ export const DADOS_ISPOTEC_2027 = {
 };
 
 export default function TabelaCursosPropinasIspotec() {
+  const { isAuthenticated } = useAuth();
   const [tabAtiva, setTabAtiva] = useState('todos');
   const [filtroTexto, setFiltroTexto] = useState('');
+
+  // Visitantes não autenticados visualizam as informações públicas de inscrições 2027.
+  // Utilizadores autenticados (Estudante, Docente, Admin) NÃO visualizam esta informação.
+  if (isAuthenticated) {
+    return null;
+  }
 
   const { mestrado, licenciaturas, posGraduacoes, especializacoes, curtaDuracao, ceap, contactos } = DADOS_ISPOTEC_2027;
 

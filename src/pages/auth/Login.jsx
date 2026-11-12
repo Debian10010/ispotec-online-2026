@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
@@ -9,9 +9,13 @@ export default function Login() {
   const [sucesso, setSucesso] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const from = location.state?.from?.pathname || '/dashboard';
 
@@ -31,8 +35,9 @@ export default function Login() {
 
     if (res.sucesso) {
       setSucesso(res.mensagem);
+      const targetPath = (!from || from === '/' || from === '/index.php' || from.startsWith('/pre-inscricao') || from.startsWith('/consultar-candidatura')) ? '/dashboard' : from;
       setTimeout(() => {
-        navigate(from, { replace: true });
+        navigate(targetPath, { replace: true });
       }, 1000);
     } else {
       setErro(res.mensagem);

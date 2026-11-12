@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useInstitution } from '../context/InstitutionContext';
 import TabelaCursosPropinasIspotec from '../components/TabelaCursosPropinasIspotec';
@@ -7,6 +7,11 @@ import TabelaCursosPropinasIspotec from '../components/TabelaCursosPropinasIspot
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const { switchInstitution } = useInstitution();
+
+  // Utilizadores autenticados (Estudante, Docente, Admin) são encaminhados directamente para o Dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <>
@@ -359,9 +364,6 @@ export default function Home() {
                 <Link to="/dashboard" className="hero-btn hero-btn-primary">
                   Ir para Dashboard →
                 </Link>
-                <Link to="/ifoptec" className="hero-btn hero-btn-secondary">
-                  Ver IFOPTEC Online ↗
-                </Link>
               </div>
             </div>
           )}
@@ -369,8 +371,8 @@ export default function Home() {
       </section>
 
       <div className="container" style={{ paddingTop: '2.5rem' }}>
-        {/* Tabela Oficial de Cursos e Propinas ISPOTEC (Inscrições 2027) */}
-        <TabelaCursosPropinasIspotec />
+        {/* Tabela Oficial de Cursos e Propinas ISPOTEC (Inscrições 2027) - Visível apenas para visitantes */}
+        {!isAuthenticated && <TabelaCursosPropinasIspotec />}
 
         {/* Core Academic Modules Section (Ensino, Extensão, Investigação, Tecnologia & Inovação, Ambiente Virtual e Aprendizagem) */}
         <section style={{ margin: '1.5rem 0 1rem 0' }}>
@@ -555,9 +557,6 @@ export default function Home() {
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link to="/auth/register" className="btn btn-success" style={{ padding: '0.9rem 2.5rem', fontSize: '1rem' }}>
                 Criar Conta Grátis
-              </Link>
-              <Link to="/ifoptec" className="btn btn-outline-primary" style={{ padding: '0.9rem 2.5rem', fontSize: '1rem' }}>
-                Ver IFOPTEC Online ↗
               </Link>
             </div>
           </section>

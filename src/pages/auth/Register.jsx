@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useInstitution } from '../../context/InstitutionContext';
 import { CURSOS_IFOPTEC, CURSOS_ISPOTEC } from '../../services/homeschoolService';
@@ -7,6 +7,11 @@ import { CURSOS_IFOPTEC, CURSOS_ISPOTEC } from '../../services/homeschoolService
 export default function Register() {
   const [searchParams] = useSearchParams();
   const { institution, isIfoptec } = useInstitution();
+  const { register, isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const initialInst = searchParams.get('instituicao') === 'ifoptec' || isIfoptec ? 'ifoptec' : 'ispotec';
 
@@ -24,8 +29,6 @@ export default function Register() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const { register } = useAuth();
 
   useEffect(() => {
     if (instituicao === 'ifoptec') {
