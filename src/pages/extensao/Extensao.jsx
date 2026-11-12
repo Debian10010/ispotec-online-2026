@@ -213,7 +213,9 @@ function CentroCard({ c, projetos, canEdit, canDelete, onViewProjects, onDelete,
               🎯 Missão
             </span>
             <p style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.55, margin: 0 }}>
-              {info.missao}
+              {!expandido && info.missao.length > 220
+                ? `${info.missao.slice(0, 210).trim()}...`
+                : info.missao}
             </p>
           </div>
         )}
