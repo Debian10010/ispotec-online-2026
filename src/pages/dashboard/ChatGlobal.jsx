@@ -46,12 +46,15 @@ export default function ChatGlobal() {
   const longPressTimer = useRef(null);
 
   const messagesEndRef = useRef(null);
+  const chatMessagesStreamRef = useRef(null);
   const chatInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const audioInputRef = useRef(null);
   const isFirstLoad = useRef(true);
   const highlightedRef = useRef(false);
+  const isUserNearBottomRef = useRef(true);
+  const prevMessagesLengthRef = useRef(0);
 
   const isAdmin = user && (['admin', 'especialista'].includes(String(user.tipo || '').toLowerCase().trim()));
 
@@ -98,6 +101,12 @@ export default function ChatGlobal() {
     }
   }, []);
 
+  const handleScroll = (e) => {
+    const target = e.currentTarget;
+    const distanceToBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    isUserNearBottomRef.current = distanceToBottom <= 120;
+  };
+
   // Initial load
   useEffect(() => {
     loadMessages();
@@ -109,7 +118,7 @@ export default function ChatGlobal() {
     return () => clearInterval(interval);
   }, [loadMessages]);
 
-  // Handle message highlight from URL parameter
+  // Handle message highlight from URL parameter or auto-scroll when near bottom
   useEffect(() => {
     if (highlightMsgId && messages.length > 0) {
       setTimeout(() => {
@@ -120,8 +129,15 @@ export default function ChatGlobal() {
           setTimeout(() => el.classList.remove('highlight-pulsate'), 4000);
         }
       }, 300);
-    } else if (!highlightedRef.current && messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    const isInitial = prevMessagesLengthRef.current === 0 && messages.length > 0;
+    const hasNewMessage = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (isInitial || (hasNewMessage && isUserNearBottomRef.current)) {
+      messagesEndRef.current?.scrollIntoView({ behavior: isInitial ? 'auto' : 'smooth' });
     }
   }, [messages, highlightMsgId]);
 
@@ -208,6 +224,7 @@ export default function ChatGlobal() {
       setSelectedFile(null);
       setReplyingTo(null);
       setSelectedMentions([]);
+      isUserNearBottomRef.current = true;
       await loadMessages(true);
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
@@ -1375,7 +1392,9 @@ export default function ChatGlobal() {
         <div className="chat-main-box">
           {/* Message Stream */}
           <div
+            ref={chatMessagesStreamRef}
             className="chat-messages-stream"
+            onScroll={handleScroll}
             onClick={() => activeMenuMsgId && setActiveMenuMsgId(null)}
           >
             {loading ? (

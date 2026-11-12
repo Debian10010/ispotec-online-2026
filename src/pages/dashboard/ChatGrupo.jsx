@@ -44,10 +44,13 @@ export default function ChatGrupo() {
   const longPressTimer = useRef(null);
 
   const messagesEndRef = useRef(null);
+  const chatMessagesContainerRef = useRef(null);
   const chatInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const audioInputRef = useRef(null);
+  const isUserNearBottomRef = useRef(true);
+  const prevMessagesLengthRef = useRef(0);
 
   const isAdmin = user && (['admin', 'especialista'].includes(String(user.tipo || '').toLowerCase().trim()));
 
@@ -90,7 +93,12 @@ export default function ChatGrupo() {
 
   const loadMessages = async () => {
     const msgs = await chatService.getGroupMessages(groupId);
-    setMessages(msgs);
+    setMessages((prev) => {
+      if (JSON.stringify(prev) !== JSON.stringify(msgs)) {
+        return msgs;
+      }
+      return prev;
+    });
   };
 
   const loadUsersForMentions = async () => {
@@ -98,6 +106,13 @@ export default function ChatGrupo() {
       const list = await userService.getAllUsers();
       setAllUsers(list || []);
     } catch (_) {}
+  };
+
+  const handleScroll = (e) => {
+    const target = e.currentTarget;
+    const distanceToBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    // Consider near bottom if within 120px
+    isUserNearBottomRef.current = distanceToBottom <= 120;
   };
 
   useEffect(() => {
@@ -112,7 +127,7 @@ export default function ChatGrupo() {
     return () => clearInterval(interval);
   }, [groupId]);
 
-  // Auto scroll to bottom on new messages or handle highlight
+  // Auto scroll to bottom only on initial load, or if user is near bottom, or when a new message arrives and user is near bottom
   useEffect(() => {
     if (highlightMsgId && messages.length > 0) {
       setTimeout(() => {
@@ -123,8 +138,16 @@ export default function ChatGrupo() {
           setTimeout(() => el.classList.remove('highlight-pulsate-group'), 4000);
         }
       }, 300);
-    } else {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    const isFirstLoad = prevMessagesLengthRef.current === 0 && messages.length > 0;
+    const hasNewMessage = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    // Only scroll down if it's first load OR user is actively at the bottom
+    if (isFirstLoad || (hasNewMessage && isUserNearBottomRef.current)) {
+      messagesEndRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
     }
   }, [messages, highlightMsgId]);
 
@@ -209,6 +232,7 @@ export default function ChatGrupo() {
     setSelectedFile(null);
     setReplyingTo(null);
     setSelectedMentions([]);
+    isUserNearBottomRef.current = true;
     await loadMessages();
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -948,7 +972,9 @@ export default function ChatGrupo() {
 
         <div className="chat-box">
           <div
+            ref={chatMessagesContainerRef}
             className="chat-messages"
+            onScroll={handleScroll}
             onClick={() => activeMenuMsgId && setActiveMenuMsgId(null)}
           >
             {messages.length === 0 ? (
