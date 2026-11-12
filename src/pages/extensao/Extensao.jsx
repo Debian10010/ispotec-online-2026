@@ -67,110 +67,260 @@ function AttachmentBadge({ url, nome }) {
   return <AttachmentDisplay url={url} nome={nome} primaryColor="#059669" />;
 }
 
-// ── Centro Card ───────────────────────────────────────────────────────────────
+// ── Utilitário para estruturar a informação dos centros ────────────────────────
+function parseCentroInfo(descricao = '') {
+  if (!descricao) return { missao: '', visao: '', valores: [], iniciativas: [], servicosExtra: [], textoLivre: '' };
+
+  const sections = {
+    missao: '',
+    visao: '',
+    valores: [],
+    iniciativas: [],
+    servicosExtra: [],
+    textoLivre: '',
+  };
+
+  // Seções por regex simples
+  const lines = descricao.split(/\r?\n/).map(l => l.trim());
+  let currentSec = 'inicio';
+  let buffer = [];
+
+  for (let line of lines) {
+    if (!line) continue;
+    const lower = line.toLowerCase();
+
+    if (/^miss[ãa]o/i.test(line)) {
+      if (currentSec === 'inicio' && buffer.length) sections.textoLivre = buffer.join(' ');
+      currentSec = 'missao';
+      buffer = [];
+      const clean = line.replace(/^miss[ãa]o[:\s-]*/i, '').trim();
+      if (clean) buffer.push(clean);
+      continue;
+    }
+    if (/^vis[ãa]o/i.test(line)) {
+      if (currentSec === 'missao') sections.missao = buffer.join(' ');
+      currentSec = 'visao';
+      buffer = [];
+      const clean = line.replace(/^vis[ãa]o[:\s-]*/i, '').trim();
+      if (clean) buffer.push(clean);
+      continue;
+    }
+    if (/^valores/i.test(line)) {
+      if (currentSec === 'visao') sections.visao = buffer.join(' ');
+      if (currentSec === 'missao') sections.missao = buffer.join(' ');
+      currentSec = 'valores';
+      buffer = [];
+      continue;
+    }
+    if (/^(principais iniciativas|iniciativas|principais actividades|actividades|objectivos|metodologia)/i.test(line)) {
+      if (currentSec === 'visao') sections.visao = buffer.join(' ');
+      if (currentSec === 'missao') sections.missao = buffer.join(' ');
+      currentSec = 'iniciativas';
+      buffer = [];
+      continue;
+    }
+    if (/^(nossos servi[çc]os|servi[çc]os)/i.test(line)) {
+      if (currentSec === 'visao') sections.visao = buffer.join(' ');
+      if (currentSec === 'missao') sections.missao = buffer.join(' ');
+      currentSec = 'servicos';
+      buffer = [];
+      continue;
+    }
+
+    if (currentSec === 'valores') {
+      const val = line.replace(/^[•\-\*]\s*/, '').replace(/;$/, '').trim();
+      if (val) sections.valores.push(val);
+    } else if (currentSec === 'servicos') {
+      const s = line.replace(/^[•\-\*]\s*/, '').trim();
+      if (s) sections.servicosExtra.push(s);
+    } else if (currentSec === 'iniciativas') {
+      const ini = line.replace(/^[•\-\*]\s*/, '').trim();
+      if (ini && ini.length > 5) sections.iniciativas.push(ini);
+    } else {
+      buffer.push(line);
+    }
+  }
+
+  if (currentSec === 'missao' && !sections.missao) sections.missao = buffer.join(' ');
+  if (currentSec === 'visao' && !sections.visao) sections.visao = buffer.join(' ');
+  if (currentSec === 'inicio' && !sections.textoLivre) sections.textoLivre = buffer.join(' ');
+
+  return sections;
+}
+
+// ── Centro Card Profissional ──────────────────────────────────────────────────
 function CentroCard({ c, projetos, canEdit, canDelete, onViewProjects, onDelete, onEdit }) {
+  const [expandido, setExpandido] = useState(false);
   const { cor, corBg, corBorder } = getCentroColors(c);
   const cId = c.slug || c.id || c._id;
   const cRealId = c.id || c._id;
   const logoUrl = resolveLogo(c);
   const projetosCount = projetos.filter(p => p.centro_id === cId || p.centro_id === cRealId).length;
-  const servicos = c.servicos || [];
+  
+  // Informação estruturada
+  const info = parseCentroInfo(c.descricao);
+  const servicos = (c.servicos && c.servicos.length > 0) ? c.servicos : info.servicosExtra;
 
   return (
     <div style={{
       background: '#fff', borderRadius: '16px', overflow: 'hidden',
-      boxShadow: '0 4px 16px rgba(0,0,0,0.07)', border: `1px solid ${corBorder}`,
-      display: 'flex', flexDirection: 'column', transition: 'transform 0.2s, box-shadow 0.2s',
+      boxShadow: '0 4px 18px rgba(0,0,0,0.06)', border: `1px solid ${corBorder}`,
+      display: 'flex', flexDirection: 'column', transition: 'all 0.25s ease',
     }}
-    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.12)'; }}
-    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.07)'; }}
+    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.11)'; }}
+    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.06)'; }}
     >
-      {/* Header com logo */}
-      <div style={{ background: `linear-gradient(135deg, ${corBg} 0%, #fff 100%)`, padding: '1.75rem 1.5rem 1.25rem', borderBottom: `2px solid ${corBorder}`, position: 'relative' }}>
+      {/* Header com Logotipo e Título */}
+      <div style={{ background: `linear-gradient(135deg, ${corBg} 0%, #ffffff 100%)`, padding: '1.5rem', borderBottom: `1px solid ${corBorder}`, position: 'relative' }}>
         {/* Admin actions */}
         {(canEdit || canDelete) && (
-          <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', gap: '0.35rem' }}>
+          <div style={{ position: 'absolute', top: '0.85rem', right: '0.85rem', display: 'flex', gap: '0.35rem' }}>
             {canEdit && (
-              <button onClick={() => onEdit(c)} style={{ background: '#fff', border: `1px solid ${corBorder}`, borderRadius: '6px', padding: '0.25rem 0.5rem', fontSize: '0.72rem', fontWeight: 600, color: '#475569', cursor: 'pointer' }}>✏️</button>
+              <button onClick={() => onEdit(c)} title="Editar" style={{ background: '#fff', border: `1px solid ${corBorder}`, borderRadius: '6px', padding: '0.3rem 0.55rem', fontSize: '0.74rem', fontWeight: 600, color: '#475569', cursor: 'pointer' }}>✏️</button>
             )}
             {canDelete && (
-              <button onClick={() => onDelete(cRealId)} style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '6px', padding: '0.25rem 0.5rem', fontSize: '0.72rem', fontWeight: 600, color: '#991b1b', cursor: 'pointer' }}>🗑️</button>
+              <button onClick={() => onDelete(cRealId)} title="Eliminar" style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '6px', padding: '0.3rem 0.55rem', fontSize: '0.74rem', fontWeight: 600, color: '#991b1b', cursor: 'pointer' }}>🗑️</button>
             )}
           </div>
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
-          {/* Logo */}
-          <div style={{ width: '72px', height: '72px', borderRadius: '12px', overflow: 'hidden', background: '#fff', border: `2px solid ${corBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <div style={{ width: '74px', height: '74px', borderRadius: '14px', overflow: 'hidden', background: '#fff', border: `2px solid ${corBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 10px rgba(0,0,0,0.07)' }}>
             {logoUrl ? (
               <img src={logoUrl} alt={c.sigla} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
             ) : null}
-            <div style={{ display: logoUrl ? 'none' : 'flex', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>{c.icone || '🏢'}</div>
+            <div style={{ display: logoUrl ? 'none' : 'flex', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', fontSize: '1.9rem' }}>{c.icone || '🏢'}</div>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, paddingRight: (canEdit || canDelete) ? '3.5rem' : '0' }}>
             {c.sigla && (
-              <span style={{ display: 'inline-block', background: cor, color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.6rem', borderRadius: '20px', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>
+              <span style={{ display: 'inline-block', background: cor, color: '#fff', fontSize: '0.72rem', fontWeight: 800, padding: '0.2rem 0.65rem', borderRadius: '20px', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>
                 {c.sigla}
               </span>
             )}
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#1e293b', margin: 0, lineHeight: 1.3 }}>{c.nome}</h3>
-            {c.curso && <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.2rem 0 0' }}>{c.curso}</p>}
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.3 }}>{c.nome}</h3>
+            {c.curso && <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, margin: '0.2rem 0 0' }}>🎓 {c.curso}</p>}
           </div>
         </div>
       </div>
 
-      {/* Body */}
-      <div style={{ padding: '1.25rem 1.5rem', flex: 1 }}>
-        {c.descricao && (
-          <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 1rem' }}>{c.descricao}</p>
+      {/* Body: Informações Organizadas */}
+      <div style={{ padding: '1.25rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        
+        {/* Missão */}
+        {info.missao && (
+          <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '10px', borderLeft: `3px solid ${cor}` }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: cor, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.25rem' }}>
+              🎯 Missão
+            </span>
+            <p style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.55, margin: 0 }}>
+              {info.missao}
+            </p>
+          </div>
         )}
 
-        {/* Serviços */}
-        {servicos.length > 0 && (
-          <div style={{ marginBottom: '0.9rem' }}>
-            <p style={{ fontSize: '0.74rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 0.5rem' }}>Serviços</p>
+        {/* Visão (se expandido ou se não tiver missão) */}
+        {info.visao && (expandido || !info.missao) && (
+          <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '10px', borderLeft: '3px solid #64748b' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.25rem' }}>
+              🔭 Visão
+            </span>
+            <p style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.55, margin: 0 }}>
+              {info.visao}
+            </p>
+          </div>
+        )}
+
+        {/* Valores */}
+        {info.valores.length > 0 && (
+          <div>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+              ⭐ Valores Institucionais
+            </span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-              {servicos.slice(0, 5).map((s, i) => (
-                <span key={i} style={{ background: corBg, color: cor, border: `1px solid ${corBorder}`, borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.6rem' }}>
-                  {s}
+              {info.valores.map((v, i) => (
+                <span key={i} style={{ background: '#f1f5f9', color: '#334155', borderRadius: '6px', fontSize: '0.74rem', padding: '0.2rem 0.55rem', fontWeight: 500 }}>
+                  {v}
                 </span>
               ))}
-              {servicos.length > 5 && (
-                <span style={{ background: '#f1f5f9', color: '#64748b', borderRadius: '20px', fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>+{servicos.length - 5}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Serviços / Áreas de Atuação */}
+        {servicos && servicos.length > 0 && (
+          <div>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+              🛠️ Serviços &amp; Práticas
+            </span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+              {(expandido ? servicos : servicos.slice(0, 6)).map((s, i) => (
+                <span key={i} style={{ background: corBg, color: cor, border: `1px solid ${corBorder}`, borderRadius: '20px', fontSize: '0.73rem', fontWeight: 600, padding: '0.2rem 0.65rem' }}>
+                  ✓ {s}
+                </span>
+              ))}
+              {!expandido && servicos.length > 6 && (
+                <span onClick={() => setExpandido(true)} style={{ background: '#f1f5f9', color: '#64748b', borderRadius: '20px', fontSize: '0.72rem', padding: '0.2rem 0.6rem', cursor: 'pointer', fontWeight: 600 }}>
+                  +{servicos.length - 6} mais
+                </span>
               )}
             </div>
           </div>
         )}
 
-        {/* Info */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+        {/* Iniciativas quando expandido */}
+        {expandido && info.iniciativas.length > 0 && (
+          <div style={{ background: '#f0fdf4', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+              🚀 Principais Ações &amp; Metodologia
+            </span>
+            <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.8rem', color: '#14532d', lineHeight: 1.55 }}>
+              {info.iniciativas.slice(0, 5).map((ini, i) => (
+                <li key={i} style={{ marginBottom: '0.3rem' }}>{ini}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Detalhes de Contacto e Coordenação */}
+        <div style={{ background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: 'auto' }}>
           {c.coordenador && (
-            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              <span style={{ fontWeight: 700 }}>👤 Coordenador:</span> {c.coordenador}
+            <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+              <strong>👤 Coordenação:</strong> {c.coordenador}
+            </div>
+          )}
+          {c.contacto && (
+            <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+              <strong>📞 Contacto:</strong> {c.contacto}
             </div>
           )}
           {c.localizacao && (
-            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              <span style={{ fontWeight: 700 }}>📍 Localização:</span> {c.localizacao}
-            </div>
-          )}
-          {c.email && (
-            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              <span style={{ fontWeight: 700 }}>✉️ Contacto:</span>{' '}
-              <a href={`mailto:${c.email}`} style={{ color: cor, textDecoration: 'none' }}>{c.email}</a>
+            <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+              <strong>📍 Localização:</strong> {c.localizacao}
             </div>
           )}
         </div>
+
+        {/* Botão Ver Mais / Ver Menos */}
+        {(info.visao || info.iniciativas.length > 0 || servicos.length > 6) && (
+          <button
+            onClick={() => setExpandido(!expandido)}
+            style={{ background: 'transparent', border: 'none', color: cor, fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer', padding: '0.2rem 0', textAlign: 'center' }}
+          >
+            {expandido ? '▲ Recolher detalhes' : '▼ Ver estrutura completa (Visão, Metodologia e Iniciativas)'}
+          </button>
+        )}
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '0.9rem 1.5rem', background: corBg, borderTop: `1px solid ${corBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-          📋 <strong style={{ color: '#1e293b' }}>{projetosCount}</strong> {projetosCount === 1 ? 'projeto' : 'projetos'}
+      <div style={{ padding: '0.85rem 1.5rem', background: corBg, borderTop: `1px solid ${corBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600 }}>
+          📋 <strong style={{ color: '#0f172a' }}>{projetosCount}</strong> {projetosCount === 1 ? 'projeto comunitário' : 'projetos comunitários'}
         </span>
         <button
           onClick={() => onViewProjects(cId)}
-          style={{ background: cor, color: '#fff', border: 'none', borderRadius: '8px', padding: '0.4rem 0.9rem', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+          style={{ background: cor, color: '#fff', border: 'none', borderRadius: '8px', padding: '0.45rem 1rem', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', transition: 'opacity 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
         >
           Ver Projetos →
         </button>
