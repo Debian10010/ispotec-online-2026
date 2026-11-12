@@ -5,11 +5,37 @@ import { extensaoService } from '../../services/extensaoService';
 import { getFileUrl } from '../../services/api';
 import AttachmentDisplay from '../../components/AttachmentDisplay';
 
+// ── Fallback dos logótipos e cores dos centros ──────────────────────────────
+const LOGOS_CENTROS = {
+  CRC: '/assets/img/extensao/logo-crc.jpg',
+  CPE: '/assets/img/extensao/logo-cpe.jpg',
+  CETODEH: '/assets/img/extensao/logo-cetodeh.jpg',
+  CTODH: '/assets/img/extensao/logo-cetodeh.jpg',
+  'CUM-ISPOTEC': '/assets/img/extensao/logo-clinica-universitaria.jpg',
+  CMU: '/assets/img/extensao/logo-clinica-universitaria.jpg',
+  CUM: '/assets/img/extensao/logo-clinica-universitaria.jpg',
+};
+
+function resolveLogo(c) {
+  if (c.logo_url) return c.logo_url;
+  const sigla = (c.sigla || '').toUpperCase();
+  if (LOGOS_CENTROS[sigla]) return LOGOS_CENTROS[sigla];
+  const slug = (c.slug || '').toLowerCase();
+  if (slug.includes('crc') || slug.includes('conflito')) return LOGOS_CENTROS.CRC;
+  if (slug.includes('cpe') || slug.includes('empresarial')) return LOGOS_CENTROS.CPE;
+  if (slug.includes('cetodeh') || slug.includes('terapia') || slug.includes('habilidade')) return LOGOS_CENTROS.CETODEH;
+  if (slug.includes('clinica') || slug.includes('m-dico') || slug.includes('medico') || slug.includes('cmu')) return LOGOS_CENTROS['CUM-ISPOTEC'];
+  return null;
+}
+
 // ── Cores por centro (fallback por sigla) ─────────────────────────────────────
 const CENTRO_CORES = {
   CRC:    { cor: '#dc2626', corBg: '#fef2f2', corBorder: '#fecaca' },
   CUM:    { cor: '#dc2626', corBg: '#fef2f2', corBorder: '#fecaca' },
+  'CUM-ISPOTEC': { cor: '#dc2626', corBg: '#fef2f2', corBorder: '#fecaca' },
+  CMU:    { cor: '#dc2626', corBg: '#fef2f2', corBorder: '#fecaca' },
   CETODEH:{ cor: '#7c3aed', corBg: '#f5f3ff', corBorder: '#ddd6fe' },
+  CTODH:  { cor: '#7c3aed', corBg: '#f5f3ff', corBorder: '#ddd6fe' },
   CPE:    { cor: '#0369a1', corBg: '#eff6ff', corBorder: '#bfdbfe' },
 };
 
@@ -46,7 +72,7 @@ function CentroCard({ c, projetos, canEdit, canDelete, onViewProjects, onDelete,
   const { cor, corBg, corBorder } = getCentroColors(c);
   const cId = c.slug || c.id || c._id;
   const cRealId = c.id || c._id;
-  const logoUrl = c.logo_url;
+  const logoUrl = resolveLogo(c);
   const projetosCount = projetos.filter(p => p.centro_id === cId || p.centro_id === cRealId).length;
   const servicos = c.servicos || [];
 
