@@ -192,7 +192,7 @@ export default function Dashboard() {
               borderRadius: 'var(--isp-radius-md)'
             }}
           >
-            💬 Abrir Chat Geral
+            💬 Abrir Chat Room
           </Link>
         </div>
       </div>
@@ -585,7 +585,7 @@ export default function Dashboard() {
               <span style={{ fontSize: '1.5rem' }}>💬</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--isp-blue-700)' }}>
-                  Chat Geral ISPOTEC
+                  Chat Room ISPOTEC
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--isp-slate-600)' }}>
                   Canal de comunicação instantânea para toda a comunidade académica

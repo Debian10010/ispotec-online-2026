@@ -274,12 +274,12 @@ export default function Sidebar({
           {isAuthenticated && (
             <Link
               to="/dashboard/chat-global"
-              className={`sidebar-nav-item ${isActive('/dashboard/chat-global') || isActive('/chat-geral') ? 'active' : ''}`}
+              className={`sidebar-nav-item ${isActive('/dashboard/chat-global') || isActive('/chat-geral') || isActive('/dashboard/chatroom') ? 'active' : ''}`}
               onClick={handleNavClick}
-              data-tooltip="Chat Geral"
+              data-tooltip="Chat Room"
             >
               <span className="sidebar-item-icon">💬</span>
-              <span className="sidebar-item-label">Chat Geral</span>
+              <span className="sidebar-item-label">Chat Room</span>
               <span className="sidebar-item-badge">Directo</span>
             </Link>
           )}

@@ -8,8 +8,14 @@ import { isImageUrl, getCleanFileName } from '../../components/AttachmentDisplay
 
 const QUICK_EMOJIS = ['👍', '👏', '💡', '📚', '📢', '🚀', '🎓', '✨', '🔥', '🤝'];
 
-export default function ChatGlobal() {
-  const { user } = useAuth();
+export default function ChatGlobal({
+  title = 'Chat Room ISPOTEC',
+  subtitle = 'Espaço colaborativo de partilha e comunicação de toda a comunidade ISPOTEC',
+  embedded = false,
+  user: userProp = null,
+}) {
+  const { user: authUser } = useAuth();
+  const user = userProp || authUser;
   const [searchParams] = useSearchParams();
   const highlightMsgId = searchParams.get('highlightMsg');
 
@@ -1343,18 +1349,18 @@ export default function ChatGlobal() {
         }
       `}</style>
 
-      <div className="chat-container-page">
+      <div className={`chat-container-page ${embedded ? 'chat-embedded' : ''}`} style={embedded ? { maxWidth: '100%', margin: '0 0 2rem 0', padding: 0 } : undefined}>
         {/* Header Bar */}
         <div className="chat-header-bar">
           <div className="chat-title-group">
             <h1>
-              💬 Chat Geral ISPOTEC
+              💬 {title}
               <span className="chat-status-pill">
                 <span className="live-dot"></span>
                 Em Direto
               </span>
             </h1>
-            <p>Espaço colaborativo de partilha e comunicação de toda a comunidade ISPOTEC</p>
+            <p>{subtitle}</p>
           </div>
 
           <div className="chat-header-actions">
@@ -1366,9 +1372,11 @@ export default function ChatGlobal() {
             >
               🔄 Atualizar
             </button>
-            <Link to="/dashboard" className="chat-btn-action">
-              ← Dashboard
-            </Link>
+            {!embedded && (
+              <Link to="/dashboard" className="chat-btn-action">
+                ← Dashboard
+              </Link>
+            )}
           </div>
         </div>
 
@@ -1799,7 +1807,7 @@ export default function ChatGlobal() {
         <div className="modal-overlay-chat" onClick={() => setShowAudioModal(false)}>
           <div className="modal-card-chat" onClick={(e) => e.stopPropagation()}>
             <h3>🎤 Gravar ou Enviar Áudio</h3>
-            <p>Grave uma mensagem de voz ou selecione um ficheiro de áudio para enviar para o Chat Geral.</p>
+            <p>Grave uma mensagem de voz ou selecione um ficheiro de áudio para enviar para o Chat Room.</p>
             <input
               type="file"
               ref={audioInputRef}

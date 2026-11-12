@@ -93,7 +93,7 @@ export default function Header({
     if (path.startsWith('/consultar-candidatura')) return 'Consultar Candidatura';
     if (path.startsWith('/dashboard/pre-inscricoes') || path.startsWith('/dashboard/candidaturas')) return 'Gestão de Pré-Inscrições 2027';
     if (path.startsWith('/dashboard/feed')) return 'Feed Académico';
-    if (path.startsWith('/dashboard/chat-global')) return 'Chat Geral ISPOTEC';
+    if (path.startsWith('/dashboard/chat-global') || path.startsWith('/dashboard/chatroom') || path.startsWith('/dashboard/chat-room')) return 'Chat Room ISPOTEC';
     if (path.startsWith('/dashboard/chat-group')) return 'Chat da Disciplina';
     if (path.startsWith('/dashboard/my-groups')) return 'Minhas Disciplinas';
     if (path.startsWith('/dashboard/groups-manage')) return 'Gestão de Disciplinas';
@@ -365,10 +365,10 @@ export default function Header({
             <Link
               to="/dashboard/chat-global"
               className="header-chat-btn"
-              title="Aceder ao Chat Geral em tempo real"
+              title="Aceder ao Chat Room em tempo real"
             >
               <span>💬</span>
-              <span>Chat Geral</span>
+              <span>Chat Room</span>
             </Link>
 
             {/* Notification Bell Dropdown */}
@@ -482,7 +482,7 @@ export default function Header({
                     role="menuitem"
                   >
                     <span>💬</span>
-                    <span>Chat Geral</span>
+                    <span>Chat Room</span>
                   </Link>
 
                   {isAdmin && (

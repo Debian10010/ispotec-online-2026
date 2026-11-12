@@ -6,7 +6,7 @@ const DEFAULT_WELCOME_MESSAGES = [
     user_id: 'sys-admin',
     user_nome: 'Secretaria Académica ISPOTEC',
     user_tipo: 'especialista',
-    conteudo: '👋 Bem-vindos ao Chat Geral ISPOTEC! Este é o espaço de comunicação de toda a comunidade académica. Todos os estudantes, docentes e especialistas registados podem partilhar informações e colaborar aqui.',
+    conteudo: '👋 Bem-vindos ao Chat Room ISPOTEC! Este é o espaço de comunicação de toda a comunidade académica. Todos os estudantes, docentes e especialistas registados podem partilhar informações e colaborar aqui.',
     tipo_mensagem: 'texto',
     data_criacao: new Date(Date.now() - 3600000 * 2).toISOString().replace('T', ' ').substring(0, 19),
   },

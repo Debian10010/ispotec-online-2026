@@ -213,6 +213,38 @@ export default function App() {
           } 
         />
         <Route 
+          path="/dashboard/chatroom" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/chat-room" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/chatroom" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/chat-room" 
+          element={
+            <ProtectedRoute>
+              <ChatGlobal />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/dashboard/chat-geral" 
           element={
             <ProtectedRoute>
