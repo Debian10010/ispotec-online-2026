@@ -98,7 +98,7 @@ function ChatRoomSection({ sala, user }) {
       });
       const data = await res.json();
       if (data.sucesso && Array.isArray(data.dados)) {
-        const ordenadas = data.dados.reverse().map(m => ({
+        const ordenadas = data.dados.map(m => ({
           ...m,
           id: m._id || m.id,
           user_id: m.remetente_id || m.user_id,
@@ -344,7 +344,18 @@ function ChatRoomSection({ sala, user }) {
     if (!editingMessage || !editText.trim() || savingEdit) return;
     setSavingEdit(true);
     try {
-      await chatService.editMessage(editingMessage.id || editingMessage._id, editText.trim());
+      const token = localStorage.getItem('ispotec_token');
+      const msgId = editingMessage.id || editingMessage._id;
+      const res = await fetch(`/api/chatroom/mensagens/${msgId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ conteudo: editText.trim() })
+      });
+      const data = await res.json();
+      if (!data.sucesso) throw new Error(data.mensagem || 'Erro ao guardar edição.');
       setEditingMessage(null);
       setEditText('');
       await carregarMensagens(true);
@@ -359,7 +370,13 @@ function ChatRoomSection({ sala, user }) {
     if (!deletingMsgId || deleting) return;
     setDeleting(true);
     try {
-      await chatService.deleteMessage(deletingMsgId);
+      const token = localStorage.getItem('ispotec_token');
+      const res = await fetch(`/api/chatroom/mensagens/${deletingMsgId}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      if (!data.sucesso) throw new Error(data.mensagem || 'Erro ao eliminar mensagem.');
       setDeletingMsgId(null);
       await carregarMensagens(true);
     } catch (err) {
