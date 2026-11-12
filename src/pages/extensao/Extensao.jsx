@@ -5,6 +5,19 @@ import { extensaoService } from '../../services/extensaoService';
 import { getFileUrl } from '../../services/api';
 import AttachmentDisplay from '../../components/AttachmentDisplay';
 
+// ── Cores por centro (fallback por sigla) ─────────────────────────────────────
+const CENTRO_CORES = {
+  CRC:    { cor: '#dc2626', corBg: '#fef2f2', corBorder: '#fecaca' },
+  CUM:    { cor: '#dc2626', corBg: '#fef2f2', corBorder: '#fecaca' },
+  CETODEH:{ cor: '#7c3aed', corBg: '#f5f3ff', corBorder: '#ddd6fe' },
+  CPE:    { cor: '#0369a1', corBg: '#eff6ff', corBorder: '#bfdbfe' },
+};
+
+function getCentroColors(c) {
+  const sigla = (c.sigla || '').toUpperCase();
+  return CENTRO_CORES[sigla] || { cor: c.cor || '#059669', corBg: c.corBg || '#ecfdf5', corBorder: '#a7f3d0' };
+}
+
 // ── Shared Empty State ────────────────────────────────────────────────────────
 function EmptyState({ mensagem = "Não existem registos disponíveis.", canAdd, onAdd, btnText = "+ Adicionar Registo" }) {
   return (
@@ -28,6 +41,118 @@ function AttachmentBadge({ url, nome }) {
   return <AttachmentDisplay url={url} nome={nome} primaryColor="#059669" />;
 }
 
+// ── Centro Card ───────────────────────────────────────────────────────────────
+function CentroCard({ c, projetos, canEdit, canDelete, onViewProjects, onDelete, onEdit }) {
+  const { cor, corBg, corBorder } = getCentroColors(c);
+  const cId = c.slug || c.id || c._id;
+  const cRealId = c.id || c._id;
+  const logoUrl = c.logo_url;
+  const projetosCount = projetos.filter(p => p.centro_id === cId || p.centro_id === cRealId).length;
+  const servicos = c.servicos || [];
+
+  return (
+    <div style={{
+      background: '#fff', borderRadius: '16px', overflow: 'hidden',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.07)', border: `1px solid ${corBorder}`,
+      display: 'flex', flexDirection: 'column', transition: 'transform 0.2s, box-shadow 0.2s',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,0,0,0.12)'; }}
+    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.07)'; }}
+    >
+      {/* Header com logo */}
+      <div style={{ background: `linear-gradient(135deg, ${corBg} 0%, #fff 100%)`, padding: '1.75rem 1.5rem 1.25rem', borderBottom: `2px solid ${corBorder}`, position: 'relative' }}>
+        {/* Admin actions */}
+        {(canEdit || canDelete) && (
+          <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', gap: '0.35rem' }}>
+            {canEdit && (
+              <button onClick={() => onEdit(c)} style={{ background: '#fff', border: `1px solid ${corBorder}`, borderRadius: '6px', padding: '0.25rem 0.5rem', fontSize: '0.72rem', fontWeight: 600, color: '#475569', cursor: 'pointer' }}>✏️</button>
+            )}
+            {canDelete && (
+              <button onClick={() => onDelete(cRealId)} style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '6px', padding: '0.25rem 0.5rem', fontSize: '0.72rem', fontWeight: 600, color: '#991b1b', cursor: 'pointer' }}>🗑️</button>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.1rem' }}>
+          {/* Logo */}
+          <div style={{ width: '72px', height: '72px', borderRadius: '12px', overflow: 'hidden', background: '#fff', border: `2px solid ${corBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            {logoUrl ? (
+              <img src={logoUrl} alt={c.sigla} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+            ) : null}
+            <div style={{ display: logoUrl ? 'none' : 'flex', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>{c.icone || '🏢'}</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {c.sigla && (
+              <span style={{ display: 'inline-block', background: cor, color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.6rem', borderRadius: '20px', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>
+                {c.sigla}
+              </span>
+            )}
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#1e293b', margin: 0, lineHeight: 1.3 }}>{c.nome}</h3>
+            {c.curso && <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.2rem 0 0' }}>{c.curso}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '1.25rem 1.5rem', flex: 1 }}>
+        {c.descricao && (
+          <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.6, margin: '0 0 1rem' }}>{c.descricao}</p>
+        )}
+
+        {/* Serviços */}
+        {servicos.length > 0 && (
+          <div style={{ marginBottom: '0.9rem' }}>
+            <p style={{ fontSize: '0.74rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 0.5rem' }}>Serviços</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+              {servicos.slice(0, 5).map((s, i) => (
+                <span key={i} style={{ background: corBg, color: cor, border: `1px solid ${corBorder}`, borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.6rem' }}>
+                  {s}
+                </span>
+              ))}
+              {servicos.length > 5 && (
+                <span style={{ background: '#f1f5f9', color: '#64748b', borderRadius: '20px', fontSize: '0.72rem', padding: '0.2rem 0.6rem' }}>+{servicos.length - 5}</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          {c.coordenador && (
+            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <span style={{ fontWeight: 700 }}>👤 Coordenador:</span> {c.coordenador}
+            </div>
+          )}
+          {c.localizacao && (
+            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <span style={{ fontWeight: 700 }}>📍 Localização:</span> {c.localizacao}
+            </div>
+          )}
+          {c.email && (
+            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              <span style={{ fontWeight: 700 }}>✉️ Contacto:</span>{' '}
+              <a href={`mailto:${c.email}`} style={{ color: cor, textDecoration: 'none' }}>{c.email}</a>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding: '0.9rem 1.5rem', background: corBg, borderTop: `1px solid ${corBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+          📋 <strong style={{ color: '#1e293b' }}>{projetosCount}</strong> {projetosCount === 1 ? 'projeto' : 'projetos'}
+        </span>
+        <button
+          onClick={() => onViewProjects(cId)}
+          style={{ background: cor, color: '#fff', border: 'none', borderRadius: '8px', padding: '0.4rem 0.9rem', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+        >
+          Ver Projetos →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Extensao() {
   const { canAdd, canEdit, canDelete } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,6 +163,7 @@ export default function Extensao() {
   const [projetos, setProjetos] = useState([]);
   const [parceiros, setParceiros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editCentro, setEditCentro] = useState(null);
 
   const [showAddCentro, setShowAddCentro] = useState(false);
   const [showAddProjectFor, setShowAddProjectFor] = useState(null);
@@ -46,7 +172,7 @@ export default function Extensao() {
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [novoCentro, setNovoCentro] = useState({ slug: '', nome: '', sigla: '', curso: '', area: '', descricao: '', coordenador: '' });
+  const [novoCentro, setNovoCentro] = useState({ slug: '', nome: '', sigla: '', curso: '', area: '', descricao: '', coordenador: '', logo_url: '', email: '', localizacao: '', servicos: '' });
   const [novoProjeto, setNovoProjeto] = useState({ titulo: '', descricao: '', impacto: '', estado: 'Em Curso', dataInicio: '2025' });
   const [novoParceiro, setNovoParceiro] = useState({ nome: '', tipo: '', contribuicao: '', logoIcon: '🤝' });
 
@@ -97,11 +223,19 @@ export default function Extensao() {
     if (!novoCentro.nome) return;
     setSubmitting(true);
     try {
-      const slug = novoCentro.slug || novoCentro.nome.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      const saved = await extensaoService.createCentro({ ...novoCentro, slug });
+      const slug = novoCentro.slug || (novoCentro.sigla ? novoCentro.sigla.toLowerCase() : novoCentro.nome.toLowerCase().replace(/[^a-z0-9]/g, '-'));
+      const servicosArr = typeof novoCentro.servicos === 'string'
+        ? novoCentro.servicos.split(',').map(s => s.trim()).filter(Boolean)
+        : novoCentro.servicos;
+
+      const saved = await extensaoService.createCentro({
+        ...novoCentro,
+        slug,
+        servicos: servicosArr,
+      });
       alert('Registo criado com sucesso.');
       setCentros([...centros, saved]);
-      setNovoCentro({ slug: '', nome: '', sigla: '', curso: '', area: '', descricao: '', coordenador: '' });
+      setNovoCentro({ slug: '', nome: '', sigla: '', curso: '', area: '', descricao: '', coordenador: '', logo_url: '', email: '', localizacao: '', servicos: '' });
       setShowAddCentro(false);
     } catch (err) {
       alert(err.message || 'Erro ao criar centro.');
@@ -450,6 +584,29 @@ export default function Extensao() {
                     onChange={e => setNovoCentro({ ...novoCentro, coordenador: e.target.value })}
                   />
                 </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <input
+                    type="text"
+                    className="ext-input"
+                    placeholder="URL do Logótipo (ex: /assets/img/extensao/logo-crc.jpg)"
+                    value={novoCentro.logo_url}
+                    onChange={e => setNovoCentro({ ...novoCentro, logo_url: e.target.value })}
+                  />
+                  <input
+                    type="text"
+                    className="ext-input"
+                    placeholder="Email de contacto"
+                    value={novoCentro.email}
+                    onChange={e => setNovoCentro({ ...novoCentro, email: e.target.value })}
+                  />
+                </div>
+                <input
+                  type="text"
+                  className="ext-input"
+                  placeholder="Serviços (separados por vírgula: Mediação, Arbitragem, Consultoria)"
+                  value={novoCentro.servicos}
+                  onChange={e => setNovoCentro({ ...novoCentro, servicos: e.target.value })}
+                />
                 <textarea
                   className="ext-input"
                   rows="2"
@@ -473,41 +630,26 @@ export default function Extensao() {
                   const cId = c.slug || c.id || c._id;
                   const cRealId = c.id || c._id;
                   return (
-                    <div key={cId} className="centro-card">
-                      <div className="centro-card-header">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                          <span style={{ fontSize: '1.75rem' }}>{c.icone || '🏢'}</span>
-                          <div>
-                            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: '#1e293b' }}>{c.nome}</h3>
-                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>{c.curso}</span>
-                          </div>
-                        </div>
-                        <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>{c.descricao}</p>
-                      </div>
-
-                      <div className="centro-card-body">
-                        <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                          <strong>👤 Coordenação:</strong> {c.coordenador || 'Coordenação de Extensão'}
-                        </div>
-                        <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                          <strong>📍 Localização:</strong> {c.localizacao || 'Campus ISPOTEC'}
-                        </div>
-                      </div>
-
-                      <div className="centro-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <button
-                          onClick={() => setTab('projetos', cId)}
-                          style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.35rem 0.75rem', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                          Ver Projetos ({projetos.filter(p => p.centro_id === cId).length})
-                        </button>
-                        {canDelete && (
-                          <button className="btn-del-action" onClick={() => handleDeleteCentro(cRealId)}>
-                            🗑️
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <CentroCard
+                      key={cId}
+                      c={c}
+                      projetos={projetos}
+                      canEdit={canEdit}
+                      canDelete={canDelete}
+                      onViewProjects={(id) => setTab('projetos', id)}
+                      onDelete={handleDeleteCentro}
+                      onEdit={(centro) => {
+                        const novoNome = window.prompt('Editar nome do centro:', centro.nome);
+                        if (!novoNome) return;
+                        const novaDesc = window.prompt('Editar descrição:', centro.descricao) || centro.descricao;
+                        extensaoService.updateCentro(cRealId, { ...centro, nome: novoNome, descricao: novaDesc })
+                          .then(updated => {
+                            setCentros(centros.map(item => (item.id === cRealId || item._id === cRealId) ? updated : item));
+                            alert('Centro atualizado com sucesso.');
+                          })
+                          .catch(() => alert('Erro ao atualizar centro.'));
+                      }}
+                    />
                   );
                 })}
               </div>
