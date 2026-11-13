@@ -855,7 +855,7 @@ export default function ReciboPagamentoPrint({ candidatura, onClose }) {
             <tr>
               <td style={{ textAlign: 'center', fontWeight: 700 }}>01</td>
               <td>
-                <strong>Taxa Oficial de Pré-Inscrição &amp; Processamento de Candidatura</strong>
+                <strong>Taxa Oficial de Confirmação de Inscrição e Matrícula &amp; Processamento de Candidatura</strong>
                 <div style={{ fontSize: '7.2pt', color: '#64748b', marginTop: '2px', lineHeight: 1.3 }}>
                   Liquidado via Banco BCI / ISPOTEC (Sujeito a IVA de 5%)
                   <br />
